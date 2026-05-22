@@ -37,12 +37,7 @@ const Home = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
                   </Link>
-                  <Link
-                    to="/studyplan"
-                    className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-blue-600 bg-white border border-blue-200 hover:bg-blue-50 transform hover:scale-105 transition-all duration-300"
-                  >
-                    View Study Plan
-                  </Link>
+                  {/* Study Plan removed */}
                 </div>
               </div>
 
@@ -483,9 +478,7 @@ const Home = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/studyplan" className="text-gray-400 hover:text-white transition-colors duration-300">
-                    Study Plan
-                  </Link>
+                  {/* Study Plan removed */}
                 </li>
               </ul>
             </div>
@@ -495,9 +488,7 @@ const Home = () => {
               <h3 className="text-lg font-semibold mb-4">Resources</h3>
               <ul className="space-y-2">
                 <li>
-                  <Link to="/ai-study-plan" className="text-gray-400 hover:text-white transition-colors duration-300">
-                    AI Study Plan
-                  </Link>
+                  {/* AI Study Plan removed */}
                 </li>
                 <li>
                   <Link to="/dashboard" className="text-gray-400 hover:text-white transition-colors duration-300">

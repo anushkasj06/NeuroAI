@@ -233,7 +233,7 @@ const Prediction = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-end mb-8">
           <button
-            onClick={() => navigate('/ai-study-plan')}
+            onClick={() => navigate('/study-plan/generate')}
             className="group flex items-center gap-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold px-6 py-3 rounded-xl 
             hover:from-green-700 hover:to-emerald-700 transition-all duration-300 shadow-lg hover:shadow-xl 
             transform hover:scale-[1.02] active:scale-95"

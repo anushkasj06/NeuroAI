@@ -13,13 +13,10 @@ import Diagnostic from './pages/Diagnostic';
 import Dashboard from './pages/Dashboard';
 import AIDashboard from './pages/AIDashboard';
 import Prediction from './pages/Prediction';
-import StudyPlan from './pages/StudyPlan';
 import StudyPlanPage from './pages/StudyPlanPage';
 import StudyPlanGenerator from './pages/StudyPlanGenerator';
 import LearnPage from './pages/LearnPage';
 import ProgressPage from './pages/ProgressPage';
-import AiStudyPlanGenerator from './pages/AiStudyPlanGenerator.jsx';
-import Leaderboard from './pages/Leaderboard';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
 import Test from './pages/Test';
@@ -51,12 +48,9 @@ function App() {
             <Route path="/progress" element={<P allowedRoles={['student']}><ProgressPage /></P>} />
             <Route path="/study-plan/generate" element={<P allowedRoles={['student']}><StudyPlanGenerator /></P>} />
             <Route path="/study-plan" element={<P allowedRoles={['student']}><StudyPlanPage /></P>} />
-            <Route path="/studyplan" element={<P allowedRoles={['student']}><StudyPlan /></P>} />
-            <Route path="/ai-study-plan" element={<P allowedRoles={['student']}><AiStudyPlanGenerator /></P>} />
             <Route path="/prediction" element={<P allowedRoles={['student']}><Prediction /></P>} />
             <Route path="/test" element={<P allowedRoles={['student']}><Test /></P>} />
             <Route path="/battle" element={<P allowedRoles={['student']}><BattleArena /></P>} />
-            <Route path="/leaderboard" element={<P allowedRoles={['student']}><Leaderboard /></P>} />
             <Route path="/community" element={<P allowedRoles={['student']}><Community /></P>} />
             <Route path="/materials" element={<P allowedRoles={['student']}><StudyMaterial /></P>} />
             <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
@@ -70,3 +64,4 @@ function App() {
 }
 
 export default App;
+

@@ -166,7 +166,7 @@ const Test = () => {
                 </p>
               </div>
               <button
-                onClick={() => navigate('/studyplan')}
+                onClick={() => navigate('/study-plan')}
                 className="mt-6 bg-gray-600 text-white px-6 py-2 rounded-lg 
                 hover:bg-gray-700 transition-all duration-200"
               >
