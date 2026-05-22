@@ -8,7 +8,9 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const diagnosticRoutes = require('./routes/diagnosticRoutes');
-
+const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
+const studyPlanRoutes = require('./routes/studyPlanRoutes');
+const learningMaterialRoutes = require('./routes/learningMaterialRoutes');
 const app = express();
 
 // Middleware
@@ -36,7 +38,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
-
+app.use('/api/rapid-battle', rapidBattleRoutes);
+app.use('/api/study-plan', studyPlanRoutes);
+app.use('/api/learning-material', learningMaterialRoutes);
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)

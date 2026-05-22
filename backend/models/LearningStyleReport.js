@@ -33,8 +33,16 @@ const learningStyleReportSchema = new mongoose.Schema(
       enum: ['Visual Learner', 'Audio Learner', 'Reading/Writing Learner', 'Interactive Learner'],
       required: true,
     },
-    strongestLearningMode: { type: String, enum: ['text', 'audio', 'video'], required: true },
-    weakestLearningMode: { type: String, enum: ['text', 'audio', 'video'], required: true },
+    strongestLearningMode: {
+      type: String,
+      enum: ['text', 'audio', 'video', 'interactive'],
+      required: true,
+    },
+    weakestLearningMode: {
+      type: String,
+      enum: ['text', 'audio', 'video', 'interactive'],
+      required: true,
+    },
     attentionLevel: { type: String, required: true },
     engagementScore: { type: Number, min: 0, max: 100 },
     confidenceLevel: { type: String, required: true },

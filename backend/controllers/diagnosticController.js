@@ -41,13 +41,19 @@ exports.getStatus = async (req, res) => {
 
     let step = 'onboarding';
     if (profile) {
-      if (report) step = 'report';
-      else if (assessment?.status === 'completed') step = 'analyze';
-      else if (assessment?.textMode?.completed) {
-        if (!assessment.audioMode?.completed) step = 'audio';
-        else if (!assessment.videoMode?.completed) step = 'video';
-        else step = 'analyze';
-      } else if (profile.diagnosticStatus === 'onboarding_complete') step = 'text';
+      if (report) {
+        step = 'report';
+      } else if (!assessment?.textMode?.completed) {
+        step = 'text';
+      } else if (!assessment?.audioMode?.completed) {
+        step = 'audio';
+      } else if (!assessment?.videoMode?.completed) {
+        step = 'video';
+      } else if (!assessment?.interactiveMode?.completed) {
+        step = 'interactive';
+      } else {
+        step = 'analyze';
+      }
     }
 
     res.status(200).json({
@@ -73,10 +79,10 @@ exports.submitOnboarding = async (req, res) => {
       const report = await LearningStyleReport.findOne({ userId });
       let resumeStep = 'text';
       if (report) resumeStep = 'report';
-      else if (assessment?.status === 'completed') resumeStep = 'analyze';
       else if (!assessment?.textMode?.completed) resumeStep = 'text';
       else if (!assessment?.audioMode?.completed) resumeStep = 'audio';
       else if (!assessment?.videoMode?.completed) resumeStep = 'video';
+      else if (!assessment?.interactiveMode?.completed) resumeStep = 'interactive';
       else resumeStep = 'analyze';
 
       return res.status(200).json({
@@ -199,7 +205,8 @@ const submitModality = async (req, res, mode, fieldName) => {
     const allDone =
       assessment.textMode?.completed &&
       assessment.audioMode?.completed &&
-      assessment.videoMode?.completed;
+      assessment.videoMode?.completed &&
+      assessment.interactiveMode?.completed;
 
     if (allDone) {
       assessment.status = 'completed';
@@ -223,6 +230,7 @@ const getNextModality = (assessment) => {
   if (!assessment.textMode?.completed) return 'text';
   if (!assessment.audioMode?.completed) return 'audio';
   if (!assessment.videoMode?.completed) return 'video';
+  if (!assessment.interactiveMode?.completed) return 'interactive';
   return 'analyze';
 };
 
@@ -234,6 +242,9 @@ exports.submitAudioAssessment = (req, res) =>
 
 exports.submitVideoAssessment = (req, res) =>
   submitModality(req, res, 'video', 'videoMode');
+
+exports.submitInteractiveAssessment = (req, res) =>
+  submitModality(req, res, 'interactive', 'interactiveMode');
 
 exports.analyzeAndGenerateReport = async (req, res) => {
   try {
@@ -249,11 +260,12 @@ exports.analyzeAndGenerateReport = async (req, res) => {
     if (
       !assessment.textMode?.completed ||
       !assessment.audioMode?.completed ||
-      !assessment.videoMode?.completed
+      !assessment.videoMode?.completed ||
+      !assessment.interactiveMode?.completed
     ) {
       return res.status(400).json({
         status: 'error',
-        message: 'Complete all three assessments before analysis',
+        message: 'Complete all four assessments (text, audio, video, interactive) before analysis',
       });
     }
 

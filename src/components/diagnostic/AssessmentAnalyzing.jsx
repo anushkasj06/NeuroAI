@@ -31,11 +31,11 @@ export default function AssessmentAnalyzing({ onComplete, onError }) {
       </div>
       <h2 className="text-2xl font-bold text-gray-900 mb-2">Analyzing your learning profile</h2>
       <p className="text-gray-600 max-w-md mx-auto">
-        Our AI is comparing your text, audio, and video assessment results, response timing, and
-        engagement metrics to build your personalized diagnostic report.
+        Our AI is comparing your text, audio, video, and interactive assessment results, response
+        timing, and engagement metrics to build your personalized diagnostic report.
       </p>
       <div className="mt-8 flex justify-center gap-2">
-        {['Text', 'Audio', 'Video', 'AI Report'].map((label, i) => (
+        {['Text', 'Audio', 'Video', 'Interactive', 'AI Report'].map((label, i) => (
           <span
             key={label}
             className="px-3 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 animate-pulse"

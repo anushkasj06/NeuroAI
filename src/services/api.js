@@ -63,5 +63,13 @@ export const leaderboard = {
   getLeaderboard: (subject = 'all') => api.get(`/quiz/marks?subject=${subject.toLowerCase()}`),
 };
 
+export const rapidBattle = {
+  generateQuiz: (data) => api.post('/rapid-battle/generate', data),
+  submitAttempt: (data) => api.post('/rapid-battle/attempts', data),
+  getLeaderboard: ({ topic = 'all', mode = 'solo', limit = 20 } = {}) =>
+    api.get(`/rapid-battle/leaderboard?topic=${encodeURIComponent(topic)}&mode=${mode}&limit=${limit}`),
+  getHistory: () => api.get('/rapid-battle/history'),
+};
+
 export { API_BASE };
 export default api;

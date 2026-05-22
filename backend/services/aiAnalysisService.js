@@ -5,8 +5,8 @@ const DIAGNOSTIC_SYSTEM_PROMPT = `You are an expert educational psychologist and
 Analyze student diagnostic data and return ONLY valid JSON (no markdown fences) matching this exact schema:
 {
   "preferredLearningStyle": "Visual Learner" | "Audio Learner" | "Reading/Writing Learner" | "Interactive Learner",
-  "strongestLearningMode": "text" | "audio" | "video",
-  "weakestLearningMode": "text" | "audio" | "video",
+  "strongestLearningMode": "text" | "audio" | "video" | "interactive",
+  "weakestLearningMode": "text" | "audio" | "video" | "interactive",
   "attentionLevel": "string",
   "attentionBehavior": "string",
   "engagementAnalysis": "string",
@@ -38,6 +38,7 @@ ASSESSMENT RESULTS:
 Text — accuracy ${assessment.textMode.accuracyPercent}%, avg response ${assessment.textMode.avgResponseTimeMs}ms, reading time ${assessment.textMode.readingOrWatchTimeSeconds}s
 Audio — accuracy ${assessment.audioMode.accuracyPercent}%, replays ${assessment.audioMode.replayCount}, listening ${assessment.audioMode.listeningDurationSeconds}s
 Video — accuracy ${assessment.videoMode.accuracyPercent}%, pauses ${assessment.videoMode.pauseCount}, skips ${assessment.videoMode.skipCount}, watch ${assessment.videoMode.readingOrWatchTimeSeconds}s
+Interactive — accuracy ${assessment.interactiveMode?.accuracyPercent}%, interactions ${assessment.interactiveMode?.interactionCount || 0}
 
 PRE-COMPUTED SCORES:
 ${JSON.stringify(numericInsights, null, 2)}`;

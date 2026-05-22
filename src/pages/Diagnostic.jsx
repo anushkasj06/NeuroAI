@@ -5,8 +5,21 @@ import api, { getApiErrorMessage, API_BASE } from '../services/api';
 import ProgressStepper from '../components/diagnostic/ProgressStepper';
 import OnboardingForm from '../components/diagnostic/OnboardingForm';
 import ModalityAssessment from '../components/diagnostic/ModalityAssessment';
+import InteractiveAssessment from '../components/diagnostic/InteractiveAssessment';
 import AssessmentAnalyzing from '../components/diagnostic/AssessmentAnalyzing';
 import DiagnosticReportView from '../components/diagnostic/DiagnosticReportView';
+
+function ContentLoadingPlaceholder({ label }) {
+  return (
+    <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
+      <div className="relative w-16 h-16 mx-auto mb-4">
+        <div className="absolute inset-0 rounded-full border-4 border-indigo-100" />
+        <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
+      </div>
+      <p className="text-gray-600 font-medium">Loading {label}…</p>
+    </div>
+  );
+}
 
 export default function Diagnostic() {
   const {
@@ -40,7 +53,9 @@ export default function Diagnostic() {
           ? diagnostic.submitTextAssessment
           : mode === 'audio'
             ? diagnostic.submitAudioAssessment
-            : diagnostic.submitVideoAssessment;
+            : mode === 'video'
+              ? diagnostic.submitVideoAssessment
+              : diagnostic.submitInteractiveAssessment;
       const res = await fn(payload);
       const next = res.data.data.nextStep;
       if (next === 'analyze') {
@@ -95,31 +110,55 @@ export default function Diagnostic() {
           />
         )}
 
-        {step === 'text' && assessmentContent?.text && (
-          <ModalityAssessment
-            mode="text"
-            content={assessmentContent.text}
-            loading={submitting}
-            onSubmit={(p) => handleModalitySubmit('text', p)}
-          />
+        {step === 'text' && (
+          assessmentContent?.text ? (
+            <ModalityAssessment
+              mode="text"
+              content={assessmentContent.text}
+              loading={submitting}
+              onSubmit={(p) => handleModalitySubmit('text', p)}
+            />
+          ) : (
+            <ContentLoadingPlaceholder label="Text Assessment" />
+          )
         )}
 
-        {step === 'audio' && assessmentContent?.audio && (
-          <ModalityAssessment
-            mode="audio"
-            content={assessmentContent.audio}
-            loading={submitting}
-            onSubmit={(p) => handleModalitySubmit('audio', p)}
-          />
+        {step === 'audio' && (
+          assessmentContent?.audio ? (
+            <ModalityAssessment
+              mode="audio"
+              content={assessmentContent.audio}
+              loading={submitting}
+              onSubmit={(p) => handleModalitySubmit('audio', p)}
+            />
+          ) : (
+            <ContentLoadingPlaceholder label="Audio Assessment" />
+          )
         )}
 
-        {step === 'video' && assessmentContent?.video && (
-          <ModalityAssessment
-            mode="video"
-            content={assessmentContent.video}
-            loading={submitting}
-            onSubmit={(p) => handleModalitySubmit('video', p)}
-          />
+        {step === 'video' && (
+          assessmentContent?.video ? (
+            <ModalityAssessment
+              mode="video"
+              content={assessmentContent.video}
+              loading={submitting}
+              onSubmit={(p) => handleModalitySubmit('video', p)}
+            />
+          ) : (
+            <ContentLoadingPlaceholder label="Video Assessment" />
+          )
+        )}
+
+        {step === 'interactive' && (
+          assessmentContent?.interactive ? (
+            <InteractiveAssessment
+              content={assessmentContent.interactive}
+              loading={submitting}
+              onSubmit={(p) => handleModalitySubmit('interactive', p)}
+            />
+          ) : (
+            <ContentLoadingPlaceholder label="Interactive Assessment" />
+          )
         )}
 
         {step === 'analyze' && (
