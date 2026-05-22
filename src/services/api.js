@@ -76,5 +76,23 @@ export const teacher = {
   createResource: (data) => api.post('/teacher/resources', data),
 };
 
+export const content = {
+  getTeacherContent: () => api.get('/content/teacher'),
+  getTeacherStudents: () => api.get('/content/teacher/students'),
+  createContent: (data) => api.post('/content/teacher', data),
+  updateContent: (id, data) => api.put(`/content/teacher/${id}`, data),
+  publishContent: (id, data) => api.post(`/content/teacher/${id}/publish`, data),
+  unpublishContent: (id) => api.post(`/content/teacher/${id}/draft`),
+  deleteContent: (id) => api.delete(`/content/teacher/${id}`),
+  uploadAsset: (file) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return api.post('/content/teacher/uploads', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+  },
+  getStudentContent: () => api.get('/content/student'),
+};
+
 export default api; 
 export { API_BASE };

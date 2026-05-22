@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
@@ -10,6 +11,7 @@ const quizRoutes = require('./routes/quizRoutes');
 const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 const diagnosticRoutes = require('./routes/diagnosticRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
+const contentRoutes = require('./routes/contentRoutes');
 
 const app = express();
 
@@ -25,11 +27,13 @@ app.use(cors({
   credentials: true,
 }));
 
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routes: ['auth', 'profile', 'quiz', 'diagnostic', 'teacher'],
+    routes: ['auth', 'profile', 'quiz', 'diagnostic', 'teacher', 'content'],
   });
 });
 
@@ -40,6 +44,7 @@ app.use('/api/quiz', quizRoutes);
 app.use('/api/rapid-battle', rapidBattleRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
 app.use('/api/teacher', teacherRoutes);
+app.use('/api/content', contentRoutes);
 
 // Connect to MongoDB
 mongoose
@@ -53,6 +58,18 @@ mongoose
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res.status(400).json({
+      status: 'error',
+      message: 'File exceeds the 25MB upload limit.',
+    });
+  }
+  if (err.message === 'Unsupported file type') {
+    return res.status(400).json({
+      status: 'error',
+      message: 'Unsupported file type. Upload images, video, PDF, or office files.',
+    });
+  }
   res.status(500).json({
     status: 'error',
     message: 'Something went wrong!'

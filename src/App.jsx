@@ -18,6 +18,8 @@ import Leaderboard from './pages/Leaderboard';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
 import TeacherDashboard from './pages/TeacherDashboard';
+import StudyMaterial from './pages/StudyMaterial';
+import TeacherContentStudio from './pages/TeacherContentStudio';
 
 function App() {
   return (
@@ -102,6 +104,14 @@ function App() {
               }
             />
             <Route
+              path="/materials"
+              element={
+                <PrivateRoute allowedRoles={['student']}>
+                  <StudyMaterial />
+                </PrivateRoute>
+              }
+            />
+            <Route
               path="/leaderboard"
               element={
                 <PrivateRoute allowedRoles={['student']}>
@@ -122,6 +132,14 @@ function App() {
               element={
                 <PrivateRoute allowedRoles={['teacher']}>
                   <TeacherDashboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teacher/content"
+              element={
+                <PrivateRoute allowedRoles={['teacher']}>
+                  <TeacherContentStudio />
                 </PrivateRoute>
               }
             />

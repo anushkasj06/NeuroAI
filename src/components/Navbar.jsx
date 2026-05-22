@@ -115,13 +115,22 @@ const Navbar = () => {
                     </>
                   )}
                   {isTeacher && (
-                    <Link
-                      to="/teacher"
-                      className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                    >
-                      <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Teacher Dashboard</span>
-                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                    </Link>
+                    <>
+                      <Link
+                        to="/teacher"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Teacher Dashboard</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                      <Link
+                        to="/teacher/content"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Content Studio</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                    </>
                   )}
                   
                   {isStudent && (
@@ -130,6 +139,15 @@ const Navbar = () => {
                       className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
                     >
                       <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">AI Study Plan</span>
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                    </Link>
+                  )}
+                  {isStudent && (
+                    <Link
+                      to="/materials"
+                      className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                    >
+                      <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Materials</span>
                       <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                     </Link>
                   )}
