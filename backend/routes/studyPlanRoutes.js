@@ -14,5 +14,9 @@ router.post('/recommendations/generate', ctrl.generateRecommendations);
 router.patch('/recommendations/:id/dismiss', ctrl.dismissRecommendation);
 router.post('/progress/update', ctrl.updateTopicProgress);
 router.get('/progress', ctrl.getTopicProgress);
+router.post('/test/generate', ctrl.generateStrictTopicTest);
+router.post('/test/submit', ctrl.submitStrictTopicTest);
+router.get('/report/performance', ctrl.getPerformanceReport);
+router.post('/adapt', ctrl.adaptPlanFromPerformance);
 
 module.exports = router;

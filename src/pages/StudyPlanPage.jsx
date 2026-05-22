@@ -12,7 +12,7 @@ const buildSessionLink = (session) => {
     topic: session.topic,
   });
   if (session.subtopic) query.set('subtopic', session.subtopic);
-  return `/learn?${query.toString()}`;
+  return `/ai-teacher?${query.toString()}`;
 };
 
 export default function StudyPlanPage() {

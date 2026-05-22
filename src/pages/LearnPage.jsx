@@ -20,6 +20,14 @@ export default function LearnPage() {
   const [quizMode, setQuizMode] = useState(false);
   const [quizAnswers, setQuizAnswers] = useState({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [strictTest, setStrictTest] = useState(null);
+  const [strictAttemptId, setStrictAttemptId] = useState(null);
+  const [strictAnswers, setStrictAnswers] = useState({});
+  const [strictSubmitted, setStrictSubmitted] = useState(false);
+  const [strictReport, setStrictReport] = useState(null);
+  const [testLoading, setTestLoading] = useState(false);
+  const [adapting, setAdapting] = useState(false);
+  const [personalityMode, setPersonalityMode] = useState('balanced coach');
 
   useEffect(() => {
     (async () => {
@@ -46,18 +54,70 @@ export default function LearnPage() {
   const handleGenerate = async () => {
     if (!selected.subjectSlug || !selected.topic) { setError('Select a subject and topic.'); return; }
     setLoading(true); setError(''); setMaterial(null); setQuizMode(false); setQuizAnswers({}); setQuizSubmitted(false);
+    setStrictTest(null); setStrictAttemptId(null); setStrictAnswers({}); setStrictSubmitted(false); setStrictReport(null);
     try {
       const res = await learningMaterialApi.generateMaterial({
         subject: selected.subjectName,
         subjectSlug: selected.subjectSlug,
         topic: selected.topic,
         subtopic: selected.subtopic,
+        forceRegenerate: true,
       });
       setMaterial(res.data.data.material);
     } catch (err) {
       setError(getApiErrorMessage(err, 'Failed to generate material'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGenerateStrictTest = async () => {
+    if (!material) return;
+    setTestLoading(true); setError(''); setStrictReport(null); setStrictAnswers({}); setStrictSubmitted(false);
+    try {
+      const res = await studyPlanApi.generateStrictTest({
+        subject: material.subject,
+        subjectSlug: material.subjectSlug,
+        topic: material.topic,
+        subtopic: material.subtopic,
+        materialId: material._id,
+        difficultyLevel: material.difficultyLevel,
+        personalityMode,
+      });
+      setStrictAttemptId(res.data.data.attemptId);
+      setStrictTest(res.data.data.test);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to generate strict test'));
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  const handleStrictSubmit = async () => {
+    if (!strictAttemptId || !strictTest?.questions?.length) return;
+    setTestLoading(true); setError('');
+    try {
+      const answers = strictTest.questions.map((_, i) => strictAnswers[i] || {});
+      const res = await studyPlanApi.submitStrictTest({ attemptId: strictAttemptId, answers });
+      setStrictReport(res.data.data.report);
+      setStrictSubmitted(true);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to submit strict test'));
+    } finally {
+      setTestLoading(false);
+    }
+  };
+
+  const handleAdaptPlan = async () => {
+    if (!strictAttemptId) return;
+    setAdapting(true); setError('');
+    try {
+      await studyPlanApi.adaptPlan({ attemptId: strictAttemptId });
+      setStrictReport((prev) => prev ? { ...prev, summary: `${prev.summary} Plan updated with a targeted revision session.` } : prev);
+    } catch (err) {
+      setError(getApiErrorMessage(err, 'Failed to adapt plan'));
+    } finally {
+      setAdapting(false);
     }
   };
 
@@ -114,10 +174,40 @@ export default function LearnPage() {
 
         {/* Material viewer */}
         {material && !quizMode && (
-          <MaterialViewer
-            material={material}
-            learningStyle={learningStyle}
-            onStartQuiz={() => setQuizMode(true)}
+          <>
+            <div className="bg-white rounded-2xl p-4 border border-gray-100 flex flex-col sm:flex-row sm:items-center gap-3 sm:justify-between">
+              <div>
+                <p className="text-sm font-semibold text-gray-900">Strict test personality</p>
+                <p className="text-xs text-gray-500">Used for the generated test tone and feedback.</p>
+              </div>
+              <select value={personalityMode} onChange={(e) => setPersonalityMode(e.target.value)} className="px-3 py-2 rounded-xl border border-gray-200 text-sm">
+                <option value="balanced coach">Balanced coach</option>
+                <option value="strict examiner">Strict examiner</option>
+                <option value="encouraging mentor">Encouraging mentor</option>
+                <option value="competitive gamer">Competitive gamer</option>
+              </select>
+            </div>
+            <MaterialViewer
+              material={material}
+              learningStyle={learningStyle}
+              onStartQuiz={handleGenerateStrictTest}
+            />
+          </>
+        )}
+
+        {testLoading && <div className="bg-white rounded-2xl p-6 text-center text-indigo-600 font-medium">Generating or scoring your strict test...</div>}
+
+        {strictTest && (
+          <StrictTestSection
+            test={strictTest}
+            answers={strictAnswers}
+            submitted={strictSubmitted}
+            report={strictReport}
+            adapting={adapting}
+            onAnswer={(i, patch) => setStrictAnswers((p) => ({ ...p, [i]: { ...(p[i] || {}), ...patch } }))}
+            onSubmit={handleStrictSubmit}
+            onRetake={handleGenerateStrictTest}
+            onAdaptPlan={handleAdaptPlan}
           />
         )}
 
@@ -133,6 +223,86 @@ export default function LearnPage() {
           />
         )}
       </div>
+    </div>
+  );
+}
+
+function StrictTestSection({ test, answers, submitted, report, adapting, onAnswer, onSubmit, onRetake, onAdaptPlan }) {
+  const questions = test.questions || [];
+  const answeredCount = questions.filter((_, i) => answers[i]?.selectedAnswer).length;
+  const canSubmit = answeredCount === questions.length && questions.every((_, i) => answers[i]?.confidenceBefore);
+
+  return (
+    <div className="bg-white rounded-2xl shadow-xl p-6 sm:p-8 space-y-6 border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+        <div>
+          <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Strict gamified mastery test</p>
+          <h2 className="text-xl font-bold text-gray-900 mt-1">{test.title}</h2>
+          <p className="text-sm text-gray-500 mt-1">{test.timeLimitMinutes || 15} minutes · pass at {test.passingScore || 75}% · +{test.xpPerCorrect || 10} XP/correct</p>
+        </div>
+        <div className="text-sm font-semibold text-indigo-600">{answeredCount}/{questions.length} answered</div>
+      </div>
+
+      {test.rules?.length > 0 && (
+        <div className="grid sm:grid-cols-3 gap-2">
+          {test.rules.map((rule, i) => <div key={i} className="rounded-xl bg-amber-50 text-amber-800 p-3 text-xs">{rule}</div>)}
+        </div>
+      )}
+
+      {report && (
+        <div className={`rounded-xl p-4 ${submitted ? 'bg-indigo-50 text-indigo-900' : 'bg-gray-50 text-gray-700'}`}>
+          <p className="font-semibold">{report.summary}</p>
+          {report.weakAreas?.length > 0 && <p className="text-sm mt-2">Weak areas: {report.weakAreas.slice(0, 3).join(' | ')}</p>}
+          <div className="flex gap-3 mt-4 flex-wrap">
+            <button onClick={onAdaptPlan} disabled={adapting} className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium disabled:opacity-50">
+              {adapting ? 'Updating plan...' : 'Change Study Plan From Report'}
+            </button>
+            <button onClick={onRetake} className="px-4 py-2 rounded-xl border border-indigo-200 text-indigo-700 text-sm font-medium">
+              Generate Retest
+            </button>
+          </div>
+        </div>
+      )}
+
+      {questions.map((q, i) => (
+        <div key={i} className="border border-gray-100 rounded-xl p-4">
+          <div className="flex items-start justify-between gap-3 mb-3">
+            <p className="font-medium text-gray-800">{i + 1}. {q.question}</p>
+            <span className="text-xs rounded-full bg-gray-100 text-gray-600 px-2 py-1">{q.difficulty || 'medium'} · {q.points || 10} pts</span>
+          </div>
+          <div className="space-y-2">
+            {(q.options || []).map((opt) => {
+              const selected = answers[i]?.selectedAnswer === opt;
+              const isCorrect = submitted && opt === q.correctAnswer;
+              const isWrong = submitted && selected && opt !== q.correctAnswer;
+              return (
+                <button key={opt} disabled={submitted} onClick={() => onAnswer(i, { selectedAnswer: opt })}
+                  className={`w-full text-left p-3 rounded-xl border-2 text-sm transition-all ${isCorrect ? 'border-emerald-400 bg-emerald-50' : isWrong ? 'border-red-400 bg-red-50' : selected ? 'border-indigo-400 bg-indigo-50' : 'border-gray-100 hover:border-indigo-200'}`}>
+                  {opt}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-3">
+            <p className="text-xs text-gray-500 mb-1">Confidence before submitting</p>
+            <div className="flex gap-2">
+              {[1, 2, 3, 4, 5].map((level) => (
+                <button key={level} disabled={submitted} onClick={() => onAnswer(i, { confidenceBefore: level })}
+                  className={`w-9 h-8 rounded-lg text-xs font-semibold border ${answers[i]?.confidenceBefore === level ? 'bg-indigo-600 text-white border-indigo-600' : 'border-gray-200 text-gray-500'}`}>
+                  {level}
+                </button>
+              ))}
+            </div>
+          </div>
+          {submitted && q.explanation && <p className="mt-3 text-xs text-gray-600 bg-gray-50 p-2 rounded-lg">{q.explanation}</p>}
+        </div>
+      ))}
+
+      {!submitted && (
+        <button onClick={onSubmit} disabled={!canSubmit} className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium disabled:opacity-50">
+          Submit Strict Test
+        </button>
+      )}
     </div>
   );
 }

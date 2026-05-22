@@ -8,7 +8,7 @@ const { generateLearningMaterial, generateRevisionContent } = require('../servic
 exports.generateMaterial = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { subject, subjectSlug, topic, subtopic, difficultyLevel, contentType } = req.body;
+    const { subject, subjectSlug, topic, subtopic, difficultyLevel, contentType, forceRegenerate } = req.body;
 
     if (!subject || !topic) {
       return res.status(400).json({ status: 'error', message: 'Subject and topic are required' });
@@ -37,7 +37,7 @@ exports.generateMaterial = async (req, res) => {
       difficultyLevel: difficulty,
     });
 
-    if (existing) {
+    if (existing && !forceRegenerate) {
       return res.status(200).json({ status: 'success', data: { material: existing }, cached: true });
     }
 
@@ -69,11 +69,13 @@ exports.generateMaterial = async (req, res) => {
       flashcards: aiContent.flashcards || [],
       quizQuestions: aiContent.quizQuestions || [],
       audioScript: aiContent.audioScript || '',
+      videoResources: aiContent.videoResources || buildDummyVideos(subject, topic),
+      practiceTasks: aiContent.practiceTasks || [],
       codeExercises: aiContent.codeExercises || [],
       sourceResources: aiContent.sourceResources || [],
       estimatedReadMinutes: aiContent.estimatedReadMinutes || 10,
       generatedByAI: true,
-      aiModel: 'grok',
+      aiModel: process.env.OPENAI_API_KEY ? (process.env.OPENAI_MODEL || 'gpt-5-nano') : 'grok',
       rawAiResponse: aiContent,
     });
 
@@ -162,3 +164,18 @@ const mapStyleToContentType = (style) => {
   };
   return map[style] || 'notes';
 };
+
+const buildDummyVideos = (subject, topic) => [
+  {
+    title: `${topic} visual walkthrough`,
+    url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    durationMinutes: 12,
+    watchGoal: `Watch for the core idea behind ${topic} in ${subject}.`,
+  },
+  {
+    title: `${topic} practice demo`,
+    url: 'https://www.youtube.com/watch?v=ysz5S6PUM-U',
+    durationMinutes: 8,
+    watchGoal: 'Pause after each example and solve before the explanation continues.',
+  },
+];

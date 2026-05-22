@@ -59,6 +59,21 @@ const learningMaterialSchema = new mongoose.Schema(
     flashcards: [flashcardSchema],
     quizQuestions: [quizQuestionSchema],
     audioScript: { type: String, default: '' },       // TTS-ready script
+    videoResources: [
+      {
+        title: String,
+        url: String,
+        durationMinutes: Number,
+        watchGoal: String,
+      },
+    ],
+    practiceTasks: [
+      {
+        title: String,
+        instruction: String,
+        expectedOutcome: String,
+      },
+    ],
     codeExercises: [
       {
         title: String,

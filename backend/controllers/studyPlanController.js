@@ -4,7 +4,9 @@ const AIRecommendation = require('../models/AIRecommendation');
 const StudentProfile = require('../models/StudentProfile');
 const SubjectPerformance = require('../models/SubjectPerformance');
 const LearningStyleReport = require('../models/LearningStyleReport');
-const { generateStudyPlan, generateAdaptiveRecommendations } = require('../services/grokService');
+const StudyTestAttempt = require('../models/StudyTestAttempt');
+const LearningMaterial = require('../models/LearningMaterial');
+const { generateStudyPlan, generateAdaptiveRecommendations, generateTopicTest } = require('../services/grokService');
 
 // ── Generate / regenerate study plan ─────────────────────────────────────────
 exports.generatePlan = async (req, res) => {
@@ -460,6 +462,279 @@ exports.getTopicProgress = async (req, res) => {
     const progress = await TopicProgress.find(filter).lean();
     res.status(200).json({ status: 'success', data: { progress } });
   } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+exports.generateStrictTopicTest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const {
+      subject,
+      subjectSlug,
+      topic,
+      subtopic,
+      materialId,
+      difficultyLevel,
+      personalityMode = 'balanced coach',
+    } = req.body;
+
+    if (!subject || !subjectSlug || !topic) {
+      return res.status(400).json({ status: 'error', message: 'Subject, subjectSlug, and topic are required' });
+    }
+
+    const [profile, learningReport, plan, progress, material] = await Promise.all([
+      StudentProfile.findOne({ userId }).lean(),
+      LearningStyleReport.findOne({ userId }).lean(),
+      StudyPlan.findOne({ userId, status: 'active' }).lean(),
+      TopicProgress.findOne({ userId, subjectSlug, topic }).lean(),
+      materialId
+        ? LearningMaterial.findOne({ _id: materialId, userId }).lean()
+        : LearningMaterial.findOne({ userId, subjectSlug, topic }).sort({ updatedAt: -1, createdAt: -1 }).lean(),
+    ]);
+
+    if (!profile) {
+      return res.status(404).json({ status: 'error', message: 'Complete onboarding first' });
+    }
+
+    const learningStyle = learningReport?.preferredLearningStyle || 'Reading/Writing Learner';
+    const difficulty = difficultyLevel || progress?.currentDifficulty || 'medium';
+    const test = await generateTopicTest({
+      subject,
+      topic,
+      subtopic: subtopic || '',
+      learningStyle,
+      confidenceLevel: learningReport?.confidenceLevel || 'Moderate',
+      personalityMode,
+      difficultyLevel: difficulty,
+      profile,
+      materialContext: material,
+    });
+
+    const attempt = await StudyTestAttempt.create({
+      userId,
+      studyPlanId: plan?._id,
+      subject,
+      subjectSlug,
+      topic,
+      subtopic: subtopic || '',
+      learningStyle,
+      personalityMode,
+      difficultyLevel: difficulty,
+      test,
+      sourceMaterialId: material?._id,
+      maxScore: (test.questions || []).reduce((sum, q) => sum + (q.points || 10), 0),
+    });
+
+    res.status(201).json({ status: 'success', data: { attemptId: attempt._id, test } });
+  } catch (error) {
+    console.error('Strict test generation error:', error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+exports.submitStrictTopicTest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { attemptId, answers = [] } = req.body;
+
+    const attempt = await StudyTestAttempt.findOne({ _id: attemptId, userId });
+    if (!attempt) return res.status(404).json({ status: 'error', message: 'Test attempt not found' });
+
+    const questions = attempt.test?.questions || [];
+    const negativeMarking = Number(attempt.test?.negativeMarking || 0);
+    const xpPerCorrect = Number(attempt.test?.xpPerCorrect || 10);
+    const passingScore = Number(attempt.test?.passingScore || 75);
+
+    let rawScore = 0;
+    let correctCount = 0;
+    const scoredAnswers = questions.map((q, index) => {
+      const answer = answers[index] || {};
+      const selectedAnswer = answer.selectedAnswer || '';
+      const isCorrect = selectedAnswer === q.correctAnswer;
+      const points = Number(q.points || 10);
+      const pointsAwarded = isCorrect ? points : -negativeMarking;
+      rawScore += pointsAwarded;
+      if (isCorrect) correctCount += 1;
+      return {
+        question: q.question,
+        selectedAnswer,
+        correctAnswer: q.correctAnswer,
+        isCorrect,
+        confidenceBefore: Number(answer.confidenceBefore || 3),
+        pointsAwarded,
+        explanation: q.explanation,
+      };
+    });
+
+    const maxScore = Math.max(1, questions.reduce((sum, q) => sum + Number(q.points || 10), 0));
+    rawScore = Math.max(0, rawScore);
+    const scorePercent = Math.round((rawScore / maxScore) * 100);
+    const confidenceAverage = Number(
+      (
+        scoredAnswers.reduce((sum, answer) => sum + Number(answer.confidenceBefore || 3), 0) /
+        Math.max(1, scoredAnswers.length)
+      ).toFixed(1)
+    );
+    const performanceBand = scorePercent >= 90 ? 'excellent' : scorePercent >= passingScore ? 'pass' : 'revise';
+    const weakAreas = scoredAnswers
+      .filter((answer) => !answer.isCorrect)
+      .slice(0, 4)
+      .map((answer) => answer.question);
+
+    const report = {
+      summary:
+        performanceBand === 'excellent'
+          ? `Excellent mastery: ${correctCount}/${questions.length} correct with ${confidenceAverage}/5 confidence.`
+          : performanceBand === 'pass'
+            ? `Passed: ${correctCount}/${questions.length} correct. Revise mistakes before moving ahead.`
+            : `Revision needed: ${correctCount}/${questions.length} correct. The plan should slow down for this topic.`,
+      strengths: scoredAnswers
+        .filter((answer) => answer.isCorrect)
+        .slice(0, 3)
+        .map((answer) => answer.question),
+      weakAreas,
+      nextActions:
+        performanceBand === 'revise'
+          ? ['Reread the generated notes', 'Watch the dummy video resource', 'Complete one practice task', 'Retake the strict test']
+          : ['Review wrong answers once', 'Continue to the next planned session'],
+      planAdjustmentReason:
+        performanceBand === 'revise'
+          ? `Low score on ${attempt.topic}; add revision and practice before harder tasks.`
+          : `Performance on ${attempt.topic} is acceptable; continue current pacing.`,
+    };
+
+    attempt.answers = scoredAnswers;
+    attempt.scorePercent = scorePercent;
+    attempt.rawScore = rawScore;
+    attempt.maxScore = maxScore;
+    attempt.xpEarned = correctCount * xpPerCorrect;
+    attempt.passed = scorePercent >= passingScore;
+    attempt.confidenceAverage = confidenceAverage;
+    attempt.performanceBand = performanceBand;
+    attempt.report = report;
+    await attempt.save();
+
+    await TopicProgress.findOneAndUpdate(
+      { userId, subjectSlug: attempt.subjectSlug, topic: attempt.topic },
+      {
+        $set: {
+          subject: attempt.subject,
+          subjectSlug: attempt.subjectSlug,
+          topic: attempt.topic,
+          subtopic: attempt.subtopic || '',
+          masteryPercent: scorePercent,
+          status: attempt.passed ? 'completed' : 'needs_revision',
+          lastQuizScore: scorePercent,
+          currentDifficulty: scorePercent >= 85 ? 'hard' : scorePercent >= 60 ? 'medium' : 'easy',
+          ...(attempt.passed ? { completedAt: new Date() } : {}),
+        },
+        $inc: { quizAttempts: 1 },
+        $max: { bestQuizScore: scorePercent },
+      },
+      { upsert: true }
+    );
+
+    res.status(200).json({ status: 'success', data: { attempt, report } });
+  } catch (error) {
+    console.error('Strict test submit error:', error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+exports.getPerformanceReport = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const attempts = await StudyTestAttempt.find({ userId })
+      .sort({ createdAt: -1 })
+      .limit(20)
+      .lean();
+
+    const averageScore = attempts.length
+      ? Math.round(attempts.reduce((sum, a) => sum + (a.scorePercent || 0), 0) / attempts.length)
+      : 0;
+    const averageConfidence = attempts.length
+      ? Number((attempts.reduce((sum, a) => sum + (a.confidenceAverage || 0), 0) / attempts.length).toFixed(1))
+      : 0;
+    const needsRevision = attempts.filter((a) => a.performanceBand === 'revise').map((a) => ({
+      subject: a.subject,
+      topic: a.topic,
+      scorePercent: a.scorePercent,
+      reason: a.report?.planAdjustmentReason,
+    }));
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        summary: { attempts: attempts.length, averageScore, averageConfidence, needsRevisionCount: needsRevision.length },
+        needsRevision,
+        attempts,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+exports.adaptPlanFromPerformance = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { attemptId } = req.body;
+    const [plan, attempt] = await Promise.all([
+      StudyPlan.findOne({ userId, status: 'active' }),
+      attemptId ? StudyTestAttempt.findOne({ _id: attemptId, userId }).lean() : StudyTestAttempt.findOne({ userId }).sort({ createdAt: -1 }).lean(),
+    ]);
+
+    if (!plan) return res.status(404).json({ status: 'error', message: 'No active study plan found' });
+    if (!attempt) return res.status(404).json({ status: 'error', message: 'No test attempt found' });
+
+    const revisionSession = {
+      subject: attempt.subject,
+      subjectSlug: attempt.subjectSlug,
+      topic: attempt.topic,
+      subtopic: attempt.subtopic || '',
+      durationMinutes: Math.min(45, Math.max(25, Math.round((plan.availableHoursPerDay || 1) * 20))),
+      sessionType: attempt.passed ? 'revise' : 'practice',
+      difficultyLevel: attempt.scorePercent >= 85 ? 'hard' : attempt.scorePercent >= 60 ? 'medium' : 'easy',
+      resources: [
+        'AI notes from the learning session',
+        'Dummy video: https://www.youtube.com/watch?v=ysz5S6PUM-U',
+        'Strict test mistake review',
+      ],
+      completed: false,
+      notes: `Auto-added after ${attempt.scorePercent}% test score.`,
+    };
+
+    let inserted = false;
+    for (const week of plan.weeklyPlan || []) {
+      for (const day of week.days || []) {
+        if (!day.completed) {
+          day.sessions.unshift(revisionSession);
+          day.totalMinutes = (day.totalMinutes || 0) + revisionSession.durationMinutes;
+          inserted = true;
+          break;
+        }
+      }
+      if (inserted) break;
+    }
+
+    if (!inserted) {
+      return res.status(400).json({ status: 'error', message: 'No open day found to adapt' });
+    }
+
+    plan.adaptationHistory.push({
+      reason: attempt.report?.planAdjustmentReason || `Performance update for ${attempt.topic}`,
+      change: `Added ${revisionSession.sessionType} session for ${attempt.topic}.`,
+    });
+    plan.aiRecommendations = [
+      `Adapted after ${attempt.topic} test: score ${attempt.scorePercent}%, confidence ${attempt.confidenceAverage}/5.`,
+      ...(plan.aiRecommendations || []).slice(0, 4),
+    ];
+    await plan.save();
+
+    res.status(200).json({ status: 'success', data: { plan } });
+  } catch (error) {
+    console.error('Adapt plan error:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

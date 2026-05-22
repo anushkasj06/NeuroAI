@@ -102,6 +102,14 @@ export default function MaterialViewer({ material, learningStyle, onStartQuiz })
           <CodeExercises exercises={material.codeExercises || []} />
         )}
 
+        {tab === 'videos' && (
+          <VideoResources videos={material.videoResources || []} />
+        )}
+
+        {tab === 'practice' && (
+          <PracticeTasks tasks={material.practiceTasks || []} />
+        )}
+
         {/* Audio script */}
         {tab === 'audio' && (
           <div>
@@ -122,7 +130,7 @@ export default function MaterialViewer({ material, learningStyle, onStartQuiz })
       <div className="px-6 pb-6 flex gap-3 flex-wrap">
         {(material.quizQuestions?.length > 0) && (
           <button onClick={onStartQuiz} className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium text-sm hover:opacity-90">
-            🧪 Take Quiz ({material.quizQuestions.length} questions)
+            Generate Strict Test ({material.quizQuestions.length}+ questions)
           </button>
         )}
       </div>
@@ -136,7 +144,37 @@ function buildTabs(learningStyle, material) {
   if (material.flashcards?.length > 0) tabs.push({ id: 'flashcards', emoji: '🃏', label: 'Flashcards' });
   if (material.audioScript) tabs.push({ id: 'audio', emoji: '🎧', label: 'Audio' });
   if (material.codeExercises?.length > 0) tabs.push({ id: 'code', emoji: '💻', label: 'Exercises' });
+  if (material.videoResources?.length > 0) tabs.push({ id: 'videos', emoji: 'Video', label: 'Videos' });
+  if (material.practiceTasks?.length > 0) tabs.push({ id: 'practice', emoji: 'Task', label: 'Practice' });
   return tabs;
+}
+
+function VideoResources({ videos }) {
+  return (
+    <div className="grid sm:grid-cols-2 gap-4">
+      {videos.map((video, i) => (
+        <a key={i} href={video.url} target="_blank" rel="noreferrer" className="block rounded-xl border border-gray-200 p-4 hover:border-indigo-300 hover:bg-indigo-50 transition-all">
+          <p className="text-sm font-semibold text-gray-900">{video.title}</p>
+          <p className="text-xs text-gray-500 mt-1">{video.durationMinutes || 10} min dummy video resource</p>
+          <p className="text-sm text-indigo-700 mt-3">{video.watchGoal}</p>
+        </a>
+      ))}
+    </div>
+  );
+}
+
+function PracticeTasks({ tasks }) {
+  return (
+    <div className="space-y-3">
+      {tasks.map((task, i) => (
+        <div key={i} className="rounded-xl border border-gray-200 p-4">
+          <p className="text-sm font-semibold text-gray-900">{i + 1}. {task.title}</p>
+          <p className="text-sm text-gray-600 mt-2">{task.instruction}</p>
+          <p className="text-xs text-emerald-700 bg-emerald-50 rounded-lg p-2 mt-3">{task.expectedOutcome}</p>
+        </div>
+      ))}
+    </div>
+  );
 }
 
 function ConceptMap({ data }) {
