@@ -1,260 +1,207 @@
-import { useState, useEffect } from 'react';
-import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import {
+  AcademicCapIcon,
+  Bars3Icon,
+  BeakerIcon,
+  ChartBarSquareIcon,
+  ChatBubbleLeftRightIcon,
+  ClipboardDocumentListIcon,
+  HomeIcon,
+  PresentationChartLineIcon,
+  PuzzlePieceIcon,
+  SparklesIcon,
+  Squares2X2Icon,
+  UserCircleIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
+import './Navbar.css';
+
+const getHomePath = (user) => {
+  if (!user) return '/';
+  return user.role === 'teacher' ? '/teacher' : '/ai-dashboard';
+};
+
+const studentLinksBase = [
+  { to: '/ai-dashboard', label: 'Dashboard', icon: Squares2X2Icon },
+  { to: '/learn', label: 'Learn', icon: AcademicCapIcon },
+  { to: '/progress', label: 'Progress', icon: PresentationChartLineIcon },
+  { to: '/materials', label: 'Materials', icon: ClipboardDocumentListIcon },
+  { to: '/battle', label: 'Battle Arena', icon: SparklesIcon },
+  { to: '/community', label: 'Community', icon: ChatBubbleLeftRightIcon },
+  { to: '/diagnostic', label: 'Diagnostic', icon: BeakerIcon },
+  { to: '/prediction', label: 'Predictions', icon: ChartBarSquareIcon },
+  { to: '/profile', label: 'Profile', icon: UserCircleIcon },
+];
+
+const teacherLinks = [
+  { to: '/teacher', label: 'Classroom', icon: HomeIcon },
+  { to: '/teacher/content', label: 'Content Studio', icon: PuzzlePieceIcon },
+  { to: '/profile', label: 'Profile', icon: UserCircleIcon },
+];
+
+const SidebarLinks = ({ links, onNavigate }) => (
+  <div className="space-y-1">
+    {links.map((link) => {
+      const Icon = link.icon;
+      return (
+        <NavLink
+          key={link.to}
+          to={link.to}
+          onClick={onNavigate}
+          className={({ isActive }) =>
+            `side-link ${isActive ? 'side-link--active' : 'side-link--idle'}`
+          }
+        >
+          <span className="side-link__icon">
+            <Icon className="h-4 w-4" />
+          </span>
+          <span className="side-link__label">{link.label}</span>
+        </NavLink>
+      );
+    })}
+  </div>
+);
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-
+  const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [hasDiagnosticProfile, setHasDiagnosticProfile] = useState(false);
+
+  const isTeacher = user?.role === 'teacher';
+  const isStudent = Boolean(user) && !isTeacher;
+
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [location.pathname]);
 
   useEffect(() => {
     const checkDiagnosticStatus = async () => {
       try {
-        if (user) {
-          await api.get('/diagnostic/status');
+        if (!isStudent) {
+          setHasDiagnosticProfile(false);
+          return;
         }
-      } catch (error) {
-        console.error('Error checking diagnostic status:', error);
+
+        const response = await api.get('/diagnostic/status');
+        setHasDiagnosticProfile(Boolean(response?.data?.data?.profile));
+      } catch {
+        setHasDiagnosticProfile(false);
       }
     };
 
     checkDiagnosticStatus();
-  }, [user]);
+  }, [isStudent, user?._id]);
+
+  const links = useMemo(() => {
+    if (isTeacher) return teacherLinks;
+    if (isStudent) {
+      const studyPlanLink = hasDiagnosticProfile
+        ? { to: '/study-plan', label: 'Study Plan', icon: ClipboardDocumentListIcon }
+        : { to: '/study-plan/generate', label: 'Plan Builder', icon: SparklesIcon };
+      return [...studentLinksBase, studyPlanLink];
+    }
+    return [];
+  }, [isTeacher, isStudent, hasDiagnosticProfile]);
 
   const handleLogout = async () => {
     try {
       await logout();
       navigate('/login');
     } catch (error) {
-      console.error(error);
+      console.error('Logout failed:', error);
     }
   };
 
-  const linkClass = ({ isActive }) =>
-    `relative group inline-flex items-center px-1 pt-1 text-sm font-medium transition-colors duration-300 ${
-      isActive ? 'text-blue-600' : 'text-gray-600 hover:text-blue-600'
-    }`;
+  if (!user) {
+    return (
+      <header className="guest-topbar">
+        <div className="guest-topbar__inner">
+          <Link to="/" className="brand">
+            <span className="brand__name">NeuroLearn</span>
+            <span className="brand__chip">AI</span>
+          </Link>
+          <div className="guest-topbar__actions">
+            <Link to="/login" className="guest-btn guest-btn--subtle">
+              Login
+            </Link>
+            <Link to="/signup" className="guest-btn guest-btn--primary">
+              Sign Up
+            </Link>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
-    <nav className="bg-gradient-to-r from-white/80 via-blue-50/50 to-indigo-50/50 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-white/20">
-      <div className="relative">
-        
-        {/* Animated Background */}
-        <div className="absolute inset-0 overflow-hidden">
-          <div className="absolute -inset-[100%] opacity-50">
-            <div className="absolute top-0 -left-48 w-96 h-96 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob"></div>
-
-            <div className="absolute top-0 -right-48 w-96 h-96 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full mix-blend-multiply filter blur-3xl animate-blob animation-delay-2000"></div>
-          </div>
+    <>
+      <aside className="app-sidebar hidden lg:flex">
+        <div className="app-sidebar__header">
+          <Link to={getHomePath(user)} className="brand">
+            <span className="brand__name">NeuroLearn</span>
+            <span className="brand__chip">AI</span>
+          </Link>
+          <span className="role-chip">{isTeacher ? 'Teacher Workspace' : 'Student Workspace'}</span>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
-          <div className="flex justify-between items-center h-16">
-
-            {/* Left Section */}
-            <div className="flex items-center">
-
-              {/* Logo */}
-              <Link to="/" className="relative group">
-                <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text group-hover:opacity-80 transition-all duration-300">
-                  NeuroLearn AI
-                </span>
-
-                <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
-              </Link>
-
-              {/* Desktop Navigation */}
-              {user && (
-                <div className="hidden md:flex ml-8 space-x-6">
-
-                  <NavLink to="/dashboard" className={linkClass}>
-                    Dashboard
-                  </NavLink>
-
-                  <NavLink to="/profile" className={linkClass}>
-                    Profile
-                  </NavLink>
-
-                  <NavLink to="/diagnostic" className={linkClass}>
-                    Diagnostic
-                  </NavLink>
-
-                  <NavLink to="/battle" className={linkClass}>
-                    Battle Arena
-                  </NavLink>
-
-                  <NavLink to="/community" className={linkClass}>
-                    Community
-                  </NavLink>
-
-                </div>
-              )}
-            </div>
-
-            {/* Right Section */}
-            <div className="hidden md:flex items-center gap-3">
-              {user ? (
-                <>
-                  <span className="text-sm text-gray-600 font-medium max-w-[120px] truncate">
-                    {user.name}
-                  </span>
-
-                  <button
-                    onClick={handleLogout}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-red-500 to-pink-500 text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-sm"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <>
-                  <Link
-                    to="/login"
-                    className="text-sm text-gray-600 font-medium hover:text-indigo-600 px-3 py-2"
-                  >
-                    Login
-                  </Link>
-
-                  <Link
-                    to="/signup"
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-medium hover:opacity-90 transition-opacity shadow-sm"
-                  >
-                    Sign Up
-                  </Link>
-                </>
-              )}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100"
-              onClick={() => setMobileOpen((prev) => !prev)}
-              aria-label="Toggle menu"
-            >
-              <svg
-                className="w-6 h-6"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth={2}
-              >
-                {mobileOpen ? (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M6 18L18 6M6 6l12 12"
-                  />
-                ) : (
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                )}
-              </svg>
-            </button>
-          </div>
+        <div className="app-sidebar__body">
+          <SidebarLinks links={links} />
         </div>
 
-        {/* Mobile Menu */}
+        <div className="app-sidebar__footer">
+          <p className="user-label" title={user.name}>
+            {user.name}
+          </p>
+          <button type="button" onClick={handleLogout} className="logout-btn">
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      <div className="mobile-shell lg:hidden">
+        <header className="mobile-topbar">
+          <Link to={getHomePath(user)} className="brand">
+            <span className="brand__name">NeuroLearn</span>
+            <span className="brand__chip">AI</span>
+          </Link>
+          <button
+            type="button"
+            className="mobile-menu-btn"
+            onClick={() => setMobileOpen((prev) => !prev)}
+            aria-label="Toggle navigation"
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? <XMarkIcon className="h-5 w-5" /> : <Bars3Icon className="h-5 w-5" />}
+          </button>
+        </header>
+
         {mobileOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-1 max-h-[80vh] overflow-y-auto">
-
-            {user ? (
-              <>
-                <MobileLink
-                  to="/dashboard"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  🧠 Dashboard
-                </MobileLink>
-
-                <MobileLink
-                  to="/diagnostic"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  🔬 Diagnostic
-                </MobileLink>
-
-                <MobileLink
-                  to="/battle"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  ⚔️ Battle Arena
-                </MobileLink>
-
-                <MobileLink
-                  to="/community"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  👥 Community
-                </MobileLink>
-
-                <MobileLink
-                  to="/profile"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  👤 Profile
-                </MobileLink>
-
-                <div className="pt-3 border-t border-gray-100">
-                  <p className="text-sm text-gray-500 px-3 mb-2">
-                    {user.name}
-                  </p>
-
-                  <button
-                    onClick={() => {
-                      setMobileOpen(false);
-                      handleLogout();
-                    }}
-                    className="w-full text-left px-3 py-2.5 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <MobileLink
-                  to="/login"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Login
-                </MobileLink>
-
-                <MobileLink
-                  to="/signup"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Sign Up
-                </MobileLink>
-              </>
-            )}
+          <div className="mobile-drawer">
+            <div className="mobile-drawer__role">
+              <span>{isTeacher ? 'Teacher Workspace' : 'Student Workspace'}</span>
+              <p title={user.name}>{user.name}</p>
+            </div>
+            <SidebarLinks links={links} onNavigate={() => setMobileOpen(false)} />
+            <button
+              type="button"
+              className="logout-btn mt-4 w-full"
+              onClick={() => {
+                setMobileOpen(false);
+                handleLogout();
+              }}
+            >
+              Logout
+            </button>
           </div>
         )}
       </div>
-    </nav>
+    </>
   );
 };
-
-function MobileLink({ to, onClick, children }) {
-  return (
-    <NavLink
-      to={to}
-      onClick={onClick}
-      className={({ isActive }) =>
-        `block px-3 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-          isActive
-            ? 'bg-indigo-50 text-indigo-600'
-            : 'text-gray-700 hover:bg-gray-50'
-        }`
-      }
-    >
-      {children}
-    </NavLink>
-  );
-}
 
 export default Navbar;
