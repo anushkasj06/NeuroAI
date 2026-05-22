@@ -7,4 +7,76 @@
     @apply antialiased;
     font-family: 'Sora', 'Space Grotesk', 'Manrope', 'Segoe UI', sans-serif;
   }
-} 
+}
+
+/* ── Google Translate Overrides ──────────────────────────────────────────── */
+
+/* Hide the top banner frame */
+.skiptranslate iframe,
+.VIpgJd-ZVi9od-ORHb-OEVmcd {
+  display: none !important;
+}
+
+/* Remove forced top margin added by Google */
+body {
+  top: 0 !important;
+}
+
+/* Float the widget beautifully */
+#google_translate_element {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 8px 12px;
+  border-radius: 14px;
+  border: 1px solid rgba(15, 118, 110, 0.25);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  transition: all 0.2s ease;
+}
+
+#google_translate_element:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.15);
+  border-color: rgba(15, 118, 110, 0.45);
+}
+
+/* Style the internal select dropdown */
+.goog-te-combo {
+  font-family: 'Sora', sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  color: #0f766e !important;
+  border: none !important;
+  background: transparent !important;
+  outline: none !important;
+  cursor: pointer;
+  padding-right: 4px;
+}
+
+/* Hide the default logo and label */
+.goog-logo-link, 
+.goog-te-gadget span {
+  display: none !important;
+}
+
+/* Clean up the gadget container */
+.goog-te-gadget {
+  color: transparent !important;
+  font-size: 0 !important;
+}
+
+/* Hide popups when hovering translated text */
+.goog-tooltip {
+  display: none !important;
+}
+.goog-tooltip:hover {
+  display: none !important;
+}
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

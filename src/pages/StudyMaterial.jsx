@@ -229,7 +229,7 @@ export default function StudyMaterial() {
                       </span>
                     </div>
                     <div className="material-card__tags">
-                      {(item.tags || []).slice(0, 3).map((tag) => (
+                      {(item.tags || []).filter(tag => tag && tag.trim()).slice(0, 3).map((tag) => (
                         <span key={tag}>{tag}</span>
                       ))}
                     </div>
