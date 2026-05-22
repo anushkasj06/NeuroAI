@@ -29,10 +29,10 @@ const Home = () => {
 
                 <div className="flex items-center gap-4">
                   <Link
-                    to="/quiz"
+                    to="/diagnostic"
                     className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium rounded-lg text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 transform hover:scale-105 transition-all duration-300"
                   >
-                    Take Quiz
+                    Start Diagnostic
                     <svg className="ml-2 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                     </svg>
@@ -124,10 +124,10 @@ const Home = () => {
               
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                 <Link
-                  to={user ? "/quiz" : "/signup"}
+                  to={user ? "/diagnostic" : "/signup"}
                   className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-lg text-indigo-600 bg-white hover:bg-white/90 transform hover:scale-105 transition-all duration-300 shadow-lg shadow-white/20"
                 >
-                  {user ? "Take Quiz" : "Get Started"}
+                  {user ? "Start Diagnostic" : "Get Started"}
                   <svg className="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
                   </svg>
@@ -473,8 +473,8 @@ const Home = () => {
                   </Link>
                 </li>
                 <li>
-                  <Link to="/quiz" className="text-gray-400 hover:text-white transition-colors duration-300">
-                    Take Quiz
+                  <Link to="/diagnostic" className="text-gray-400 hover:text-white transition-colors duration-300">
+                    Start Diagnostic
                   </Link>
                 </li>
                 <li>

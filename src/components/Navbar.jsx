@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import api from '../services/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -12,8 +12,8 @@ const Navbar = () => {
     const checkQuizAnswers = async () => {
       try {
         if (user) {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/quiz/answers/${user._id}`);
-          setHasQuizAnswers(response.data.length > 0);
+          const response = await api.get('/diagnostic/status');
+          setHasQuizAnswers(response.data?.data?.profile != null);
         }
       } catch (error) {
         console.error('Error checking quiz answers:', error);
@@ -52,7 +52,7 @@ const Navbar = () => {
                   className="relative group"
                 >
                   <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text group-hover:opacity-80 transition-all duration-300">
-                    LearnAhead AI
+                    NeuroLearn AI
                   </span>
                   <span className="absolute -bottom-2 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 group-hover:w-full transition-all duration-300"></span>
                 </Link>
@@ -74,10 +74,10 @@ const Navbar = () => {
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                   </Link>
                   <Link
-                    to="/quiz"
+                    to="/diagnostic"
                     className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
                   >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Quiz</span>
+                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Diagnostic</span>
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                   </Link>
                   <Link

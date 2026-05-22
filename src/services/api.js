@@ -1,11 +1,13 @@
 import axios from 'axios';
 
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:5000').replace(/\/$/, '');
+
 const api = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: `${API_BASE}/api`,
   withCredentials: true,
+  timeout: 30000,
 });
 
-// Add a request interceptor to add the auth token to requests
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   if (token) {
@@ -20,10 +22,21 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('token');
     }
-
     return Promise.reject(error);
   }
 );
+
+/** Human-readable message from axios errors */
+export function getApiErrorMessage(error, fallback = 'Request failed') {
+  if (!error.response) {
+    if (error.code === 'ECONNABORTED') {
+      return 'Request timed out. Is the backend running?';
+    }
+    return `Cannot reach backend at ${API_BASE}. Start it with: cd backend && npm start`;
+  }
+  const data = error.response.data;
+  return data?.message || data?.error || fallback;
+}
 
 export const auth = {
   signup: (data) => api.post('/auth/signup', data),
@@ -50,4 +63,5 @@ export const leaderboard = {
   getLeaderboard: (subject = 'all') => api.get(`/quiz/marks?subject=${subject.toLowerCase()}`),
 };
 
-export default api; 
+export { API_BASE };
+export default api;

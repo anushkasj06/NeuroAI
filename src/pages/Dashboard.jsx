@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { quiz } from '../services/api';
+import { diagnostic } from '../services/diagnosticApi';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -41,13 +42,33 @@ const Dashboard = () => {
 
   const fetchQuizData = async () => {
     try {
-      const response = await quiz.getAnswers();
-      setQuizData(response.data);
+      const reportRes = await diagnostic.getReport();
+      const { report, subjects, profile } = reportRes.data.data;
+      setQuizData({
+        currentCGPA: profile.currentCgpaOrPercentage / 10,
+        education: profile.educationLevel,
+        studyStyle: report.preferredLearningStyle,
+        subjects: subjects.reduce((acc, s) => {
+          acc[s.subjectSlug] = {
+            marks: s.currentMarks,
+            attendance: 85,
+            interest: 7,
+          };
+          return acc;
+        }, {}),
+        _diagnosticReport: report,
+      });
       setLoading(false);
-    } catch (err) {
-      console.log('No quiz data available');
-      setError('Please complete the quiz to view your dashboard');
-      setLoading(false);
+    } catch (diagErr) {
+      try {
+        const response = await quiz.getAnswers();
+        setQuizData(response.data);
+        setLoading(false);
+      } catch (err) {
+        console.log('No diagnostic or quiz data available');
+        setError('Please complete the diagnostic assessment to view your dashboard');
+        setLoading(false);
+      }
     }
   };
 
@@ -90,8 +111,8 @@ const Dashboard = () => {
           <div className="error-icon">📊</div>
           <h2>Welcome to Your Dashboard</h2>
           <p>{error || 'Please complete the quiz to view your dashboard'}</p>
-          <a href="/quiz" className="take-quiz-btn">
-            Take the Quiz
+          <a href="/diagnostic" className="take-quiz-btn">
+            Start Diagnostic Assessment
           </a>
         </div>
       </div>

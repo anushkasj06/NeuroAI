@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { auth } from '../services/api';
+import { auth, getApiErrorMessage } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -33,11 +33,14 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await auth.login(credentials);
       if (response.data.status === 'success') {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
         setUser(response.data.data.user);
         return response.data;
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(getApiErrorMessage(err, 'Login failed'));
       throw err;
     }
   };
@@ -47,11 +50,14 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const response = await auth.signup(userData);
       if (response.data.status === 'success') {
+        if (response.data.token) {
+          localStorage.setItem('token', response.data.token);
+        }
         setUser(response.data.data.user);
         return response.data;
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Signup failed');
+      setError(getApiErrorMessage(err, 'Signup failed'));
       throw err;
     }
   };
@@ -60,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     try {
       setError(null);
       await auth.logout();
+      localStorage.removeItem('token');
       setUser(null);
     } catch (err) {
       setError(err.response?.data?.message || 'Logout failed');
