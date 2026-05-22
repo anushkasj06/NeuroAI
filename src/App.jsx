@@ -16,6 +16,7 @@ import Test from './pages/Test';
 import AiStudyPlanGenerator from './pages/AiStudyPlanGenerator.jsx';
 import Leaderboard from './pages/Leaderboard';
 import Community from './pages/Community';
+import BattleArena from './pages/BattleArena';
 
 function App() {
   return (
@@ -96,6 +97,14 @@ function App() {
               element={
                 <PrivateRoute>
                   <Leaderboard />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/battle"
+              element={
+                <PrivateRoute>
+                  <BattleArena />
                 </PrivateRoute>
               }
             />

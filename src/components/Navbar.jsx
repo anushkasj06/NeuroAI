@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import axios from 'axios';
+import { quiz } from '../services/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -12,11 +12,13 @@ const Navbar = () => {
     const checkQuizAnswers = async () => {
       try {
         if (user) {
-          const response = await axios.get(`${import.meta.env.VITE_API_URL}/api/quiz/answers/${user._id}`);
-          setHasQuizAnswers(response.data.length > 0);
+          const response = await quiz.getAnswers();
+          setHasQuizAnswers(Boolean(response.data));
+        } else {
+          setHasQuizAnswers(false);
         }
       } catch (error) {
-        console.error('Error checking quiz answers:', error);
+        setHasQuizAnswers(false);
       }
     };
 
@@ -85,6 +87,13 @@ const Navbar = () => {
                     className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
                   >
                     <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Leaderboard</span>
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                  </Link>
+                  <Link
+                    to="/battle"
+                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                  >
+                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Battle Arena</span>
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                   </Link>
                   <Link

@@ -7,6 +7,7 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const quizRoutes = require('./routes/quizRoutes');
+const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use(cors({
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
+app.use('/api/rapid-battle', rapidBattleRoutes);
 
 // Connect to MongoDB
 mongoose
