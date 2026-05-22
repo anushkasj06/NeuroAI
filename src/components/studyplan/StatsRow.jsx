@@ -1,61 +1,67 @@
-const STYLE_EMOJI = {
-  'Visual Learner': '👁️',
-  'Audio Learner': '🎧',
-  'Reading/Writing Learner': '📖',
-  'Interactive Learner': '🧩',
-};
+import {
+  AdjustmentsHorizontalIcon,
+  PresentationChartLineIcon,
+  FireIcon,
+  ClipboardDocumentCheckIcon,
+  ArrowTrendingUpIcon,
+  CalendarDaysIcon,
+} from '@heroicons/react/24/outline';
 
 export default function StatsRow({ analytics: a }) {
   const stats = [
     {
-      label: 'Learning Style',
-      value: a.learningStyle ? STYLE_EMOJI[a.learningStyle] + ' ' + a.learningStyle.replace(' Learner', '') : '—',
+      label: 'Learning style',
+      value: a.learningStyle ? a.learningStyle.replace(' Learner', '') : 'N/A',
       sub: 'Detected by AI',
-      color: 'from-indigo-500 to-purple-600',
+      icon: AdjustmentsHorizontalIcon,
     },
     {
       label: 'Engagement',
       value: `${a.engagementScore ?? 0}%`,
       sub: a.confidenceLevel ? `${a.confidenceLevel} confidence` : 'Score',
-      color: 'from-emerald-500 to-teal-600',
+      icon: PresentationChartLineIcon,
     },
     {
-      label: 'Study Streak',
+      label: 'Study streak',
       value: `${a.currentStreak ?? 0} days`,
       sub: `Best: ${a.longestStreak ?? 0} days`,
-      color: 'from-amber-500 to-orange-500',
+      icon: FireIcon,
     },
     {
-      label: 'Plan Progress',
+      label: 'Plan progress',
       value: a.hasPlan ? `${a.overallCompletionPercent ?? 0}%` : 'No plan',
       sub: a.hasPlan ? `${a.totalCompletedHours ?? 0}h / ${a.totalPlannedHours ?? 0}h` : 'Generate one',
-      color: 'from-rose-500 to-pink-600',
+      icon: ClipboardDocumentCheckIcon,
     },
     {
-      label: 'Target Score',
+      label: 'Target score',
       value: `${a.targetScore ?? 0}%`,
       sub: `Current: ${a.currentScore ?? 0}%`,
-      color: 'from-blue-500 to-cyan-600',
+      icon: ArrowTrendingUpIcon,
     },
     {
-      label: 'Days to Exam',
-      value: a.daysUntilExam != null ? `${a.daysUntilExam}d` : '—',
+      label: 'Days to exam',
+      value: a.daysUntilExam != null ? `${a.daysUntilExam} days` : 'N/A',
       sub: a.examName || 'Set exam date',
-      color: 'from-violet-500 to-purple-600',
+      icon: CalendarDaysIcon,
     },
   ];
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-      {stats.map((s) => (
-        <div key={s.label} className="bg-white rounded-2xl p-4 shadow-sm border border-gray-50">
-          <p className="text-xs text-gray-400 font-medium mb-1">{s.label}</p>
-          <p className={`text-lg font-bold bg-gradient-to-r ${s.color} bg-clip-text text-transparent leading-tight`}>
-            {s.value}
-          </p>
-          <p className="text-xs text-gray-400 mt-0.5 truncate">{s.sub}</p>
-        </div>
-      ))}
+    <div className="ai-kpi-strip grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+      {stats.map((s) => {
+        const Icon = s.icon;
+        return (
+          <div key={s.label} className="ai-kpi">
+            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+              <Icon className="h-4 w-4 text-teal-600" />
+              {s.label}
+            </div>
+            <p className="text-lg font-semibold text-slate-900 leading-tight">{s.value}</p>
+            <p className="text-xs text-slate-400 mt-0.5 truncate">{s.sub}</p>
+          </div>
+        );
+      })}
     </div>
   );
 }

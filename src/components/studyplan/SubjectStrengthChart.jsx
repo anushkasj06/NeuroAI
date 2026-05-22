@@ -1,11 +1,20 @@
+import { ChartBarSquareIcon, CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+
 export default function SubjectStrengthChart({ subjects, strengths, weaknesses }) {
   if (!subjects?.length) return null;
 
   const sorted = [...subjects].sort((a, b) => b.currentMarks - a.currentMarks);
 
   return (
-    <div className="bg-white rounded-2xl shadow-md p-6 border border-gray-50">
-      <h3 className="font-bold text-gray-900 mb-5">📊 Subject Performance</h3>
+    <div className="ai-rail">
+      <div className="ai-panel__header">
+        <div className="ai-panel__title">
+          <ChartBarSquareIcon className="h-5 w-5 text-teal-600" />
+          Subject performance
+        </div>
+      </div>
+
+      <div className="ai-panel__body">
 
       <div className="space-y-3">
         {sorted.map((s) => {
@@ -32,14 +41,17 @@ export default function SubjectStrengthChart({ subjects, strengths, weaknesses }
       </div>
 
       {(strengths?.length > 0 || weaknesses?.length > 0) && (
-        <div className="grid sm:grid-cols-2 gap-4 mt-5 pt-5 border-t border-gray-100">
+        <div className="grid sm:grid-cols-2 gap-4 mt-5 pt-5 border-t border-slate-100">
           {strengths?.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-emerald-600 mb-2">✅ Strengths</p>
+              <p className="flex items-center gap-2 text-xs font-semibold text-emerald-600 mb-2">
+                <CheckCircleIcon className="h-4 w-4" />
+                Strengths
+              </p>
               <ul className="space-y-1">
                 {strengths.slice(0, 3).map((s) => (
-                  <li key={s.subject} className="text-xs text-gray-600">
-                    <span className="font-medium">{s.subject}</span> — {s.strength}
+                  <li key={s.subject} className="text-xs text-slate-600">
+                    <span className="font-medium">{s.subject}</span> - {s.strength}
                   </li>
                 ))}
               </ul>
@@ -47,11 +59,14 @@ export default function SubjectStrengthChart({ subjects, strengths, weaknesses }
           )}
           {weaknesses?.length > 0 && (
             <div>
-              <p className="text-xs font-semibold text-amber-600 mb-2">⚠️ Needs Work</p>
+              <p className="flex items-center gap-2 text-xs font-semibold text-amber-600 mb-2">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                Needs work
+              </p>
               <ul className="space-y-1">
                 {weaknesses.slice(0, 3).map((s) => (
-                  <li key={s.subject} className="text-xs text-gray-600">
-                    <span className="font-medium">{s.subject}</span> — {s.weakness}
+                  <li key={s.subject} className="text-xs text-slate-600">
+                    <span className="font-medium">{s.subject}</span> - {s.weakness}
                   </li>
                 ))}
               </ul>
@@ -59,6 +74,7 @@ export default function SubjectStrengthChart({ subjects, strengths, weaknesses }
           )}
         </div>
       )}
+      </div>
     </div>
   );
 }
