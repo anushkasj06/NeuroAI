@@ -92,6 +92,10 @@ export const content = {
     });
   },
   getStudentContent: () => api.get('/content/student'),
+  getConceptMap: (id, options = {}) => {
+    const query = options.refresh ? '?refresh=1' : '';
+    return api.get(`/content/student/${id}/concept-map${query}`);
+  },
 };
 
 export { API_BASE };

@@ -70,6 +70,7 @@ exports.generateMaterial = async (req, res) => {
       quizQuestions: aiContent.quizQuestions || [],
       audioScript: aiContent.audioScript || '',
       codeExercises: aiContent.codeExercises || [],
+      sourceResources: aiContent.sourceResources || [],
       estimatedReadMinutes: aiContent.estimatedReadMinutes || 10,
       generatedByAI: true,
       aiModel: 'grok',

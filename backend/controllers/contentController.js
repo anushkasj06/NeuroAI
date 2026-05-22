@@ -1,5 +1,6 @@
 const StudyContent = require('../models/StudyContent');
 const User = require('../models/User');
+const { generateConceptMapForContent } = require('../services/conceptMapService');
 
 const normalizeString = (value, maxLength = 4000) => {
   if (typeof value !== 'string') return '';
@@ -118,6 +119,28 @@ exports.getStudentContent = async (req, res) => {
   } catch (error) {
     console.error('Student content error:', error);
     res.status(500).json({ status: 'error', message: 'Failed to load study materials' });
+  }
+};
+
+exports.getStudentConceptMap = async (req, res) => {
+  try {
+    const contentItem = await StudyContent.findOne({
+      _id: req.params.id,
+      status: 'published',
+      targetUserIds: req.user._id,
+    }).lean();
+
+    if (!contentItem) {
+      return res.status(404).json({ status: 'error', message: 'Study material not found' });
+    }
+
+    const forceRefresh = req.query.refresh === '1' || req.query.refresh === 'true';
+    const conceptMap = await generateConceptMapForContent(contentItem, { forceRefresh });
+
+    res.status(200).json({ status: 'success', data: conceptMap });
+  } catch (error) {
+    console.error('Student concept map error:', error);
+    res.status(500).json({ status: 'error', message: 'Failed to generate concept map' });
   }
 };
 

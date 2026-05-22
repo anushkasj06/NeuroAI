@@ -8,6 +8,7 @@ const router = express.Router();
 router.use(protect);
 
 router.get('/student', restrictTo('student'), contentController.getStudentContent);
+router.get('/student/:id/concept-map', restrictTo('student'), contentController.getStudentConceptMap);
 router.get('/teacher/students', restrictTo('teacher'), contentController.getTeacherStudents);
 router.get('/teacher', restrictTo('teacher'), contentController.getTeacherContent);
 router.post('/teacher', restrictTo('teacher'), contentController.createContent);

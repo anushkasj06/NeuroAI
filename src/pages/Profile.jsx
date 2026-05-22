@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { profile, quiz } from '../services/api';
+import { profile } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
@@ -8,7 +8,6 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [isEditing, setIsEditing] = useState(false);
-  const [quizData, setQuizData] = useState(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,7 +30,6 @@ const Profile = () => {
 
   useEffect(() => {
     fetchProfile();
-    fetchQuizData();
   }, []);
 
   const fetchProfile = async () => {
@@ -70,15 +68,6 @@ const Profile = () => {
       console.error('Error fetching profile:', err.response?.data || err.message || err);
       setError(err.response?.data?.message || 'Failed to load profile data');
       setLoading(false);
-    }
-  };
-
-  const fetchQuizData = async () => {
-    try {
-      const response = await quiz.getAnswers();
-      setQuizData(response.data);
-    } catch (err) {
-      console.log('No quiz data available');
     }
   };
 
@@ -227,50 +216,12 @@ const Profile = () => {
               </div>
             )}
 
-            {/* Quiz Data Section */}
-            {quizData && (
-              <div className="bg-blue-50 rounded-xl p-6 mb-8">
-                <h3 className="text-xl font-semibold text-blue-900 mb-4 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Quiz Results
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Current CGPA</h4>
-                    <p className="text-2xl font-bold text-blue-900">{quizData.currentCGPA}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Target CGPA</h4>
-                    <p className="text-2xl font-bold text-blue-900">{quizData.goal}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Study Style</h4>
-                    <p className="text-lg text-blue-900 capitalize">{quizData.studyStyle}</p>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Career Aim</h4>
-                    <p className="text-lg text-blue-900 capitalize">{quizData.aim}</p>
-                  </div>
-                  <div className="md:col-span-2">
-                    <h4 className="text-sm font-semibold text-blue-700 mb-2">Subject Performance</h4>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                      {Object.entries(quizData.subjects).map(([subject, data]) => (
-                        <div key={subject} className="bg-white p-3 rounded-lg shadow-sm">
-                          <p className="text-sm font-medium text-blue-900 capitalize">{subject}</p>
-                          <div className="mt-2 space-y-1">
-                            <p className="text-xs text-gray-600">Marks: {data.marks}%</p>
-                            <p className="text-xs text-gray-600">Attendance: {data.attendance}%</p>
-                            <p className="text-xs text-gray-600">Interest: {data.interest}/10</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="bg-blue-50 rounded-xl p-6 mb-8">
+              <h3 className="text-xl font-semibold text-blue-900 mb-4">Academic Snapshot</h3>
+              <p className="text-gray-700">
+                Your profile stores your educational details, subject performance, and achievements. Keep this information up to date so your learning path stays aligned with your goals.
+              </p>
+            </div>
 
             {/* Existing Profile Form */}
             {!isEditing ? (

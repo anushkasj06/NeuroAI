@@ -10,7 +10,18 @@ import {
   Legend,
 } from 'chart.js';
 import { Line, Bar } from 'react-chartjs-2';
+import {
+  BoltIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  FireIcon,
+  ListBulletIcon,
+  RocketLaunchIcon,
+  TrophyIcon,
+  UserGroupIcon,
+} from '@heroicons/react/24/outline';
 import { rapidBattle } from '../services/api';
+import './AIDashboard.css';
 import './BattleArena.css';
 
 const DEFAULT_QUESTION_COUNT = 8;
@@ -307,7 +318,6 @@ const BattleArena = () => {
   const currentQuestion = questions[currentIndex];
   const currentSelection = answers[currentIndex]?.selectedIndex;
   const pressureClass = timeLeft <= 2 ? 'arena-danger' : timeLeft <= 4 ? 'arena-warning' : 'arena-safe';
-  const timerAngle = Math.max(0, (timeLeft / secondsPerQuestion) * 360);
 
   const orderedHistory = useMemo(
     () => [...history].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()),
@@ -542,52 +552,88 @@ const BattleArena = () => {
   );
 
   return (
-    <div className="battle-arena-root min-h-screen py-10 px-4 sm:px-6 lg:px-8">
-      <div className="battle-grid max-w-6xl mx-auto space-y-6">
-        <div className="arena-shell rounded-3xl border border-white/50 shadow-2xl overflow-hidden">
-          <div className="arena-header px-6 py-7 md:px-9">
-            <p className="arena-tag">LIVE QUIZ BATTLE</p>
-            <h1 className="arena-title">Rapid Fire Arena</h1>
-            <p className="arena-subtitle">Fast answers. Rising pressure. Climb the table.</p>
+    <div className="battle-page ai-dashboard min-h-screen">
+      <div className="ai-shell battle-shell space-y-6">
+        <header className="ai-hero ai-fade-up battle-hero">
+          <div className="space-y-3">
+            <div className="ai-chip">
+              <BoltIcon className="h-4 w-4" />
+              Rapid Quiz Battle
+            </div>
+            <h1 className="ai-hero__title">Battle Arena</h1>
+            <p className="battle-hero-copy">
+              Pick a topic, choose speed, and start instantly. Short rounds, clear choices, real progress.
+            </p>
           </div>
 
-          <div className="p-6 md:p-8 space-y-6">
-            {error && <div className="arena-error">{error}</div>}
+          <div className="battle-hero-kpis">
+            <div className="battle-mini-kpi">
+              <span>Total attempts</span>
+              <strong>{history.length}</strong>
+            </div>
+            <div className="battle-mini-kpi">
+              <span>Avg accuracy</span>
+              <strong>{averageAccuracy}%</strong>
+            </div>
+            <div className="battle-mini-kpi">
+              <span>Completion</span>
+              <strong>{completionRate}%</strong>
+            </div>
+          </div>
+        </header>
 
-            {phase === 'setup' && (
-              <div className="space-y-7">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <button
-                    onClick={() => setMode('solo')}
-                    className={`arena-mode-card ${mode === 'solo' ? 'active-solo' : ''}`}
-                  >
-                    <p className="mode-title">Solo Sprint</p>
-                    <p className="mode-desc">Instant queue. Score goes straight to leaderboard.</p>
-                  </button>
+        {error && (
+          <div className="battle-alert">
+            <span>{error}</span>
+          </div>
+        )}
 
-                  <button
-                    onClick={() => setMode('friend')}
-                    className={`arena-mode-card ${mode === 'friend' ? 'active-friend' : ''}`}
-                  >
-                    <p className="mode-title">Challenge Friend</p>
-                    <p className="mode-desc">Head-to-head rooms are next in the roadmap.</p>
-                  </button>
-                </div>
+        <section className="battle-main ai-rail ai-fade-up">
+          {phase === 'setup' && (
+            <div className="battle-setup space-y-6">
+              <div className="battle-step-grid">
+                <button
+                  onClick={() => setMode('solo')}
+                  className={`battle-mode ${mode === 'solo' ? 'is-active' : ''}`}
+                >
+                  <div>
+                    <p className="battle-mode__title">Solo Mode</p>
+                    <p className="battle-mode__desc">Immediate start and leaderboard score.</p>
+                  </div>
+                  <span className="battle-badge">Live</span>
+                </button>
 
-                {mode === 'solo' ? (
-                  <div className="space-y-5">
-                    <div>
-                      <label className="arena-label">Topic</label>
+                <button
+                  onClick={() => setMode('friend')}
+                  className={`battle-mode ${mode === 'friend' ? 'is-active' : ''}`}
+                >
+                  <div>
+                    <p className="battle-mode__title">Challenge Friend</p>
+                    <p className="battle-mode__desc">Head-to-head rooms and private invites.</p>
+                  </div>
+                  <span className="battle-badge battle-badge--muted">Soon</span>
+                </button>
+              </div>
+
+              {mode === 'solo' ? (
+                <div className="space-y-5">
+                  <div className="battle-step">
+                    <span className="battle-step__index">1</span>
+                    <div className="battle-step__body">
+                      <label className="arena-label">Choose Topic</label>
                       <input
                         value={topic}
                         onChange={(event) => setTopic(event.target.value)}
-                        placeholder="Examples: AI agents, recursion, geopolitics, chemistry"
+                        placeholder="Example: recursion, AI agents, organic chemistry"
                         className="arena-input"
                       />
                     </div>
+                  </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
+                  <div className="battle-controls-grid">
+                    <div className="battle-step">
+                      <span className="battle-step__index">2</span>
+                      <div className="battle-step__body">
                         <label className="arena-label">Question Count</label>
                         <select
                           value={questionCount}
@@ -601,9 +647,12 @@ const BattleArena = () => {
                           ))}
                         </select>
                       </div>
+                    </div>
 
-                      <div className="md:col-span-2">
-                        <label className="arena-label">Intensity</label>
+                    <div className="battle-step">
+                      <span className="battle-step__index">3</span>
+                      <div className="battle-step__body">
+                        <label className="arena-label">Select Intensity</label>
                         <div className="intensity-row">
                           {Object.entries(PRESET_CONFIG).map(([id, config]) => (
                             <button
@@ -612,269 +661,296 @@ const BattleArena = () => {
                               className={`intensity-chip ${presetId === id ? 'active' : ''}`}
                             >
                               <span>{config.label}</span>
-                              <small>{config.secondsPerQuestion}s / Q</small>
+                              <small>{config.secondsPerQuestion}s per question</small>
                             </button>
                           ))}
                         </div>
                       </div>
                     </div>
-
-                    <button
-                      onClick={startSoloBattle}
-                      disabled={loading}
-                      className={`arena-launch ${loading ? 'disabled' : ''}`}
-                    >
-                      {loading ? 'Spinning Up Questions...' : `Launch ${preset.label} Battle`}
-                    </button>
                   </div>
-                ) : (
-                  <div className="arena-coming-soon">
-                    <p className="mode-title">Challenge Mode Incoming</p>
-                    <p className="mode-desc">
-                      Next step: invite codes, shared question packs, synchronized countdown, and winner board.
-                    </p>
-                  </div>
-                )}
-              </div>
-            )}
 
-            {phase === 'countdown' && (
-              <div className="arena-countdown-wrap">
-                <p className="countdown-top">Arena Locked</p>
-                <div className="countdown-value">{countdown || 'GO'}</div>
-                <p className="countdown-note">
-                  {preset.label} mode active: {secondsPerQuestion}s per question
+                  <div className="battle-tips">
+                    <span>
+                      <ClockIcon className="h-4 w-4" />
+                      Timer starts after countdown
+                    </span>
+                    <span>
+                      <ListBulletIcon className="h-4 w-4" />
+                      Keys `1-4` can answer quickly
+                    </span>
+                    <span>
+                      <FireIcon className="h-4 w-4" />
+                      Correct streak boosts score
+                    </span>
+                  </div>
+
+                  <button
+                    onClick={startSoloBattle}
+                    disabled={loading}
+                    className={`arena-launch ${loading ? 'disabled' : ''}`}
+                  >
+                    <RocketLaunchIcon className="h-4 w-4" />
+                    {loading ? 'Generating questions...' : `Start ${preset.label} Battle`}
+                  </button>
+                </div>
+              ) : (
+                <div className="battle-coming-soon">
+                  <p className="battle-mode__title">Challenge Mode Coming Soon</p>
+                  <p className="battle-mode__desc">For now, use Solo Mode to practice and build your ranking.</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {phase === 'countdown' && (
+            <div className="battle-countdown">
+              <p className="battle-countdown__tag">Get Ready</p>
+              <div className="battle-countdown__value">{countdown || 'GO'}</div>
+              <p className="battle-countdown__note">
+                {preset.label}: {secondsPerQuestion}s per question
+              </p>
+            </div>
+          )}
+
+          {phase === 'playing' && currentQuestion && (
+            <div className="battle-live space-y-5">
+              <div className="battle-live-top">
+                <p className="battle-live-step">
+                  Question {currentIndex + 1} of {questions.length}
                 </p>
+                <div className={`battle-timer-pill ${pressureClass}`}>
+                  <ClockIcon className="h-4 w-4" />
+                  {timeLeft}s
+                </div>
               </div>
-            )}
 
-            {phase === 'playing' && currentQuestion && (
-              <div className="space-y-5">
-                <div className="arena-hud">
-                  <div className="hud-card">
-                    <span>Score</span>
-                    <strong>{liveScore}</strong>
+              <div className="h-2 rounded-full bg-white/70 overflow-hidden">
+                <div className="arena-progress" style={{ width: `${progressPercent}%` }} />
+              </div>
+
+              <div className="battle-hud">
+                <div className="battle-hud-card">
+                  <span>Score</span>
+                  <strong>{liveScore}</strong>
+                </div>
+                <div className="battle-hud-card">
+                  <span>Streak</span>
+                  <strong>x{streak}</strong>
+                </div>
+                <div className="battle-hud-card">
+                  <span>Accuracy</span>
+                  <strong>{currentAccuracy}%</strong>
+                </div>
+                <div className="battle-hud-card">
+                  <span>Solved</span>
+                  <strong>
+                    {completedCount}/{questions.length}
+                  </strong>
+                </div>
+              </div>
+
+              <div className={`battle-question ${answerFlash ? `flash-${answerFlash}` : ''}`}>
+                <h3>{currentQuestion.question}</h3>
+                <p>Tip: Use keys `1-4` for faster answers.</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-3">
+                {currentQuestion.options.map((option, optionIndex) => (
+                  <button
+                    key={`${optionIndex}-${option}`}
+                    onClick={() => completeCurrentQuestion(optionIndex, false)}
+                    disabled={lockedQuestion || (currentSelection !== undefined && currentSelection !== null)}
+                    className={`arena-option ${
+                      currentSelection === optionIndex ? 'selected' : ''
+                    } ${lockedQuestion ? 'locked' : ''}`}
+                  >
+                    <span className="option-key">{optionIndex + 1}</span>
+                    <span className="option-text">{option}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {phase === 'result' && result && (
+            <div className="battle-result space-y-5">
+              <div className="battle-result-card">
+                <p className="battle-result-kicker">Round Complete</p>
+                <h2>{result.accuracy >= 80 ? 'Excellent Run' : result.accuracy >= 60 ? 'Strong Progress' : 'Good Start'}</h2>
+                <div className="battle-result-grid">
+                  <div>
+                    <span>Battle Score</span>
+                    <strong>{result.battleScore}</strong>
                   </div>
-                  <div className="hud-card">
-                    <span>Streak</span>
-                    <strong>x{streak}</strong>
-                  </div>
-                  <div className="hud-card">
-                    <span>Accuracy</span>
-                    <strong>{currentAccuracy}%</strong>
-                  </div>
-                  <div className="hud-card">
-                    <span>Solved</span>
+                  <div>
+                    <span>Correct</span>
                     <strong>
-                      {completedCount}/{questions.length}
+                      {result.correctAnswers}/{result.totalQuestions}
                     </strong>
                   </div>
-                </div>
-
-                <div className="arena-question-wrap">
-                  <div className={`arena-timer ${pressureClass}`} style={{ '--timer-angle': `${timerAngle}deg` }}>
-                    <div className="arena-timer-core">
-                      <span>{timeLeft}</span>
-                      <small>sec</small>
-                    </div>
+                  <div>
+                    <span>Best Streak</span>
+                    <strong>x{result.bestStreak}</strong>
                   </div>
-
-                  <div className={`arena-question ${answerFlash ? `flash-${answerFlash}` : ''}`}>
-                    <p className="question-step">
-                      Question {currentIndex + 1} of {questions.length}
-                    </p>
-                    <h3>{currentQuestion.question}</h3>
-                    <p className="question-hint">Use keys 1-4 for max speed.</p>
+                  <div>
+                    <span>Duration</span>
+                    <strong>{result.timeSpentSeconds}s</strong>
                   </div>
                 </div>
+                {submitting && <p className="battle-sync-note">Saving score...</p>}
+              </div>
 
-                <div className="h-2 rounded-full bg-white/70 overflow-hidden">
-                  <div className="arena-progress" style={{ width: `${progressPercent}%` }} />
-                </div>
-
-                <div className="grid grid-cols-1 gap-3">
-                  {currentQuestion.options.map((option, optionIndex) => (
-                    <button
-                      key={`${optionIndex}-${option}`}
-                      onClick={() => completeCurrentQuestion(optionIndex, false)}
-                      disabled={lockedQuestion || (currentSelection !== undefined && currentSelection !== null)}
-                      className={`arena-option ${
-                        currentSelection === optionIndex ? 'selected' : ''
-                      } ${lockedQuestion ? 'locked' : ''}`}
-                    >
-                      <span className="option-key">{optionIndex + 1}</span>
-                      <span className="option-text">{option}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {phase === 'result' && result && (
-              <div className="space-y-5">
-                <div className="arena-result-card">
-                  <p className="arena-tag">Round Complete</p>
-                  <h2>{result.accuracy >= 80 ? 'Dominating' : result.accuracy >= 60 ? 'Strong Run' : 'Keep Grinding'}</h2>
-                  <div className="result-stats">
-                    <div>
-                      <span>Battle Score</span>
-                      <strong>{result.battleScore}</strong>
-                    </div>
-                    <div>
-                      <span>Correct</span>
-                      <strong>
-                        {result.correctAnswers}/{result.totalQuestions}
-                      </strong>
-                    </div>
-                    <div>
-                      <span>Best Streak</span>
-                      <strong>x{result.bestStreak}</strong>
-                    </div>
-                    <div>
-                      <span>Duration</span>
-                      <strong>{result.timeSpentSeconds}s</strong>
-                    </div>
-                  </div>
-                  {submitting && <p className="saving-note">Syncing score...</p>}
-                </div>
-
-                <div className="flex flex-wrap gap-3">
-                  <button onClick={startSoloBattle} disabled={loading} className="arena-launch">
-                    Play Again
-                  </button>
-                  <button onClick={resetPlayState} className="arena-reset">
-                    Change Setup
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="arena-analytics rounded-3xl border border-white/50 shadow-xl overflow-hidden">
-          <div className="analytics-head">
-            <h3>Performance Intelligence</h3>
-            <p>Academic progress signals from your rapid battles.</p>
-          </div>
-
-          <div className="p-5 md:p-6 space-y-5">
-            <div className="analytics-metrics">
-              <div className="metric-card">
-                <span>Total Attempts</span>
-                <strong>{history.length}</strong>
-              </div>
-              <div className="metric-card">
-                <span>Avg Accuracy</span>
-                <strong>{averageAccuracy}%</strong>
-              </div>
-              <div className="metric-card">
-                <span>Completion Rate</span>
-                <strong>{completionRate}%</strong>
-              </div>
-              <div className="metric-card">
-                <span>Pace</span>
-                <strong>{averagePace}s/Q</strong>
-              </div>
-              <div className="metric-card">
-                <span>Strongest Topic</span>
-                <strong className="capitalize">{strongestTopic}</strong>
-              </div>
-              <div className="metric-card">
-                <span>Focus Next</span>
-                <strong className="capitalize">{focusTopic}</strong>
+              <div className="battle-result-actions">
+                <button onClick={startSoloBattle} disabled={loading} className="arena-launch">
+                  <CheckCircleIcon className="h-4 w-4" />
+                  Play Again
+                </button>
+                <button onClick={resetPlayState} className="arena-reset">
+                  Change Setup
+                </button>
               </div>
             </div>
-
-            <div className="trend-signal">
-              <span className="trend-label">Recent 5-attempt trend</span>
-              <span className={`trend-value ${trendDelta >= 0 ? 'up' : 'down'}`}>
-                {trendDelta >= 0 ? '+' : ''}
-                {trendDelta}% accuracy shift
-              </span>
-            </div>
-
-            {historyLoading ? (
-              <div className="analytics-empty">Loading your performance analytics...</div>
-            ) : !history.length ? (
-              <div className="analytics-empty">Complete a few battles to unlock charts and learning signals.</div>
-            ) : (
-              <div className="analytics-chart-grid">
-                <div className="chart-card">
-                  <p className="chart-title">Accuracy Trend (Last 12)</p>
-                  <div className="chart-wrap">
-                    <Line data={accuracyTrendData} options={chartOptions} />
-                  </div>
-                </div>
-
-                <div className="chart-card">
-                  <p className="chart-title">Topic Mastery Snapshot</p>
-                  <div className="chart-wrap">
-                    <Bar data={topicMasteryData} options={chartOptions} />
-                  </div>
-                </div>
-
-                <div className="chart-card span-2">
-                  <p className="chart-title">Pace Stability (Lower is Better)</p>
-                  <div className="chart-wrap">
-                    <Line data={paceTrendData} options={chartOptions} />
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="arena-leaderboard rounded-3xl border border-white/50 shadow-xl overflow-hidden">
-          <div className="leaderboard-head">
-            <h3>Rapid Leaderboard</h3>
-            <div className="leaderboard-filter">
-              <input
-                value={leaderboardInput}
-                onChange={(event) => setLeaderboardInput(event.target.value)}
-                placeholder="topic or leave blank for all"
-              />
-              <button onClick={() => setLeaderboardTopic(leaderboardInput.trim().toLowerCase() || 'all')}>Apply</button>
-            </div>
-          </div>
-
-          {leaderboard.length ? (
-            <div className="overflow-x-auto">
-              <table className="min-w-full text-sm">
-                <thead>
-                  <tr>
-                    <th>Rank</th>
-                    <th>User</th>
-                    <th>Topic</th>
-                    <th>Correct</th>
-                    <th>Accuracy</th>
-                    <th>Time</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {leaderboard.map((entry, index) => (
-                    <tr key={`${entry._id}-${index}`}>
-                      <td>
-                        <span className={`rank-badge ${index < 3 ? 'top' : ''}`}>#{index + 1}</span>
-                      </td>
-                      <td>{entry.userName}</td>
-                      <td className="capitalize">{entry.topic}</td>
-                      <td>
-                        {entry.correctAnswers}/{entry.questionCount}
-                      </td>
-                      <td>{entry.accuracy}%</td>
-                      <td>{entry.timeSpentSeconds}s</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : (
-            <p className="no-data">No rapid battle attempts yet.</p>
           )}
-          <p className="attempt-meta">
-            Attempts answered: {attemptedCount} | Missed by timeout: {answers.filter((entry) => entry?.timedOut).length}
-          </p>
-        </div>
+        </section>
+
+        <section className="battle-insights-grid">
+          <article className="battle-panel ai-fade-up" style={{ animationDelay: '0.12s' }}>
+            <div className="battle-panel__header">
+              <h3>
+                <TrophyIcon className="h-5 w-5" />
+                Performance Snapshot
+              </h3>
+              <p>Academic trend signals from your rapid battles.</p>
+            </div>
+
+            <div className="battle-panel__body space-y-5">
+              <div className="analytics-metrics">
+                <div className="metric-card">
+                  <span>Total Attempts</span>
+                  <strong>{history.length}</strong>
+                </div>
+                <div className="metric-card">
+                  <span>Avg Accuracy</span>
+                  <strong>{averageAccuracy}%</strong>
+                </div>
+                <div className="metric-card">
+                  <span>Completion Rate</span>
+                  <strong>{completionRate}%</strong>
+                </div>
+                <div className="metric-card">
+                  <span>Pace</span>
+                  <strong>{averagePace}s/Q</strong>
+                </div>
+                <div className="metric-card">
+                  <span>Strongest Topic</span>
+                  <strong className="capitalize">{strongestTopic}</strong>
+                </div>
+                <div className="metric-card">
+                  <span>Focus Next</span>
+                  <strong className="capitalize">{focusTopic}</strong>
+                </div>
+              </div>
+
+              <div className="trend-signal">
+                <span className="trend-label">Recent 5-attempt trend</span>
+                <span className={`trend-value ${trendDelta >= 0 ? 'up' : 'down'}`}>
+                  {trendDelta >= 0 ? '+' : ''}
+                  {trendDelta}% accuracy shift
+                </span>
+              </div>
+
+              {historyLoading ? (
+                <div className="analytics-empty">Loading your performance analytics...</div>
+              ) : !history.length ? (
+                <div className="analytics-empty">Complete a few battles to unlock charts and signals.</div>
+              ) : (
+                <div className="analytics-chart-grid">
+                  <div className="chart-card">
+                    <p className="chart-title">Accuracy Trend</p>
+                    <div className="chart-wrap">
+                      <Line data={accuracyTrendData} options={chartOptions} />
+                    </div>
+                  </div>
+
+                  <div className="chart-card">
+                    <p className="chart-title">Topic Mastery</p>
+                    <div className="chart-wrap">
+                      <Bar data={topicMasteryData} options={chartOptions} />
+                    </div>
+                  </div>
+
+                  <div className="chart-card span-2">
+                    <p className="chart-title">Pace Stability</p>
+                    <div className="chart-wrap">
+                      <Line data={paceTrendData} options={chartOptions} />
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </article>
+
+          <article className="battle-panel ai-fade-up" style={{ animationDelay: '0.16s' }}>
+            <div className="battle-panel__header">
+              <h3>
+                <UserGroupIcon className="h-5 w-5" />
+                Leaderboard
+              </h3>
+              <p>Compare your rapid round accuracy and pace.</p>
+            </div>
+
+            <div className="battle-panel__body space-y-4">
+              <div className="leaderboard-filter">
+                <input
+                  value={leaderboardInput}
+                  onChange={(event) => setLeaderboardInput(event.target.value)}
+                  placeholder="Filter by topic (leave blank for all)"
+                />
+                <button onClick={() => setLeaderboardTopic(leaderboardInput.trim().toLowerCase() || 'all')}>
+                  Apply
+                </button>
+              </div>
+
+              {leaderboard.length ? (
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>Topic</th>
+                        <th>Correct</th>
+                        <th>Accuracy</th>
+                        <th>Time</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {leaderboard.map((entry, index) => (
+                        <tr key={`${entry._id}-${index}`}>
+                          <td>
+                            <span className={`rank-badge ${index < 3 ? 'top' : ''}`}>#{index + 1}</span>
+                          </td>
+                          <td>{entry.userName}</td>
+                          <td className="capitalize">{entry.topic}</td>
+                          <td>
+                            {entry.correctAnswers}/{entry.questionCount}
+                          </td>
+                          <td>{entry.accuracy}%</td>
+                          <td>{entry.timeSpentSeconds}s</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <p className="no-data">No rapid battle attempts yet.</p>
+              )}
+              <p className="attempt-meta">
+                Attempts answered: {attemptedCount} | Missed by timeout: {answers.filter((entry) => entry?.timedOut).length}
+              </p>
+            </div>
+          </article>
+        </section>
       </div>
     </div>
   );

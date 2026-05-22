@@ -39,7 +39,7 @@ function AppShell() {
   return (
     <div className="min-h-screen bg-gradient-to-tr from-blue-50 via-white to-indigo-50">
       <Navbar />
-      <main className={withSidebar ? 'lg:pl-60' : ''}>
+      <main className={withSidebar ? 'app-main app-main--with-sidebar' : 'app-main'}>
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

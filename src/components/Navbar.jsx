@@ -2,10 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   AcademicCapIcon,
+  ArrowLeftOnRectangleIcon,
   Bars3Icon,
   BeakerIcon,
   ChartBarSquareIcon,
   ChatBubbleLeftRightIcon,
+  ChevronDoubleLeftIcon,
+  ChevronDoubleRightIcon,
   ClipboardDocumentListIcon,
   HomeIcon,
   PresentationChartLineIcon,
@@ -42,7 +45,7 @@ const teacherLinks = [
   { to: '/profile', label: 'Profile', icon: UserCircleIcon },
 ];
 
-const SidebarLinks = ({ links, onNavigate }) => (
+const SidebarLinks = ({ links, onNavigate, collapsed = false }) => (
   <div className="space-y-1">
     {links.map((link) => {
       const Icon = link.icon;
@@ -52,8 +55,9 @@ const SidebarLinks = ({ links, onNavigate }) => (
           to={link.to}
           onClick={onNavigate}
           className={({ isActive }) =>
-            `side-link ${isActive ? 'side-link--active' : 'side-link--idle'}`
+            `side-link ${collapsed ? 'side-link--compact' : ''} ${isActive ? 'side-link--active' : 'side-link--idle'}`
           }
+          title={link.label}
         >
           <span className="side-link__icon">
             <Icon className="h-4 w-4" />
@@ -70,6 +74,14 @@ const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sidebar-collapsed');
+      return saved === null ? true : saved === 'true';
+    } catch {
+      return true;
+    }
+  });
   const [hasDiagnosticProfile, setHasDiagnosticProfile] = useState(false);
 
   const isTeacher = user?.role === 'teacher';
@@ -78,6 +90,20 @@ const Navbar = () => {
   useEffect(() => {
     setMobileOpen(false);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!user) {
+      document.documentElement.style.removeProperty('--app-sidebar-width');
+      return;
+    }
+
+    const width = sidebarCollapsed ? '74px' : '240px';
+    document.documentElement.style.setProperty('--app-sidebar-width', width);
+
+    try {
+      localStorage.setItem('sidebar-collapsed', String(sidebarCollapsed));
+    } catch {}
+  }, [sidebarCollapsed, user]);
 
   useEffect(() => {
     const checkDiagnosticStatus = async () => {
@@ -140,25 +166,45 @@ const Navbar = () => {
 
   return (
     <>
-      <aside className="app-sidebar hidden lg:flex">
+      <aside className={`app-sidebar hidden lg:flex ${sidebarCollapsed ? 'app-sidebar--collapsed' : ''}`}>
         <div className="app-sidebar__header">
-          <Link to={getHomePath(user)} className="brand">
+          <Link to={getHomePath(user)} className="brand brand--sidebar" title="NeuroLearn">
+            <span className="brand__orb" />
             <span className="brand__name">NeuroLearn</span>
             <span className="brand__chip">AI</span>
           </Link>
+          <button
+            type="button"
+            className="sidebar-toggle"
+            onClick={() => setSidebarCollapsed((prev) => !prev)}
+            aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {sidebarCollapsed ? (
+              <ChevronDoubleRightIcon className="h-4 w-4" />
+            ) : (
+              <ChevronDoubleLeftIcon className="h-4 w-4" />
+            )}
+          </button>
           <span className="role-chip">{isTeacher ? 'Teacher Workspace' : 'Student Workspace'}</span>
         </div>
 
         <div className="app-sidebar__body">
-          <SidebarLinks links={links} />
+          <SidebarLinks links={links} collapsed={sidebarCollapsed} />
         </div>
 
         <div className="app-sidebar__footer">
-          <p className="user-label" title={user.name}>
-            {user.name}
-          </p>
+          <div className="user-identity">
+            <span className="user-avatar" title={user.name}>
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </span>
+            <p className="user-label" title={user.name}>
+              {user.name}
+            </p>
+          </div>
           <button type="button" onClick={handleLogout} className="logout-btn">
-            Logout
+            <ArrowLeftOnRectangleIcon className="h-4 w-4" />
+            <span>Logout</span>
           </button>
         </div>
       </aside>

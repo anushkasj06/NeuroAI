@@ -6,6 +6,15 @@ import { studyPlanApi } from '../services/studyPlanApi';
 const SESSION_TYPE_EMOJI = { learn: '📘', revise: '🔄', practice: '✏️', quiz: '🧪', rest: '☕' };
 const DIFF_COLOR = { easy: 'text-emerald-600 bg-emerald-50', medium: 'text-amber-600 bg-amber-50', hard: 'text-red-600 bg-red-50' };
 
+const buildSessionLink = (session) => {
+  const query = new URLSearchParams({
+    subject: session.subjectSlug,
+    topic: session.topic,
+  });
+  if (session.subtopic) query.set('subtopic', session.subtopic);
+  return `/learn?${query.toString()}`;
+};
+
 export default function StudyPlanPage() {
   const { plan, analytics, loading, error, loadActivePlan, loadAnalytics } = useStudyPlan();
   const [activeWeek, setActiveWeek] = useState(0);
@@ -178,10 +187,10 @@ function DayCard({ day, weekNumber, onComplete, completing }) {
         {(day.sessions || []).map((s) => (
           <div key={s._id} className={`flex items-center gap-2 p-2 rounded-lg text-xs ${s.completed ? 'opacity-50' : 'hover:bg-gray-50'}`}>
             <span>{SESSION_TYPE_EMOJI[s.sessionType] || '📘'}</span>
-            <div className="flex-1 min-w-0">
-              <p className={`font-medium truncate ${s.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>{s.topic}</p>
-              <p className="text-gray-400 truncate">{s.subject} · {s.durationMinutes}m</p>
-            </div>
+            <Link to={buildSessionLink(s)} className="flex-1 min-w-0 pr-2">
+              <p className={`font-medium truncate ${s.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>{s.topic}{s.subtopic ? ` — ${s.subtopic}` : ''}</p>
+              <p className="text-gray-400 truncate">{s.subject} · {s.durationMinutes}m{(s.resources?.length) ? ` · ${s.resources.length} resource${s.resources.length === 1 ? '' : 's'}` : ''}</p>
+            </Link>
             {!s.completed && (
               <button onClick={() => onComplete(weekNumber, day.dayLabel, s._id)} disabled={completing === s._id} className="shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex items-center justify-center disabled:opacity-50">
                 {completing === s._id ? <span className="animate-spin text-xs">⟳</span> : null}

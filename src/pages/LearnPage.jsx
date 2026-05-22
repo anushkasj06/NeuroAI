@@ -31,10 +31,11 @@ export default function LearnPage() {
         // Pre-fill from query params
         const slug = searchParams.get('subject');
         const topic = searchParams.get('topic');
+        const subtopic = searchParams.get('subtopic') || '';
         if (slug && topic) {
           const sub = s.find((x) => x.subjectSlug === slug);
           if (sub) {
-            setSelected({ subjectSlug: slug, subjectName: sub.subjectName, topic, subtopic: '' });
+            setSelected({ subjectSlug: slug, subjectName: sub.subjectName, topic, subtopic });
           }
         }
       } catch {}
@@ -59,6 +60,14 @@ export default function LearnPage() {
       setLoading(false);
     }
   };
+
+  // Auto-generate material when arriving from a study-plan link with subject+topic in query
+  useEffect(() => {
+    if (!initLoading && selected.subjectSlug && selected.topic && !material && !loading) {
+      handleGenerate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initLoading, selected.subjectSlug, selected.topic]);
 
   const handleQuizSubmit = async () => {
     setQuizSubmitted(true);
