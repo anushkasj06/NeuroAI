@@ -61,6 +61,9 @@ const Navbar = () => {
                       <NavLink to="/diagnostic" className={linkClass}>
                         Diagnostic
                       </NavLink>
+                      <NavLink to="/ai-teacher" className={linkClass}>
+                        AI Teacher
+                      </NavLink>
                       <NavLink to="/battle" className={linkClass}>
                         Battle Arena
                       </NavLink>
@@ -173,6 +176,13 @@ const Navbar = () => {
                       onClick={() => setMobileOpen(false)}
                     >
                       🔬 Diagnostic
+                    </MobileLink>
+
+                    <MobileLink
+                      to="/ai-teacher"
+                      onClick={() => setMobileOpen(false)}
+                    >
+                      AI Teacher
                     </MobileLink>
 
                     <MobileLink

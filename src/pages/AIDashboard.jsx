@@ -137,11 +137,10 @@ export default function AIDashboard() {
   };
 
   const quickActions = [
-    { to: '/learn', label: 'Start learning session', icon: BookOpenIcon },
+    { to: '/ai-teacher', label: 'Start learning session', icon: BookOpenIcon },
     { to: '/study-plan/generate', label: 'Generate study plan', icon: SparklesIcon },
     { to: '/progress', label: 'Review progress', icon: PresentationChartLineIcon },
     { to: '/diagnostic', label: 'Redo diagnostic', icon: BeakerIcon },
-    { to: '/prediction', label: 'Score prediction', icon: ChartBarSquareIcon },
   ];
 
   return (
@@ -172,13 +171,9 @@ export default function AIDashboard() {
                   View study plan
                 </Link>
               )}
-              <Link to="/learn" className="ai-btn">
+              <Link to="/ai-teacher" className="ai-btn">
                 <BookOpenIcon className="h-4 w-4" />
                 Start learning
-              </Link>
-              <Link to="/prediction" className="ai-btn ai-btn--ghost">
-                <ChartBarSquareIcon className="h-4 w-4" />
-                Predictions
               </Link>
             </div>
           </div>

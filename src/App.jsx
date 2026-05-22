@@ -16,6 +16,7 @@ import Prediction from './pages/Prediction';
 import StudyPlanPage from './pages/StudyPlanPage';
 import StudyPlanGenerator from './pages/StudyPlanGenerator';
 import LearnPage from './pages/LearnPage';
+import AITeacherSession from './pages/AITeacherSession';
 import ProgressPage from './pages/ProgressPage';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
@@ -45,6 +46,12 @@ function App() {
             <Route path="/diagnostic" element={<P allowedRoles={['student']}><Diagnostic /></P>} />
             <Route path="/quiz" element={<P allowedRoles={['student']}><Diagnostic /></P>} />
             <Route path="/learn" element={<P allowedRoles={['student']}><LearnPage /></P>} />
+            <Route path="/ai-teacher" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
+            <Route path="/ai-teacher/quiz" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
+            <Route path="/ai-teacher/analytics" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
+            <Route path="/ai-teacher/daily-progress" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
+            <Route path="/ai-teacher/feedback" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
+            <Route path="/ai-teacher/revision" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
             <Route path="/progress" element={<P allowedRoles={['student']}><ProgressPage /></P>} />
             <Route path="/study-plan/generate" element={<P allowedRoles={['student']}><StudyPlanGenerator /></P>} />
             <Route path="/study-plan" element={<P allowedRoles={['student']}><StudyPlanPage /></P>} />
