@@ -141,13 +141,9 @@ export default function DiagnosticReportView({ data }) {
         >
           Go to Dashboard
         </Link>
-        <Link
-          to="/ai-study-plan"
-          className="px-6 py-3 rounded-xl border border-indigo-200 text-indigo-700 font-medium hover:bg-indigo-50"
-        >
-          Generate study plan
-        </Link>
+        {/* AI Study Plan removed */}
       </div>
     </div>
   );
 }
+

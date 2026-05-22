@@ -7,28 +7,20 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
-  const [hasQuizAnswers, setHasQuizAnswers] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   useEffect(() => {
-    const checkQuizAnswers = async () => {
+    const checkDiagnosticStatus = async () => {
       try {
         if (user) {
-          const response = await api.get('/diagnostic/status');
-
-          setHasQuizAnswers(
-            response?.data?.data?.profile != null
-          );
-        } else {
-          setHasQuizAnswers(false);
+          await api.get('/diagnostic/status');
         }
       } catch (error) {
         console.error('Error checking diagnostic status:', error);
-        setHasQuizAnswers(false);
       }
     };
 
-    checkQuizAnswers();
+    checkDiagnosticStatus();
   }, [user]);
 
   const handleLogout = async () => {
@@ -48,6 +40,7 @@ const Navbar = () => {
   return (
     <nav className="bg-gradient-to-r from-white/80 via-blue-50/50 to-indigo-50/50 backdrop-blur-lg shadow-lg sticky top-0 z-50 border-b border-white/20">
       <div className="relative">
+        
         {/* Animated Background */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute -inset-[100%] opacity-50">
@@ -59,10 +52,10 @@ const Navbar = () => {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
           <div className="flex justify-between items-center h-16">
-            
+
             {/* Left Section */}
             <div className="flex items-center">
-              
+
               {/* Logo */}
               <Link to="/" className="relative group">
                 <span className="text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-transparent bg-clip-text group-hover:opacity-80 transition-all duration-300">
@@ -75,7 +68,7 @@ const Navbar = () => {
               {/* Desktop Navigation */}
               {user && (
                 <div className="hidden md:flex ml-8 space-x-6">
-                  
+
                   <NavLink to="/dashboard" className={linkClass}>
                     Dashboard
                   </NavLink>
@@ -88,10 +81,6 @@ const Navbar = () => {
                     Diagnostic
                   </NavLink>
 
-                  <NavLink to="/leaderboard" className={linkClass}>
-                    Leaderboard
-                  </NavLink>
-
                   <NavLink to="/battle" className={linkClass}>
                     Battle Arena
                   </NavLink>
@@ -100,15 +89,6 @@ const Navbar = () => {
                     Community
                   </NavLink>
 
-                  <NavLink to="/ai-study-plan" className={linkClass}>
-                    AI Study Plan
-                  </NavLink>
-
-                  {hasQuizAnswers && (
-                    <NavLink to="/studyplan" className={linkClass}>
-                      Study Plan
-                    </NavLink>
-                  )}
                 </div>
               )}
             </div>
@@ -181,7 +161,7 @@ const Navbar = () => {
         {/* Mobile Menu */}
         {mobileOpen && (
           <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 space-y-1 max-h-[80vh] overflow-y-auto">
-            
+
             {user ? (
               <>
                 <MobileLink
@@ -199,13 +179,6 @@ const Navbar = () => {
                 </MobileLink>
 
                 <MobileLink
-                  to="/leaderboard"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  🏆 Leaderboard
-                </MobileLink>
-
-                <MobileLink
                   to="/battle"
                   onClick={() => setMobileOpen(false)}
                 >
@@ -218,22 +191,6 @@ const Navbar = () => {
                 >
                   👥 Community
                 </MobileLink>
-
-                <MobileLink
-                  to="/ai-study-plan"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  ⚡ AI Study Plan
-                </MobileLink>
-
-                {hasQuizAnswers && (
-                  <MobileLink
-                    to="/studyplan"
-                    onClick={() => setMobileOpen(false)}
-                  >
-                    📅 Study Plan
-                  </MobileLink>
-                )}
 
                 <MobileLink
                   to="/profile"
