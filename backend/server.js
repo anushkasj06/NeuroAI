@@ -13,6 +13,7 @@ const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 const studyPlanRoutes = require('./routes/studyPlanRoutes');
 const learningMaterialRoutes = require('./routes/learningMaterialRoutes');
 const adaptiveTeacherRoutes = require('./routes/adaptiveTeacherRoutes');
+const chatbotRoutes = require('./routes/chatbotRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 
@@ -45,6 +46,7 @@ app.get('/api/health', (req, res) => {
       'study-plan',
       'learning-material',
       'ai-teacher',
+      'chatbot',
       'teacher',
       'content',
     ],
@@ -60,6 +62,7 @@ app.use('/api/rapid-battle', rapidBattleRoutes);
 app.use('/api/study-plan', studyPlanRoutes);
 app.use('/api/learning-material', learningMaterialRoutes);
 app.use('/api/ai-teacher', adaptiveTeacherRoutes);
+app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/content', contentRoutes);
 

@@ -47,7 +47,7 @@ export const auth = {
 
 export const profile = {
   getProfile: () => api.get('/profile'),
-  updateProfile: (data) => api.put('/profile', data),
+  updateProfile: (data) => api.patch('/profile', data),
 };
 
 export const quiz = {
@@ -96,6 +96,10 @@ export const content = {
     const query = options.refresh ? '?refresh=1' : '';
     return api.get(`/content/student/${id}/concept-map${query}`);
   },
+};
+
+export const chatbot = {
+  sendMessage: (data) => api.post('/chatbot/message', data),
 };
 
 export { API_BASE };

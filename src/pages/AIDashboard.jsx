@@ -11,7 +11,6 @@ import {
   BeakerIcon,
   BookOpenIcon,
   CalendarDaysIcon,
-  ChartBarSquareIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CpuChipIcon,
