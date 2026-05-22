@@ -8,22 +8,36 @@ const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
+const diagnosticRoutes = require('./routes/diagnosticRoutes');
 
 const app = express();
 
 // Middleware
 app.use(express.json());
 app.use(cookieParser());
+const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173')
+  .split(',')
+  .map((o) => o.trim());
+
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:5174'],
+  origin: corsOrigins,
   credentials: true,
 }));
+
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    routes: ['auth', 'profile', 'quiz', 'diagnostic'],
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/rapid-battle', rapidBattleRoutes);
+app.use('/api/diagnostic', diagnosticRoutes);
 
 // Connect to MongoDB
 mongoose

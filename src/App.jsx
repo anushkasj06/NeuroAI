@@ -7,7 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
-import Quiz from './pages/Quiz';
+import Diagnostic from './pages/Diagnostic';
 import Dashboard from './pages/Dashboard';
 import Chatbot from './components/Chatbot';
 import Prediction from './pages/Prediction';
@@ -40,7 +40,15 @@ function App() {
               path="/quiz"
               element={
                 <PrivateRoute>
-                  <Quiz />
+                  <Diagnostic />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/diagnostic"
+              element={
+                <PrivateRoute>
+                  <Diagnostic />
                 </PrivateRoute>
               }
             />
