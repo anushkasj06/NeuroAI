@@ -104,6 +104,76 @@ export const TOPIC_CURRICULUM = {
       { name: 'Feature Engineering', subtopics: ['Normalization', 'Encoding', 'Feature Selection', 'Dimensionality Reduction'] },
     ],
   },
+  ai: {
+    name: 'AI',
+    topics: [
+      { name: 'AI Fundamentals', subtopics: ['Intelligent Agents', 'Search Algorithms', 'Knowledge Representation', 'Problem Solving'] },
+      { name: 'Machine Learning Basics', subtopics: ['Supervised Learning', 'Unsupervised Learning', 'Model Evaluation', 'Feature Engineering'] },
+      { name: 'Deep Learning', subtopics: ['Neural Networks', 'Backpropagation', 'CNNs', 'RNNs'] },
+      { name: 'AI Applications', subtopics: ['Natural Language Processing', 'Computer Vision', 'Robotics', 'Recommendation Systems'] },
+      { name: 'AI Ethics', subtopics: ['Bias', 'Explainability', 'Fairness', 'Responsible AI'] },
+    ],
+  },
+  cloud_computing: {
+    name: 'Cloud Computing',
+    topics: [
+      { name: 'Cloud Fundamentals', subtopics: ['Cloud Models', 'Service Models', 'Deployment Models', 'Cloud Benefits'] },
+      { name: 'Virtualization', subtopics: ['Hypervisors', 'Containers', 'VMs', 'Resource Isolation'] },
+      { name: 'Infrastructure as a Service', subtopics: ['Compute', 'Storage', 'Networking', 'Scaling'] },
+      { name: 'Platform as a Service', subtopics: ['App Hosting', 'Databases', 'CI/CD', 'Serverless'] },
+      { name: 'Cloud Security', subtopics: ['Identity & Access', 'Encryption', 'Compliance', 'Monitoring'] },
+    ],
+  },
+  cyber_security: {
+    name: 'Cyber Security',
+    topics: [
+      { name: 'Network Security', subtopics: ['Firewalls', 'VPNs', 'IDS/IPS', 'Secure Protocols'] },
+      { name: 'Cryptography', subtopics: ['Symmetric Encryption', 'Asymmetric Encryption', 'Hashing', 'Digital Signatures'] },
+      { name: 'Application Security', subtopics: ['Secure Coding', 'OWASP Top 10', 'Testing', 'Authentication'] },
+      { name: 'Security Operations', subtopics: ['Incident Response', 'Monitoring', 'Threat Intelligence', 'Forensics'] },
+      { name: 'Identity Management', subtopics: ['Access Control', 'IAM', 'MFA', 'Authorization'] },
+    ],
+  },
+  software_engineering: {
+    name: 'Software Engineering',
+    topics: [
+      { name: 'SDLC & Requirements', subtopics: ['Requirement Gathering', 'Use Cases', 'Specification', 'Planning'] },
+      { name: 'Design & Architecture', subtopics: ['Design Patterns', 'UML', 'Modular Design', 'SOLID Principles'] },
+      { name: 'Testing & QA', subtopics: ['Unit Testing', 'Integration Testing', 'Automation', 'Regression Testing'] },
+      { name: 'Project Management', subtopics: ['Agile', 'Scrum', 'Kanban', 'Version Control'] },
+      { name: 'Maintenance', subtopics: ['Refactoring', 'Technical Debt', 'Release Management', 'Documentation'] },
+    ],
+  },
+  theory_of_computation: {
+    name: 'Theory of Computation',
+    topics: [
+      { name: 'Automata Theory', subtopics: ['DFA', 'NFA', 'Regular Languages', 'Pumping Lemma'] },
+      { name: 'Formal Languages', subtopics: ['Grammars', 'Context-Free Languages', 'Parsing', 'Chomsky Hierarchy'] },
+      { name: 'Computability', subtopics: ['Turing Machines', 'Decidability', 'Reduction', 'Halting Problem'] },
+      { name: 'Complexity Theory', subtopics: ['P vs NP', 'NP-Complete', 'Time Complexity', 'Space Complexity'] },
+      { name: 'Advanced Models', subtopics: ['Pushdown Automata', 'Linear Bounded Automata', 'Oracle Machines'] },
+    ],
+  },
+  compiler_design: {
+    name: 'Compiler Design',
+    topics: [
+      { name: 'Lexical Analysis', subtopics: ['Tokenization', 'Regular Expressions', 'Finite Automata'] },
+      { name: 'Syntax Analysis', subtopics: ['Parsing', 'Parse Trees', 'Context-Free Grammars'] },
+      { name: 'Semantic Analysis', subtopics: ['Type Checking', 'Symbol Tables', 'Scope Rules'] },
+      { name: 'Code Generation', subtopics: ['Intermediate Code', 'Target Code', 'Register Allocation'] },
+      { name: 'Optimization', subtopics: ['Peephole', 'Loop Optimization', 'Dead Code Elimination'] },
+    ],
+  },
+  coa: {
+    name: 'COA',
+    topics: [
+      { name: 'Digital Logic', subtopics: ['Boolean Algebra', 'Gates', 'Combinational Logic', 'Sequential Logic'] },
+      { name: 'Processor Design', subtopics: ['CPU Datapath', 'Control Unit', 'ALU', 'Registers'] },
+      { name: 'Memory Systems', subtopics: ['Cache', 'RAM', 'Virtual Memory', 'Memory Hierarchy'] },
+      { name: 'Instruction Set Architecture', subtopics: ['RISC vs CISC', 'Addressing Modes', 'Instruction Formats'] },
+      { name: 'Pipelining & I/O', subtopics: ['Pipeline Hazards', 'Interrupts', 'DMA', 'Peripheral Interfaces'] },
+    ],
+  },
   web_development: {
     name: 'Web Development',
     topics: [

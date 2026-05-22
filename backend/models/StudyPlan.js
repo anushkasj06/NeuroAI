@@ -17,6 +17,7 @@ const studySessionSchema = new mongoose.Schema(
       enum: ['easy', 'medium', 'hard'],
       default: 'medium',
     },
+    resources: [String],
     completed: { type: Boolean, default: false },
     completedAt: { type: Date },
     skipped: { type: Boolean, default: false },

@@ -1,7 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import api from '../services/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
@@ -9,26 +8,7 @@ const Navbar = () => {
   const isTeacher = user?.role === 'teacher';
   const isStudent = user && !isTeacher;
 
-  const [hasQuizAnswers, setHasQuizAnswers] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-
-  useEffect(() => {
-    const checkDiagnosticStatus = async () => {
-      try {
-        if (!isStudent) {
-          setHasQuizAnswers(false);
-          return;
-        }
-        const response = await api.get('/diagnostic/status');
-        setHasQuizAnswers(response?.data?.data?.profile != null);
-      } catch (error) {
-        console.error('Error checking diagnostic status:', error);
-        setHasQuizAnswers(false);
-      }
-    };
-
-    checkDiagnosticStatus();
-  }, [user, isStudent]);
 
   const handleLogout = async () => {
     try {
@@ -81,26 +61,15 @@ const Navbar = () => {
                       <NavLink to="/diagnostic" className={linkClass}>
                         Diagnostic
                       </NavLink>
-                      <NavLink to="/leaderboard" className={linkClass}>
-                        Leaderboard
-                      </NavLink>
                       <NavLink to="/battle" className={linkClass}>
                         Battle Arena
                       </NavLink>
                       <NavLink to="/community" className={linkClass}>
                         Community
                       </NavLink>
-                      <NavLink to="/ai-study-plan" className={linkClass}>
-                        AI Study Plan
-                      </NavLink>
                       <NavLink to="/materials" className={linkClass}>
                         Materials
                       </NavLink>
-                      {hasQuizAnswers && (
-                        <NavLink to="/studyplan" className={linkClass}>
-                          Study Plan
-                        </NavLink>
-                      )}
                     </>
                   )}
                   {isTeacher && (
@@ -207,13 +176,6 @@ const Navbar = () => {
                     </MobileLink>
 
                     <MobileLink
-                      to="/leaderboard"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      🏆 Leaderboard
-                    </MobileLink>
-
-                    <MobileLink
                       to="/battle"
                       onClick={() => setMobileOpen(false)}
                     >
@@ -228,27 +190,11 @@ const Navbar = () => {
                     </MobileLink>
 
                     <MobileLink
-                      to="/ai-study-plan"
-                      onClick={() => setMobileOpen(false)}
-                    >
-                      ⚡ AI Study Plan
-                    </MobileLink>
-
-                    <MobileLink
                       to="/materials"
                       onClick={() => setMobileOpen(false)}
                     >
                       📚 Materials
                     </MobileLink>
-
-                    {hasQuizAnswers && (
-                      <MobileLink
-                        to="/studyplan"
-                        onClick={() => setMobileOpen(false)}
-                      >
-                        📅 Study Plan
-                      </MobileLink>
-                    )}
                   </>
                 )}
 

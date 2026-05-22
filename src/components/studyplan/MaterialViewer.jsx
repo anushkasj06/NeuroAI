@@ -48,6 +48,16 @@ export default function MaterialViewer({ material, learningStyle, onStartQuiz })
           </div>
         </div>
       )}
+      {material.sourceResources?.length > 0 && (
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-100">
+          <p className="text-xs font-semibold text-gray-500 mb-2">📚 Recommended Sources</p>
+          <ul className="list-disc list-inside space-y-1 text-sm text-gray-700">
+            {material.sourceResources.map((source, i) => (
+              <li key={i}>{source}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-1 px-4 pt-4 overflow-x-auto">

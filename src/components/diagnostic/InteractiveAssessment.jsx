@@ -78,6 +78,9 @@ export default function InteractiveAssessment({ content, onSubmit, loading }) {
 
   const allMatchesDone = content.matchPairs.every((p) => matched[p.id]?.correct);
   const matchedCount = Object.values(matched).filter((m) => m.correct).length;
+  const answeredMatches = content.matchPairs.filter((p) => answers[p.id]?.selectedAnswer).length;
+  const allMatchesAttempted = content.matchPairs.every((p) => answers[p.id]?.selectedAnswer);
+  const canProceed = allMatchesAttempted;
 
   // ── QUIZ PHASE HANDLERS ────────────────────────────────────────────────────
 
@@ -211,7 +214,7 @@ export default function InteractiveAssessment({ content, onSubmit, loading }) {
           </div>
         </div>
 
-        {!selectedTerm && matchedCount < content.matchPairs.length && (
+        {!selectedTerm && answeredMatches < content.matchPairs.length && (
           <p className="mt-4 text-xs text-gray-400 text-center">
             ← Select a term on the left to begin matching
           </p>
@@ -222,9 +225,16 @@ export default function InteractiveAssessment({ content, onSubmit, loading }) {
           </p>
         )}
 
+        <div className="mt-6 rounded-3xl border border-indigo-100 bg-indigo-50/70 p-4 text-sm text-indigo-700">
+          <p className="font-medium">Interactive ability is being evaluated, not just perfectly correct matches.</p>
+          <p className="mt-1 text-gray-600">
+            {matchedCount} correct out of {content.matchPairs.length} matches, {answeredMatches} attempted.
+          </p>
+        </div>
+
         <button
           type="button"
-          disabled={!allMatchesDone}
+          disabled={!canProceed}
           onClick={() => {
             setPhase('quiz');
             setQIndex(0);
@@ -234,7 +244,7 @@ export default function InteractiveAssessment({ content, onSubmit, loading }) {
         >
           {allMatchesDone
             ? 'Continue to quiz questions →'
-            : `Match all ${content.matchPairs.length - matchedCount} remaining term${content.matchPairs.length - matchedCount !== 1 ? 's' : ''} to continue`}
+            : `Continue with current answers →`}
         </button>
       </div>
     );

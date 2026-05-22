@@ -111,6 +111,8 @@ ${selectedSubjects.map((s) => `- ${s.subjectName} (current: ${s.currentMarks}%, 
 ALL SUBJECT PERFORMANCE:
 ${subjects.map((s) => `- ${s.subjectName}: ${s.currentMarks}%`).join('\n')}
 
+If a subject has no selected topics, choose the 3 most important topics and spread them across the plan.
+
 Return ONLY this JSON structure:
 {
   "planName": "string",
@@ -136,7 +138,8 @@ Return ONLY this JSON structure:
               "subtopic": "Subtopic",
               "durationMinutes": number,
               "sessionType": "learn|revise|practice|quiz",
-              "difficultyLevel": "easy|medium|hard"
+              "difficultyLevel": "easy|medium|hard",
+              "resources": ["Recommended resource or study material"]
             }
           ]
         }
@@ -249,6 +252,7 @@ Return ONLY this JSON:
     }
   ],
   "audioScript": "conversational explanation for text-to-speech",
+  "sourceResources": ["Book, video, website, or other reference material aligned to the topic and style"],
   "codeExercises": [
     {
       "title": "Exercise title",
@@ -260,7 +264,7 @@ Return ONLY this JSON:
   ]
 }
 
-Generate at least: 3 flashcards, 3 quiz questions, 5 key points.
+Generate at least: 3 sourceResources, 3 flashcards, 3 quiz questions, 5 key points.
 For Visual Learner: include rich visualMapData with 6+ nodes.
 For Interactive Learner: include 2+ code exercises if subject is technical.
 For Audio Learner: write a detailed audioScript (300+ words).

@@ -115,20 +115,20 @@ export default function DiagnosticReportView({ data }) {
           <h3 className="font-bold text-gray-800 mb-2">Assessment analytics</h3>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-              Text: {assessment.textMode?.accuracyPercent}% accuracy,{' '}
-              {assessment.textMode?.readingOrWatchTimeSeconds}s reading
+              Text: {assessment.textMode?.accuracyPercent ?? 'N/A'}% accuracy,{' '}
+              {assessment.textMode?.readingOrWatchTimeSeconds ?? 0}s reading
             </div>
             <div>
-              Audio: {assessment.audioMode?.accuracyPercent}% accuracy, {assessment.audioMode?.replayCount}{' '}
+              Audio: {assessment.audioMode?.accuracyPercent ?? 'N/A'}% accuracy, {assessment.audioMode?.replayCount ?? 0}{' '}
               replays
             </div>
             <div>
-              Video: {assessment.videoMode?.accuracyPercent}% accuracy, {assessment.videoMode?.pauseCount}{' '}
+              Video: {assessment.videoMode?.accuracyPercent ?? 'N/A'}% accuracy, {assessment.videoMode?.pauseCount ?? 0}{' '}
               pauses
             </div>
             <div>
-              Interactive: {assessment.interactiveMode?.accuracyPercent}% accuracy,{' '}
-              {assessment.interactiveMode?.interactionCount || 0} interactions
+              Interactive: {assessment.interactiveMode?.accuracyPercent ?? 'N/A'}% accuracy,{' '}
+              {assessment.interactiveMode?.interactionCount ?? 0} interactions
             </div>
           </div>
         </div>

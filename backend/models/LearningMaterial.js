@@ -68,6 +68,7 @@ const learningMaterialSchema = new mongoose.Schema(
         language: { type: String, default: 'python' },
       },
     ],
+    sourceResources: [String],
 
     // Metadata
     estimatedReadMinutes: { type: Number, default: 5 },
