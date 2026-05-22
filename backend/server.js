@@ -11,6 +11,8 @@ const diagnosticRoutes = require('./routes/diagnosticRoutes');
 const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 const studyPlanRoutes = require('./routes/studyPlanRoutes');
 const learningMaterialRoutes = require('./routes/learningMaterialRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
+
 const app = express();
 
 // Middleware
@@ -29,7 +31,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routes: ['auth', 'profile', 'quiz', 'diagnostic'],
+    routes: ['auth', 'profile', 'quiz', 'diagnostic', 'rapid-battle', 'study-plan', 'learning-material', 'teacher'],
   });
 });
 
@@ -41,6 +43,8 @@ app.use('/api/diagnostic', diagnosticRoutes);
 app.use('/api/rapid-battle', rapidBattleRoutes);
 app.use('/api/study-plan', studyPlanRoutes);
 app.use('/api/learning-material', learningMaterialRoutes);
+app.use('/api/teacher', teacherRoutes);
+
 // Connect to MongoDB
 mongoose
   .connect(process.env.MONGODB_URI)

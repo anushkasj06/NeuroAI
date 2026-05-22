@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, restrictTo } = require('../middleware/auth');
 const {
   generateRapidQuiz,
   submitRapidBattleAttempt,
@@ -8,9 +8,12 @@ const {
   getMyRapidBattleHistory,
 } = require('../controllers/rapidBattleController');
 
-router.post('/generate', protect, generateRapidQuiz);
-router.post('/attempts', protect, submitRapidBattleAttempt);
-router.get('/leaderboard', protect, getRapidLeaderboard);
-router.get('/history', protect, getMyRapidBattleHistory);
+router.use(protect);
+router.use(restrictTo('student'));
+
+router.post('/generate', generateRapidQuiz);
+router.post('/attempts', submitRapidBattleAttempt);
+router.get('/leaderboard', getRapidLeaderboard);
+router.get('/history', getMyRapidBattleHistory);
 
 module.exports = router;

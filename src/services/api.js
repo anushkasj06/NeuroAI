@@ -71,5 +71,10 @@ export const rapidBattle = {
   getHistory: () => api.get('/rapid-battle/history'),
 };
 
+export const teacher = {
+  getDashboard: () => api.get('/teacher/dashboard'),
+  createResource: (data) => api.post('/teacher/resources', data),
+};
+
 export { API_BASE };
 export default api;

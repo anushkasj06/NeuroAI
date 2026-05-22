@@ -17,8 +17,9 @@ const Login = () => {
     setLoading(true);
 
     try {
-      await login(formData);
-      navigate('/');
+      const data = await login(formData);
+      const role = data?.data?.user?.role || 'student';
+      navigate(role === 'teacher' ? '/teacher' : '/dashboard');
     } catch (err) {
       console.error('Login error:', err);
     } finally {
