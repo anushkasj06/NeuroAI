@@ -70,3 +70,14 @@ exports.protect = async (req, res, next) => {
     });
   }
 }; 
+
+exports.restrictTo = (...roles) => (req, res, next) => {
+  if (!req.user || !roles.includes(req.user.role || 'student')) {
+    return res.status(403).json({
+      status: 'error',
+      message: 'You do not have permission to access this resource.',
+    });
+  }
+
+  next();
+};

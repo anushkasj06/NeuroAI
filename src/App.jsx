@@ -17,6 +17,7 @@ import AiStudyPlanGenerator from './pages/AiStudyPlanGenerator.jsx';
 import Leaderboard from './pages/Leaderboard';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
+import TeacherDashboard from './pages/TeacherDashboard';
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
             <Route
               path="/quiz"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Diagnostic />
                 </PrivateRoute>
               }
@@ -47,7 +48,7 @@ function App() {
             <Route
               path="/diagnostic"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Diagnostic />
                 </PrivateRoute>
               }
@@ -55,7 +56,7 @@ function App() {
             <Route
               path="/dashboard"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Dashboard />
                 </PrivateRoute>
               }
@@ -63,7 +64,7 @@ function App() {
             <Route
               path="/prediction"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Prediction />
                 </PrivateRoute>
               }
@@ -71,7 +72,7 @@ function App() {
             <Route
               path="/studyplan"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <StudyPlan />
                 </PrivateRoute>
               }
@@ -79,7 +80,7 @@ function App() {
             <Route
               path="/test"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Test />
                 </PrivateRoute>
               }
@@ -87,7 +88,7 @@ function App() {
             <Route
               path="/ai-study-plan"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <AiStudyPlanGenerator />
                 </PrivateRoute>
               }
@@ -95,7 +96,7 @@ function App() {
             <Route
               path="/community"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Community />
                 </PrivateRoute>
               }
@@ -103,7 +104,7 @@ function App() {
             <Route
               path="/leaderboard"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <Leaderboard />
                 </PrivateRoute>
               }
@@ -111,8 +112,16 @@ function App() {
             <Route
               path="/battle"
               element={
-                <PrivateRoute>
+                <PrivateRoute allowedRoles={['student']}>
                   <BattleArena />
+                </PrivateRoute>
+              }
+            />
+            <Route
+              path="/teacher"
+              element={
+                <PrivateRoute allowedRoles={['teacher']}>
+                  <TeacherDashboard />
                 </PrivateRoute>
               }
             />

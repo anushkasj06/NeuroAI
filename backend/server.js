@@ -9,6 +9,7 @@ const profileRoutes = require('./routes/profileRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 const diagnosticRoutes = require('./routes/diagnosticRoutes');
+const teacherRoutes = require('./routes/teacherRoutes');
 
 const app = express();
 
@@ -28,7 +29,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routes: ['auth', 'profile', 'quiz', 'diagnostic'],
+    routes: ['auth', 'profile', 'quiz', 'diagnostic', 'teacher'],
   });
 });
 
@@ -38,6 +39,7 @@ app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
 app.use('/api/rapid-battle', rapidBattleRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
+app.use('/api/teacher', teacherRoutes);
 
 // Connect to MongoDB
 mongoose

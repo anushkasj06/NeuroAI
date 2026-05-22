@@ -20,6 +20,24 @@ const userSchema = new mongoose.Schema({
     minlength: 6,
     select: false,
   },
+  role: {
+    type: String,
+    enum: ['student', 'teacher'],
+    default: 'student',
+    required: true,
+  },
+  teacherCode: {
+    type: String,
+    trim: true,
+    uppercase: true,
+    sparse: true,
+    unique: true,
+  },
+  assignedTeacherId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
   profile: {
     collegeName: {
       type: String,

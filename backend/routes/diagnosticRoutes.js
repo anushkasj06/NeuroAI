@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { protect } = require('../middleware/auth');
+const { protect, restrictTo } = require('../middleware/auth');
 const {
   validateOnboarding,
   validateModalitySubmission,
@@ -11,6 +11,7 @@ router.get('/config', diagnosticController.getConfig);
 router.get('/subjects/:level', diagnosticController.getSubjectsForLevel);
 
 router.use(protect);
+router.use(restrictTo('student'));
 
 router.get('/status', diagnosticController.getStatus);
 router.get('/profile', diagnosticController.getProfile);

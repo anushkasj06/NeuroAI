@@ -2,23 +2,25 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { quiz } from '../services/api';
-import api from '../services/api';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [hasQuizAnswers, setHasQuizAnswers] = useState(false);
+  const isTeacher = user?.role === 'teacher';
+  const isStudent = user && !isTeacher;
 
   useEffect(() => {
     const checkQuizAnswers = async () => {
       try {
-        if (user) {
+        if (!user || user.role === 'teacher') {
+          setHasQuizAnswers(false);
+          return;
+        }
+
+        if (user.role !== 'teacher') {
           const response = await quiz.getAnswers();
           setHasQuizAnswers(Boolean(response.data));
-        } else {
-          setHasQuizAnswers(false);
-          const response = await api.get('/diagnostic/status');
-          setHasQuizAnswers(response.data?.data?.profile != null);
         }
       } catch (error) {
         setHasQuizAnswers(false);
@@ -64,13 +66,15 @@ const Navbar = () => {
               </div>
               {user && (
                 <div className="hidden sm:ml-8 sm:flex sm:space-x-8">
-                  <Link
-                    to="/dashboard"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Dashboard</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
+                  {isStudent && (
+                    <Link
+                      to="/dashboard"
+                      className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                    >
+                      <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Dashboard</span>
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                    </Link>
+                  )}
                   <Link
                     to="/profile"
                     className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
@@ -78,43 +82,58 @@ const Navbar = () => {
                     <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Profile</span>
                     <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
                   </Link>
-                  <Link
-                    to="/diagnostic"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Diagnostic</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
-                  <Link
-                    to="/leaderboard"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Leaderboard</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
-                  <Link
-                    to="/battle"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Battle Arena</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
-                  <Link
-                    to="/community"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Community</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
+                  {isStudent && (
+                    <>
+                      <Link
+                        to="/diagnostic"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Diagnostic</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                      <Link
+                        to="/leaderboard"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Leaderboard</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                      <Link
+                        to="/battle"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Battle Arena</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                      <Link
+                        to="/community"
+                        className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                      >
+                        <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Community</span>
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                      </Link>
+                    </>
+                  )}
+                  {isTeacher && (
+                    <Link
+                      to="/teacher"
+                      className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                    >
+                      <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">Teacher Dashboard</span>
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                    </Link>
+                  )}
                   
-                  <Link
-                    to="/ai-study-plan"
-                    className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
-                  >
-                    <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">AI Study Plan</span>
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
-                  </Link>
-                  {hasQuizAnswers && (
+                  {isStudent && (
+                    <Link
+                      to="/ai-study-plan"
+                      className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"
+                    >
+                      <span className="relative z-10 group-hover:text-blue-600 transition-colors duration-300">AI Study Plan</span>
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-blue-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></span>
+                    </Link>
+                  )}
+                  {isStudent && hasQuizAnswers && (
                     <Link
                       to="/studyplan"
                       className="relative group border-transparent text-gray-600 inline-flex items-center px-1 pt-1 text-sm font-medium"

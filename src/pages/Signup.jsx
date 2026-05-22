@@ -8,6 +8,8 @@ const Signup = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    role: 'student',
+    classCode: '',
     password: '',
     confirmPassword: '',
   });
@@ -24,12 +26,15 @@ const Signup = () => {
     setLoading(true);
 
     try {
-      await signup({
+      const data = await signup({
         name: formData.name,
         email: formData.email,
+        role: formData.role,
+        classCode: formData.role === 'student' ? formData.classCode : undefined,
         password: formData.password,
       });
-      navigate('/');
+      const role = data?.data?.user?.role || 'student';
+      navigate(role === 'teacher' ? '/teacher' : '/diagnostic');
     } catch (err) {
       console.error('Signup error:', err);
     } finally {
@@ -141,6 +146,48 @@ const Signup = () => {
                 />
               </div>
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Account type
+              </label>
+              <div className="grid grid-cols-2 gap-3">
+                {[
+                  { value: 'student', label: 'Student' },
+                  { value: 'teacher', label: 'Teacher' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, role: option.value }))}
+                    className={`py-3 px-4 rounded-xl border text-sm font-semibold transition-all duration-300 ${
+                      formData.role === option.value
+                        ? 'border-blue-500 bg-blue-50 text-blue-700 shadow-sm'
+                        : 'border-gray-200 bg-white/60 text-gray-600 hover:bg-white'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {formData.role === 'student' && (
+              <div>
+                <label htmlFor="classCode" className="block text-sm font-medium text-gray-700 mb-1">
+                  Teacher class code
+                </label>
+                <input
+                  id="classCode"
+                  name="classCode"
+                  type="text"
+                  className="block w-full px-4 py-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 bg-white/60 backdrop-blur-sm hover:bg-white/80"
+                  placeholder="Optional, e.g. TCH-A1B2C3"
+                  value={formData.classCode}
+                  onChange={handleChange}
+                />
+              </div>
+            )}
 
             {/* Password Input */}
             <div>

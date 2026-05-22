@@ -10,6 +10,20 @@ const signToken = (id) => {
   });
 };
 
+const generateTeacherCode = () => `TCH-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+
+const createUniqueTeacherCode = async () => {
+  let teacherCode = generateTeacherCode();
+  let exists = await User.exists({ teacherCode });
+
+  while (exists) {
+    teacherCode = generateTeacherCode();
+    exists = await User.exists({ teacherCode });
+  }
+
+  return teacherCode;
+};
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
 
@@ -41,6 +55,8 @@ const createSendToken = (user, statusCode, res) => {
 exports.signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
+    const role = req.body.role === 'teacher' ? 'teacher' : 'student';
+    const classCode = req.body.classCode?.trim().toUpperCase();
 
     // Check if user already exists
     const existingUser = await User.findOne({ email });
@@ -51,11 +67,32 @@ exports.signup = async (req, res) => {
       });
     }
 
+    let teacherCode;
+    let assignedTeacherId = null;
+
+    if (role === 'teacher') {
+      teacherCode = await createUniqueTeacherCode();
+    }
+
+    if (role === 'student' && classCode) {
+      const teacher = await User.findOne({ role: 'teacher', teacherCode: classCode });
+      if (!teacher) {
+        return res.status(400).json({
+          status: 'error',
+          message: 'Invalid teacher class code',
+        });
+      }
+      assignedTeacherId = teacher._id;
+    }
+
     // Create new user
     const user = await User.create({
       name,
       email,
       password,
+      role,
+      teacherCode,
+      assignedTeacherId,
     });
 
     createSendToken(user, 201, res);
