@@ -1,322 +1,193 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
+import {
+  ChatBubbleLeftRightIcon,
+  PaperAirplaneIcon,
+  SparklesIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline';
+import { chatbot, getApiErrorMessage } from '../services/api';
 
-const Chatbot = () => {
-  const [messages, setMessages] = useState([]);
+const visiblePaths = ['/', '/dashboard', '/ai-dashboard', '/ai-teacher', '/study-plan', '/progress', '/profile'];
+
+const starters = [
+  'How should I revise weak topics today?',
+  'Explain virtualization with an example.',
+  'Make me a 30 minute study plan.',
+];
+
+export default function Chatbot() {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content:
+        'Hi, I am your NeuroLearn mentor. Ask me for concept help, study planning, revision strategy, quiz prep, or how to use the AI Teacher.',
+    },
+  ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const messagesEndRef = useRef(null);
   const location = useLocation();
 
-  const genAI = new GoogleGenerativeAI('AIzaSyAIur2VbrDPjm-gsheC5L8LVZzo7A2LmnE', {
-    apiVersion: 'v1'
-  });
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
+  const shouldShow = visiblePaths.some((path) =>
+    path === '/' ? location.pathname === '/' : location.pathname.startsWith(path)
+  );
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages, isOpen]);
 
-  // Only show chatbot on home and dashboard pages
-  if (!['/', '/dashboard'].includes(location.pathname)) {
-    return null;
-  }
+  if (!shouldShow) return null;
 
-  const systemPrompt = `You are an AI assistant specialized in helping students with their academic performance and study-related questions. 
-  You should only answer questions related to:
-  - Study techniques and methods
-  - Academic performance improvement
-  - Time management for students
-  - Exam preparation strategies
-  - Subject-specific study tips
-  - Academic goal setting
-  - Learning strategies
-  - CGPA improvement tips
-  - Study schedule planning
-  - Academic stress management
-  
-  Important guidelines:
-  1. Keep responses concise and to the point (2-3 lines maximum)
-  2. Focus on actionable advice
-  3. Use emojis for key points (e.g., 📚 for study tips, ⏰ for time management)
-  4. Be encouraging and positive
-  5. If a question is not related to these topics, politely inform the user that you can only answer study-related questions.`;
+  const sendMessage = async (value = input) => {
+    const userMessage = value.trim();
+    if (!userMessage || isLoading) return;
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!input.trim()) return;
-
-    const userMessage = input.trim();
+    const nextMessages = [...messages, { role: 'user', content: userMessage }];
+    setMessages(nextMessages);
     setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
 
     try {
-      const model = genAI.getGenerativeModel({ 
-        model: "gemini-1.5-flash",
-        generationConfig: {
-          temperature: 1,
-          topP: 0.95,
-          topK: 40,
-          maxOutputTokens: 8192,
-          responseMimeType: "text/plain"
-        }
+      const res = await chatbot.sendMessage({
+        message: userMessage,
+        history: messages.slice(-8),
+        page: location.pathname,
       });
-      
-      // Start a new chat with the system prompt
-      const chat = model.startChat({
-        history: [
-          {
-            role: "user",
-            parts: [{ text: systemPrompt }],
-          },
-        ],
-      });
-
-      // Send the user's message and get the response
-      const result = await chat.sendMessage([{ text: userMessage }]);
-      const response = await result.response;
-      
-      // Check if we have a valid response
-      if (!response || !response.text) {
-        throw new Error('Invalid response from API');
-      }
-
-      const text = response.text();
-      console.log('API Response:', text); // Debug log
-
-      if (!text) {
-        throw new Error('Empty response from API');
-      }
-
-      setMessages(prev => [...prev, { role: 'assistant', content: text }]);
+      setMessages((prev) => [
+        ...prev,
+        { role: 'assistant', content: res.data.data.message || 'I am here. What would you like to study?' },
+      ]);
     } catch (error) {
-      console.error('Detailed Error:', error); // More detailed error logging
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: `I apologize, but I encountered an error: ${error.message}. Please try again or rephrase your question.` 
-      }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: getApiErrorMessage(
+            error,
+            'I could not reach the AI mentor right now. Please check the backend and Grok API key.'
+          ),
+        },
+      ]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Rest of the component remains the same...
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    sendMessage();
+  };
+
   return (
     <div className="fixed bottom-4 right-4 z-50">
-      {/* Chat Button */}
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className={`relative group bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-full p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110 ${
-          isOpen ? 'rotate-180' : ''
-        }`}
-        aria-label="Toggle chat"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-700 via-sky-600 to-indigo-600 text-white shadow-xl shadow-slate-900/20 transition hover:-translate-y-1"
+        aria-label="Toggle AI mentor chat"
       >
-        {/* Animated ring effect */}
-        <div className="absolute inset-0 rounded-full bg-white opacity-25 group-hover:scale-110 transition-transform duration-300"></div>
-        <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 opacity-75 blur-sm group-hover:opacity-100 transition-opacity duration-300"></div>
-        
-        {/* Pulse effect */}
-        <div className="absolute -inset-2 rounded-full border-2 border-white/30 opacity-0 group-hover:opacity-100 animate-ping"></div>
-        
-        {/* Icon */}
-        <div className="relative">
-          <svg
-            className="w-6 h-6 transform group-hover:scale-110 transition-transform duration-300"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-            />
-          </svg>
-          
-          {/* Notification dot */}
-          <div className="absolute -top-1 -right-1 h-3 w-3">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75 animate-ping"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-          </div>
-        </div>
+        <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-300 via-sky-300 to-amber-300 opacity-60 blur transition group-hover:opacity-90" />
+        <span className="relative">
+          {isOpen ? <XMarkIcon className="h-6 w-6" /> : <ChatBubbleLeftRightIcon className="h-6 w-6" />}
+        </span>
+        {!isOpen && (
+          <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-300 opacity-70" />
+            <span className="relative inline-flex h-4 w-4 rounded-full border-2 border-white bg-amber-400" />
+          </span>
+        )}
       </button>
 
-      {/* Chat Window */}
       <div
-        className={`absolute bottom-16 right-0 w-96 bg-white rounded-lg shadow-2xl transform transition-all duration-300 ${
-          isOpen ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0 pointer-events-none'
+        className={`absolute bottom-16 right-0 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 transition-all duration-300 ${
+          isOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
         }`}
       >
-        {/* Chat Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-4 rounded-t-lg flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <svg
-                className="w-4 h-4"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                />
-              </svg>
+        <div className="border-b border-slate-200 bg-slate-950 p-4 text-white">
+          <div className="flex items-start justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-teal-400/15 text-teal-200">
+                <SparklesIcon className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="font-semibold">NeuroLearn Mentor</h3>
+                <p className="text-xs text-slate-300">Grok-powered study help</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-semibold text-white">Study Assistant</h3>
-              <p className="text-xs text-white/80">Online</p>
-            </div>
+            <button onClick={() => setIsOpen(false)} className="rounded-full p-1 text-slate-300 hover:bg-white/10 hover:text-white">
+              <XMarkIcon className="h-5 w-5" />
+            </button>
           </div>
-          <button
-            onClick={() => setIsOpen(false)}
-            className="text-white/80 hover:text-white transition-colors duration-200"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
         </div>
 
-        {/* Chat Messages */}
-        <div className="h-[400px] overflow-y-auto p-4 space-y-4 bg-gray-50">
-          {messages.length === 0 && (
-            <div className="flex items-start space-x-3">
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <svg
-                  className="w-5 h-5 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        <div className="h-[390px] overflow-y-auto bg-slate-50 p-4">
+          <div className="space-y-3">
+            {messages.map((message, index) => (
+              <div key={`${message.role}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div
+                  className={`max-w-[86%] rounded-2xl px-4 py-3 text-sm leading-6 shadow-sm ${
+                    message.role === 'user'
+                      ? 'rounded-br-md bg-gradient-to-br from-teal-700 to-sky-600 text-white'
+                      : 'rounded-bl-md border border-slate-200 bg-white text-slate-700'
+                  }`}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
-                  />
-                </svg>
-              </div>
-              <div className="bg-white rounded-lg p-4 max-w-[80%] shadow-sm">
-                <p className="text-gray-800">
-                  Hello! I'm your Study Assistant. I can help you with:
-                </p>
-                <ul className="mt-2 text-sm text-gray-600 space-y-1">
-                  <li>• Study techniques and methods</li>
-                  <li>• Academic performance improvement</li>
-                  <li>• Time management strategies</li>
-                  <li>• Exam preparation tips</li>
-                  <li>• CGPA improvement advice</li>
-                </ul>
-                <p className="mt-3 text-gray-800">
-                  What would you like to know about?
-                </p>
-              </div>
-            </div>
-          )}
-          {messages.map((message, index) => (
-            <div
-              key={index}
-              className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-            >
-              <div
-                className={`max-w-[85%] rounded-lg p-4 shadow-sm ${
-                  message.role === 'user'
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white'
-                    : 'bg-white text-gray-800'
-                }`}
-              >
-                <div className="prose prose-sm max-w-none">
                   {message.content.split('\n').map((line, i) => (
-                    <p key={i} className={`mb-2 last:mb-0 ${
-                      message.role === 'assistant' ? 'text-gray-700 leading-relaxed' : ''
-                    }`}>
-                      {line.includes('*') ? (
-                        <span className="flex items-start">
-                          <span className="mr-2">{line.split('*')[0]}</span>
-                          <span className="text-blue-500">{line.split('*')[1]}</span>
-                        </span>
-                      ) : (
-                        line
-                      )}
-                    </p>
+                    <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>
                   ))}
                 </div>
-                {message.role === 'assistant' && (
-                  <div className="mt-2 text-xs text-gray-500">
-                    {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                )}
               </div>
-            </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <div className="flex space-x-2">
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-100"></div>
-                  <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce delay-200"></div>
+            ))}
+
+            {messages.length === 1 && (
+              <div className="space-y-2 pt-1">
+                {starters.map((starter) => (
+                  <button
+                    key={starter}
+                    onClick={() => sendMessage(starter)}
+                    className="block w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-left text-xs font-medium text-slate-600 transition hover:border-teal-300 hover:bg-teal-50 hover:text-teal-900"
+                  >
+                    {starter}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="rounded-2xl rounded-bl-md border border-slate-200 bg-white px-4 py-3 shadow-sm">
+                  <div className="flex gap-1.5">
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-teal-500" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-sky-500 [animation-delay:120ms]" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-amber-400 [animation-delay:240ms]" />
+                  </div>
                 </div>
               </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
+            )}
+            <div ref={messagesEndRef} />
+          </div>
         </div>
 
-        {/* Chat Input */}
-        <form onSubmit={handleSubmit} className="p-4 border-t bg-white">
-          <div className="flex space-x-2">
+        <form onSubmit={handleSubmit} className="border-t border-slate-200 bg-white p-3">
+          <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 focus-within:border-teal-500 focus-within:bg-white">
             <input
               type="text"
               value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a study-related question..."
-              className="flex-1 px-4 py-2 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors duration-200 bg-gray-50"
+              onChange={(event) => setInput(event.target.value)}
+              placeholder="Ask about a concept or study plan..."
+              className="min-w-0 flex-1 bg-transparent text-sm text-slate-900 outline-none placeholder:text-slate-400"
             />
             <button
               type="submit"
-              disabled={isLoading}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full p-2 hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || !input.trim()}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-900 text-white transition hover:bg-teal-700 disabled:cursor-not-allowed disabled:opacity-40"
+              aria-label="Send message"
             >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                />
-              </svg>
+              <PaperAirplaneIcon className="h-4 w-4" />
             </button>
           </div>
         </form>
       </div>
     </div>
   );
-};
-
-export default Chatbot;
+}
