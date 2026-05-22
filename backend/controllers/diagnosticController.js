@@ -285,7 +285,7 @@ exports.analyzeAndGenerateReport = async (req, res) => {
       numericInsights
     );
 
-    const report = await LearningStyleReport.create({
+    const reportPayload = {
       userId,
       studentProfileId: profile._id,
       diagnosticAssessmentId: assessment._id,
@@ -313,7 +313,13 @@ exports.analyzeAndGenerateReport = async (req, res) => {
       modalityScores: numericInsights.modalityScores,
       aiGeneratedSummary: aiReport.aiGeneratedSummary,
       rawAiResponse: aiReport.rawAiResponse,
-    });
+    };
+
+    const report = await LearningStyleReport.findOneAndUpdate(
+      { userId },
+      { $set: reportPayload },
+      { new: true, upsert: true, runValidators: true }
+    );
 
     profile.diagnosticStatus = 'completed';
     await profile.save();
@@ -321,6 +327,12 @@ exports.analyzeAndGenerateReport = async (req, res) => {
     res.status(201).json({ status: 'success', data: { report } });
   } catch (error) {
     console.error('Analysis error:', error);
+    if (error.code === 11000) {
+      const existing = await LearningStyleReport.findOne({ userId: req.user._id });
+      if (existing) {
+        return res.status(200).json({ status: 'success', data: { report: existing } });
+      }
+    }
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

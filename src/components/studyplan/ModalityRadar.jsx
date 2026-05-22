@@ -1,23 +1,40 @@
+import {
+  BookOpenIcon,
+  SpeakerWaveIcon,
+  VideoCameraIcon,
+  PuzzlePieceIcon,
+  PresentationChartLineIcon,
+} from '@heroicons/react/24/outline';
+
 const MODES = [
-  { key: 'text',        label: 'Text',        emoji: '📖', color: 'from-blue-500 to-cyan-500' },
-  { key: 'audio',       label: 'Audio',       emoji: '🎧', color: 'from-amber-500 to-orange-500' },
-  { key: 'video',       label: 'Video',       emoji: '🎬', color: 'from-violet-500 to-purple-500' },
-  { key: 'interactive', label: 'Interactive', emoji: '🧩', color: 'from-emerald-500 to-teal-500' },
+  { key: 'text',        label: 'Text',        icon: BookOpenIcon,     color: 'from-sky-500 to-blue-500' },
+  { key: 'audio',       label: 'Audio',       icon: SpeakerWaveIcon,  color: 'from-amber-500 to-orange-500' },
+  { key: 'video',       label: 'Video',       icon: VideoCameraIcon,  color: 'from-indigo-500 to-slate-600' },
+  { key: 'interactive', label: 'Interactive', icon: PuzzlePieceIcon,  color: 'from-emerald-500 to-teal-500' },
 ];
 
 export default function ModalityRadar({ scores }) {
   if (!scores) return null;
   return (
-    <div className="bg-white rounded-2xl shadow-md p-5 border border-gray-50">
-      <h3 className="font-bold text-gray-900 mb-4">🎯 Modality Scores</h3>
-      <div className="space-y-3">
+    <div className="ai-rail">
+      <div className="ai-panel__header">
+        <div className="ai-panel__title">
+          <PresentationChartLineIcon className="h-5 w-5 text-teal-600" />
+          Learning mix
+        </div>
+      </div>
+      <div className="ai-panel__body space-y-3">
         {MODES.map((m) => {
           const val = scores[m.key] ?? 0;
+          const Icon = m.icon;
           return (
             <div key={m.key}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span className="text-gray-600 font-medium">{m.emoji} {m.label}</span>
-                <span className="font-bold text-gray-700">{val}%</span>
+                <span className="flex items-center gap-2 text-slate-600 font-medium">
+                  <Icon className="h-4 w-4 text-slate-500" />
+                  {m.label}
+                </span>
+                <span className="font-semibold text-slate-700">{val}%</span>
               </div>
               <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                 <div
