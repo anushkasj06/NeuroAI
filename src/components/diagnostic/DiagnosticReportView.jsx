@@ -6,7 +6,12 @@ export default function DiagnosticReportView({ data }) {
   const styleGradient =
     LEARNING_STYLE_COLORS[report.preferredLearningStyle] || 'from-indigo-500 to-purple-600';
 
-  const modeLabels = { text: 'Text', audio: 'Audio', video: 'Video' };
+  const modeLabels = {
+    text: 'Text',
+    audio: 'Audio',
+    video: 'Video',
+    interactive: 'Interactive',
+  };
 
   return (
     <div className="space-y-6">
@@ -35,7 +40,7 @@ export default function DiagnosticReportView({ data }) {
         <div className="bg-white rounded-2xl p-6 shadow-md">
           <h3 className="text-lg font-bold text-gray-900 mb-4">Learning modes</h3>
           <div className="space-y-3">
-            {['text', 'audio', 'video'].map((mode) => (
+            {['text', 'audio', 'video', 'interactive'].map((mode) => (
               <div key={mode}>
                 <div className="flex justify-between text-sm mb-1">
                   <span className="capitalize font-medium">{modeLabels[mode]}</span>
@@ -108,7 +113,7 @@ export default function DiagnosticReportView({ data }) {
       {assessment && (
         <div className="bg-slate-50 rounded-2xl p-6 text-sm text-gray-600">
           <h3 className="font-bold text-gray-800 mb-2">Assessment analytics</h3>
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               Text: {assessment.textMode?.accuracyPercent}% accuracy,{' '}
               {assessment.textMode?.readingOrWatchTimeSeconds}s reading
@@ -120,6 +125,10 @@ export default function DiagnosticReportView({ data }) {
             <div>
               Video: {assessment.videoMode?.accuracyPercent}% accuracy, {assessment.videoMode?.pauseCount}{' '}
               pauses
+            </div>
+            <div>
+              Interactive: {assessment.interactiveMode?.accuracyPercent}% accuracy,{' '}
+              {assessment.interactiveMode?.interactionCount || 0} interactions
             </div>
           </div>
         </div>

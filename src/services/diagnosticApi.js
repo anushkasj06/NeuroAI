@@ -10,6 +10,7 @@ export const diagnostic = {
   submitTextAssessment: (data) => api.post('/diagnostic/assessment/text', data),
   submitAudioAssessment: (data) => api.post('/diagnostic/assessment/audio', data),
   submitVideoAssessment: (data) => api.post('/diagnostic/assessment/video', data),
+  submitInteractiveAssessment: (data) => api.post('/diagnostic/assessment/interactive', data),
   analyze: () => api.post('/diagnostic/analyze'),
   getReport: () => api.get('/diagnostic/report'),
 };

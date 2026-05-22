@@ -8,8 +8,10 @@ require('dotenv').config();
 const authRoutes = require('./routes/authRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const quizRoutes = require('./routes/quizRoutes');
-const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
 const diagnosticRoutes = require('./routes/diagnosticRoutes');
+const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
+const studyPlanRoutes = require('./routes/studyPlanRoutes');
+const learningMaterialRoutes = require('./routes/learningMaterialRoutes');
 const teacherRoutes = require('./routes/teacherRoutes');
 const contentRoutes = require('./routes/contentRoutes');
 
@@ -33,7 +35,17 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
     mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
-    routes: ['auth', 'profile', 'quiz', 'diagnostic', 'teacher', 'content'],
+    routes: [
+      'auth',
+      'profile',
+      'quiz',
+      'diagnostic',
+      'rapid-battle',
+      'study-plan',
+      'learning-material',
+      'teacher',
+      'content',
+    ],
   });
 });
 
@@ -41,8 +53,10 @@ app.get('/api/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/quiz', quizRoutes);
-app.use('/api/rapid-battle', rapidBattleRoutes);
 app.use('/api/diagnostic', diagnosticRoutes);
+app.use('/api/rapid-battle', rapidBattleRoutes);
+app.use('/api/study-plan', studyPlanRoutes);
+app.use('/api/learning-material', learningMaterialRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/content', contentRoutes);
 

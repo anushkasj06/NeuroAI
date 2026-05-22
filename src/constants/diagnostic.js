@@ -62,6 +62,7 @@ export const DIAGNOSTIC_STEPS = [
   { id: 'text', label: 'Text Test', icon: '📖' },
   { id: 'audio', label: 'Audio Test', icon: '🎧' },
   { id: 'video', label: 'Video Test', icon: '🎬' },
+  { id: 'interactive', label: 'Interactive', icon: '🧩' },
   { id: 'analyze', label: 'AI Analysis', icon: '🤖' },
   { id: 'report', label: 'Report', icon: '📊' },
 ];

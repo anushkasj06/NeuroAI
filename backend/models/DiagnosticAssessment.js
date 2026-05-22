@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const answerSchema = new mongoose.Schema(
   {
     questionId: String,
-    questionType: { type: String, enum: ['mcq', 'short'] },
+    questionType: { type: String, enum: ['mcq', 'short', 'match'] },
     selectedAnswer: String,
     isCorrect: Boolean,
     responseTimeMs: Number,
@@ -21,6 +21,7 @@ const modalityResultSchema = new mongoose.Schema(
     replayCount: { type: Number, default: 0 },
     pauseCount: { type: Number, default: 0 },
     skipCount: { type: Number, default: 0 },
+    interactionCount: { type: Number, default: 0 },
     answers: [answerSchema],
     correctCount: { type: Number, default: 0 },
     totalQuestions: { type: Number, default: 0 },
@@ -46,6 +47,7 @@ const diagnosticAssessmentSchema = new mongoose.Schema(
     textMode: { type: modalityResultSchema, default: () => ({}) },
     audioMode: { type: modalityResultSchema, default: () => ({}) },
     videoMode: { type: modalityResultSchema, default: () => ({}) },
+    interactiveMode: { type: modalityResultSchema, default: () => ({}) },
     status: {
       type: String,
       enum: ['not_started', 'in_progress', 'completed'],

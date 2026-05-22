@@ -3,23 +3,34 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
+
+// Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Profile from './pages/Profile';
 import Diagnostic from './pages/Diagnostic';
 import Dashboard from './pages/Dashboard';
-import Chatbot from './components/Chatbot';
+import AIDashboard from './pages/AIDashboard';
 import Prediction from './pages/Prediction';
 import StudyPlan from './pages/StudyPlan';
-import Test from './pages/Test';
+import StudyPlanPage from './pages/StudyPlanPage';
+import StudyPlanGenerator from './pages/StudyPlanGenerator';
+import LearnPage from './pages/LearnPage';
+import ProgressPage from './pages/ProgressPage';
 import AiStudyPlanGenerator from './pages/AiStudyPlanGenerator.jsx';
 import Leaderboard from './pages/Leaderboard';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
+import Test from './pages/Test';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudyMaterial from './pages/StudyMaterial';
 import TeacherContentStudio from './pages/TeacherContentStudio';
+import Chatbot from './components/Chatbot';
+
+const P = ({ children, allowedRoles = [] }) => (
+  <PrivateRoute allowedRoles={allowedRoles}>{children}</PrivateRoute>
+);
 
 function App() {
   return (
@@ -31,118 +42,25 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            <Route
-              path="/profile"
-              element={
-                <PrivateRoute>
-                  <Profile />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/quiz"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Diagnostic />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/diagnostic"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Diagnostic />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Dashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/prediction"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Prediction />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/studyplan"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <StudyPlan />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/test"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Test />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/ai-study-plan"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <AiStudyPlanGenerator />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/community"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Community />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/materials"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <StudyMaterial />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/leaderboard"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <Leaderboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/battle"
-              element={
-                <PrivateRoute allowedRoles={['student']}>
-                  <BattleArena />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/teacher"
-              element={
-                <PrivateRoute allowedRoles={['teacher']}>
-                  <TeacherDashboard />
-                </PrivateRoute>
-              }
-            />
-            <Route
-              path="/teacher/content"
-              element={
-                <PrivateRoute allowedRoles={['teacher']}>
-                  <TeacherContentStudio />
-                </PrivateRoute>
-              }
-            />
+            <Route path="/profile" element={<P><Profile /></P>} />
+            <Route path="/dashboard" element={<P allowedRoles={['student']}><Dashboard /></P>} />
+            <Route path="/ai-dashboard" element={<P allowedRoles={['student']}><AIDashboard /></P>} />
+            <Route path="/diagnostic" element={<P allowedRoles={['student']}><Diagnostic /></P>} />
+            <Route path="/quiz" element={<P allowedRoles={['student']}><Diagnostic /></P>} />
+            <Route path="/learn" element={<P allowedRoles={['student']}><LearnPage /></P>} />
+            <Route path="/progress" element={<P allowedRoles={['student']}><ProgressPage /></P>} />
+            <Route path="/study-plan/generate" element={<P allowedRoles={['student']}><StudyPlanGenerator /></P>} />
+            <Route path="/study-plan" element={<P allowedRoles={['student']}><StudyPlanPage /></P>} />
+            <Route path="/studyplan" element={<P allowedRoles={['student']}><StudyPlan /></P>} />
+            <Route path="/ai-study-plan" element={<P allowedRoles={['student']}><AiStudyPlanGenerator /></P>} />
+            <Route path="/prediction" element={<P allowedRoles={['student']}><Prediction /></P>} />
+            <Route path="/test" element={<P allowedRoles={['student']}><Test /></P>} />
+            <Route path="/battle" element={<P allowedRoles={['student']}><BattleArena /></P>} />
+            <Route path="/leaderboard" element={<P allowedRoles={['student']}><Leaderboard /></P>} />
+            <Route path="/community" element={<P allowedRoles={['student']}><Community /></P>} />
+            <Route path="/materials" element={<P allowedRoles={['student']}><StudyMaterial /></P>} />
+            <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
+            <Route path="/teacher/content" element={<P allowedRoles={['teacher']}><TeacherContentStudio /></P>} />
           </Routes>
           <Chatbot />
         </div>

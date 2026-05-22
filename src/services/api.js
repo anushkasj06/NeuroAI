@@ -94,5 +94,5 @@ export const content = {
   getStudentContent: () => api.get('/content/student'),
 };
 
-export default api; 
 export { API_BASE };
+export default api;
