@@ -100,37 +100,58 @@ const geminiCompletion = async (messages, opts = {}) => {
 const chatCompletion = async (messages, opts = {}) => {
   const prompt = messages.map((message) => `${message.role.toUpperCase()}:\n${message.content}`).join('\n\n');
   const preferredProvider = (process.env.QUIZ_AI_PROVIDER || '').trim().toLowerCase();
+  let groqError = null;
+  let geminiError = null;
+  let openAiError = null;
+
+  const tryGroq = async () => {
+    try {
+      return await groqChatCompletion(messages, opts);
+    } catch (error) {
+      groqError = error;
+      console.error('Groq generation failed:', error.message);
+      return null;
+    }
+  };
+
+  const tryGemini = async () => {
+    try {
+      return await geminiBattleCompletion(prompt, opts);
+    } catch (error) {
+      geminiError = error;
+      console.error('Gemini generation failed:', error.message);
+      return null;
+    }
+  };
 
   if (preferredProvider === 'gemini') {
-    try {
-      return await geminiBattleCompletion(prompt, opts);
-    } catch (geminiError) {
-      console.error('Gemini generation failed:', geminiError.message);
-    }
-    try {
-      return await groqChatCompletion(messages, opts);
-    } catch (groqError) {
-      console.error('Groq generation failed:', groqError.message);
-    }
+    const geminiResult = await tryGemini();
+    if (geminiResult) return geminiResult;
+    const groqResult = await tryGroq();
+    if (groqResult) return groqResult;
   } else {
+    const groqResult = await tryGroq();
+    if (groqResult) return groqResult;
+    const geminiResult = await tryGemini();
+    if (geminiResult) return geminiResult;
+  }
+
+  if (process.env.OPENAI_API_KEY) {
     try {
-      return await groqChatCompletion(messages, opts);
-    } catch (groqError) {
-      console.error('Groq generation failed:', groqError.message);
-    }
-    try {
-      return await geminiBattleCompletion(prompt, opts);
-    } catch (geminiError) {
-      console.error('Gemini generation failed:', geminiError.message);
+      return await openAiCompletion(messages, opts);
+    } catch (error) {
+      openAiError = error;
+      console.error('OpenAI generation failed:', error.message);
     }
   }
 
-  try {
-    return await openAiCompletion(messages, opts);
-  } catch (openAiError) {
-    console.error('OpenAI generation failed:', openAiError.message);
-    throw new Error('No AI provider completed successfully. Check GROQ_API_KEY, GEMINI_API_KEY, or OPENAI_API_KEY in backend/.env');
-  }
+  const errorParts = [];
+  if (groqError) errorParts.push(`Groq: ${groqError.message}`);
+  if (geminiError) errorParts.push(`Gemini: ${geminiError.message}`);
+  if (openAiError) errorParts.push(`OpenAI: ${openAiError.message}`);
+
+  const suffix = errorParts.length ? ` ${errorParts.join(' | ')}` : '';
+  throw new Error(`No AI provider completed successfully.${suffix}`);
 };
 
 const groqChatCompletion = async (messages, opts = {}) => {
