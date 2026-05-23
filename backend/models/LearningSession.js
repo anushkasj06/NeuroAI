@@ -4,23 +4,12 @@ const teachingBlockSchema = new mongoose.Schema(
   {
     type: {
       type: String,
-      enum: [
-        'introduction',
-        'concept',
-        'example',
-        'visual',
-        'interactive_check',
-        'revision',
-        'summary',
-        'teacher_note',
-      ],
       default: 'concept',
     },
     title: { type: String, default: '' },
     content: { type: String, default: '' },
     mediaType: {
       type: String,
-      enum: ['markdown', 'diagram', 'flowchart', 'audio_script', 'challenge', 'none'],
       default: 'markdown',
     },
     diagramData: { type: mongoose.Schema.Types.Mixed },

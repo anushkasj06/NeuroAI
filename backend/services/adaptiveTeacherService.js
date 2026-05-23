@@ -53,34 +53,62 @@ const generateTeachingSession = async ({
 }) => {
   const learningStyle = learningReport?.preferredLearningStyle || 'Reading/Writing Learner';
   const activeTeachingMode = modeFromStyle(learningStyle);
+  const topicLabel = `${topic}${subtopic ? ` > ${subtopic}` : ''}`;
   const prompt = `${buildStudentContext({ profile, learningReport, mastery, performance: { weakConcepts: pastMistakes } })}
 
-Create a real teacher-led learning session.
+You are preparing a full, rich teaching session on a SPECIFIC topic. Every word you write must be about the actual subject matter — never generic filler.
+
 SUBJECT: ${subject}
-TOPIC: ${topic}${subtopic ? ` > ${subtopic}` : ''}
+TOPIC: ${topicLabel}
 DIFFICULTY: ${difficultyLevel}
 
-The session must follow this flow:
-1. Introduction
-2. Concept Explanation
-3. Real-Life Example
-4. Interactive Understanding Check
-5. Short Adaptive Question placeholder
-6. AI Feedback placeholder
-7. Next Concept
-8. Mini Revision
-9. Final Adaptive Quiz setup
-10. Progress Report setup
+=== TEACHING FLOW RULES ===
+Generate 7-10 blocks. Each block MUST have one of these types ONLY:
+  introduction, concept, example, visual, interactive_check, revision, summary, teacher_note
 
-Learning style adaptation:
-- Visual: diagrams, flowcharts, concept maps, visual breakdowns.
-- Audio: conversational script, story explanation, TTS-ready teacher speech.
-- Reading/Writing: structured notes, revision sheets, text walkthroughs.
-- Interactive: challenges, checkpoints, coding/problem tasks.
+Do NOT invent other types. Do NOT use types like "quiz", "feedback", "progress_report", or "adaptive_question".
 
-Return JSON:
+A good session includes AT LEAST:
+- 1 introduction block
+- 2 concept blocks (each covering a different sub-concept or principle)
+- 1 example block
+- 1 visual block
+- 1 interactive_check block
+- 1 revision or summary block
+
+=== CONTENT QUALITY RULES ===
+For EVERY block, the "content" field must be:
+- At minimum **150 words** of real educational prose, not filler.
+- Written as 3-5 paragraphs using **bold**, bullet points, numbered lists, and markdown headers.
+- Packed with actual ${subject} subject matter about ${topicLabel}.
+
+For "concept" blocks specifically:
+- Explain the **definition** of the concept in plain language.
+- Break down the **underlying principles** and how they connect.
+- List **sub-concepts**, **formulas**, or **rules** that the student must know.
+- Explain **why** each part matters, not just what it is.
+
+For "example" blocks specifically:
+- Describe a **real-world scenario** where ${topicLabel} is applied.
+- Walk through the scenario **step by step**, showing inputs, decisions, and outcomes.
+- Explain what would go wrong if the concept were applied incorrectly.
+
+For "visual" blocks specifically:
+- The "diagramData" field is MANDATORY and must contain:
+  - At least **6 nodes** with labels that are REAL concept terms from ${topicLabel} (e.g., specific techniques, components, stages — NOT generic words like "Purpose", "Parts", "Example").
+  - At least **6 edges** with descriptive relationship labels.
+  - Node types: "main" for the central concept, "sub" for key components, "detail" for specifics.
+- The "content" field must also explain the diagram in prose.
+
+=== LEARNING STYLE ADAPTATION ===
+- Visual learners: extra diagrams, spatial descriptions, color/shape references.
+- Audio learners: conversational tone, story-driven explanations, TTS-friendly phrasing.
+- Reading/Writing learners: structured notes, definitions-first, text-heavy walkthroughs.
+- Interactive learners: embedded mini-challenges, "try this" prompts, decision checkpoints.
+
+Return JSON (no markdown fences):
 {
-  "teacherPersona": "string",
+  "teacherPersona": "string – a specific persona, e.g. 'encouraging systems engineering professor'",
   "activeTeachingMode": "visual|audio|reading|interactive|mixed",
   "difficultyLevel": "easy|medium|hard",
   "estimatedMinutes": number,
@@ -89,30 +117,34 @@ Return JSON:
   "teachingFlow": [
     {
       "type": "introduction|concept|example|visual|interactive_check|revision|summary|teacher_note",
-      "title": "string",
-      "content": "rich teacher explanation, not generic notes",
+      "title": "string – specific to ${topicLabel}",
+      "content": "3-5 paragraphs of rich markdown, minimum 150 words, about the ACTUAL subject matter",
       "mediaType": "markdown|diagram|flowchart|audio_script|challenge|none",
       "diagramData": {
-        "nodes": [{"id": "1", "label": "string", "type": "main|sub|detail"}],
-        "edges": [{"from": "1", "to": "2", "label": "string"}]
+        "nodes": [{"id": "1", "label": "real concept term", "type": "main|sub|detail"}],
+        "edges": [{"from": "1", "to": "2", "label": "relationship description"}]
       },
-      "interactionPrompt": "student-facing action or reflection",
+      "interactionPrompt": "student-facing question or reflection prompt",
       "estimatedMinutes": number
     }
   ],
-  "openingMessage": "warm teacher message",
-  "revisionPoints": ["string"],
-  "ttsScript": "spoken lesson script"
+  "openingMessage": "warm, specific teacher greeting mentioning ${topicLabel}",
+  "revisionPoints": ["string – specific facts or concepts to remember"],
+  "ttsScript": "spoken lesson script covering the key points of ${topicLabel}"
 }
 
-Generate 7-10 teachingFlow blocks. Make the explanation classroom-like, concrete, and adaptive.`;
+CRITICAL REMINDERS:
+1. Every "content" field must have 150+ words of REAL ${subject} knowledge about ${topicLabel}.
+2. "visual" blocks MUST include "diagramData" with 6+ nodes using domain-specific labels.
+3. Only use valid types: introduction, concept, example, visual, interactive_check, revision, summary, teacher_note.
+4. Generate 7-10 teachingFlow blocks total.`;
 
   return safeJson(
     [
       { role: 'system', content: TEACHER_SYSTEM },
       { role: 'user', content: prompt },
     ],
-    { temperature: 0.65, maxTokens: 5000 },
+    { temperature: 0.65, maxTokens: 8000 },
     () => buildFallbackTeachingSession({ subject, topic, subtopic, learningStyle, activeTeachingMode, difficultyLevel })
   );
 };
@@ -317,77 +349,101 @@ const modifyStudyPlan = ({ plan, session, report }) => {
 
 const generateLearningContent = generateTeachingSession;
 
-const buildFallbackTeachingSession = ({ subject, topic, subtopic, learningStyle, activeTeachingMode, difficultyLevel }) => ({
-  teacherPersona: 'patient expert teacher',
-  activeTeachingMode,
-  difficultyLevel,
-  estimatedMinutes: 35,
-  weakConcepts: [],
-  strongConcepts: [],
-  openingMessage: `Today I will teach ${topic} like a live class: idea, example, check, feedback, and quiz.`,
-  revisionPoints: [`Define ${topic}`, `Explain one real example`, `Solve one fresh question`],
-  ttsScript: `Welcome. Today we are learning ${topic} in ${subject}. I will explain it step by step, then ask you one question at a time.`,
-  teachingFlow: [
-    {
-      type: 'introduction',
-      title: `Why ${topic} matters`,
-      content: `${topic}${subtopic ? ` (${subtopic})` : ''} is not just a definition in ${subject}. It is a tool you use to solve real problems. We will build from intuition to application.`,
-      mediaType: 'markdown',
-      estimatedMinutes: 4,
-    },
-    {
-      type: 'concept',
-      title: 'Core idea',
-      content: `Start with the purpose: what problem does ${topic} solve? Then learn the parts, the process, and the common mistakes. A strong answer explains both what it is and why it works.`,
-      mediaType: 'markdown',
-      estimatedMinutes: 8,
-    },
-    {
-      type: 'example',
-      title: 'Real-life example',
-      content: `Imagine organizing tasks in a day. ${topic} gives you a structure for deciding what connects, what changes, and what must be checked before moving forward.`,
-      mediaType: 'markdown',
-      estimatedMinutes: 6,
-    },
-    {
-      type: 'visual',
-      title: 'Visual breakdown',
-      content: `Map ${topic} into definition, parts, example, mistake, and test question.`,
-      mediaType: activeTeachingMode === 'audio' ? 'audio_script' : 'diagram',
-      diagramData: {
-        nodes: [
-          { id: '1', label: topic, type: 'main' },
-          { id: '2', label: 'Purpose', type: 'sub' },
-          { id: '3', label: 'Parts', type: 'sub' },
-          { id: '4', label: 'Example', type: 'sub' },
-          { id: '5', label: 'Mistake', type: 'detail' },
-        ],
-        edges: [
-          { from: '1', to: '2', label: 'answers why' },
-          { from: '1', to: '3', label: 'contains' },
-          { from: '1', to: '4', label: 'applies in' },
-          { from: '4', to: '5', label: 'watch for' },
-        ],
+const buildFallbackTeachingSession = ({ subject, topic, subtopic, learningStyle, activeTeachingMode, difficultyLevel }) => {
+  const topicLabel = `${topic}${subtopic ? ` (${subtopic})` : ''}`;
+  const subjectCtx = subject || 'this subject';
+
+  return {
+    teacherPersona: `patient and thorough ${subjectCtx} instructor`,
+    activeTeachingMode,
+    difficultyLevel,
+    estimatedMinutes: 40,
+    weakConcepts: [],
+    strongConcepts: [],
+    openingMessage: `Welcome! Today we are going to take a deep dive into **${topicLabel}** within ${subjectCtx}. I will walk you through the core ideas, show you a real-world example, map out the concept visually, and then check your understanding before we wrap up. Let's get started!`,
+    revisionPoints: [
+      `Be able to define ${topic} and explain its role in ${subjectCtx}`,
+      `Identify at least three key components or principles of ${topic}`,
+      `Describe one real scenario where ${topic} is applied and what outcome it produces`,
+      `Explain how ${topic} connects to other concepts in ${subjectCtx}`,
+    ],
+    ttsScript: `Welcome to today's lesson. We are studying ${topicLabel} in ${subjectCtx}. I will start by explaining why this concept matters, then break down the key ideas, walk through a real example, show you a concept map, and finally check your understanding with a quick exercise. Let's begin.`,
+    teachingFlow: [
+      {
+        type: 'introduction',
+        title: `Why ${topic} Matters in ${subjectCtx}`,
+        content: `**${topicLabel}** is one of the foundational ideas in ${subjectCtx}, and understanding it well will unlock your ability to tackle more advanced problems later.\n\nBefore we jump into definitions, let's think about **why** this concept exists in the first place. Every concept in ${subjectCtx} was developed to solve a specific problem or address a specific need. **${topic}** is no different — it emerged because practitioners needed a structured way to handle challenges related to this area.\n\nIn this session, we will cover:\n- **The definition and core principles** behind ${topic}\n- **Key components and sub-concepts** you need to master\n- **A real-world scenario** that shows ${topic} in action\n- **A visual concept map** to help you see how everything connects\n- **A self-check exercise** so you can test your own understanding\n\nBy the end, you should be able to explain ${topic} to someone else in your own words, identify it in real situations, and understand how it fits into the bigger picture of ${subjectCtx}. Let's dive in!`,
+        mediaType: 'markdown',
+        estimatedMinutes: 4,
       },
-      estimatedMinutes: 5,
-    },
-    {
-      type: 'interactive_check',
-      title: 'Pause and explain',
-      content: `Before the quiz, explain ${topic} in your own words in two sentences.`,
-      mediaType: 'challenge',
-      interactionPrompt: `What is ${topic}, and where would you use it?`,
-      estimatedMinutes: 4,
-    },
-    {
-      type: 'revision',
-      title: 'Mini revision',
-      content: `Remember: purpose first, structure second, example third, mistake last. That order keeps your answer clear.`,
-      mediaType: 'markdown',
-      estimatedMinutes: 4,
-    },
-  ],
-});
+      {
+        type: 'concept',
+        title: `Understanding ${topic}: Definition & Core Principles`,
+        content: `**What is ${topic}?**\n\nAt its core, **${topic}** refers to the set of principles, methods, and structures within ${subjectCtx} that govern how we approach this particular area of knowledge. Think of it as the "rulebook" that tells us what the important pieces are, how they interact, and what outcomes we should expect.\n\n**Core Principles:**\n\n1. **Foundational Principle** — Every application of ${topic} begins with understanding the base conditions or inputs. Without knowing where you start, you cannot predict where you will end up.\n2. **Structural Organization** — ${topic} is not a single flat idea; it has layers. There are primary components that form the backbone, and secondary details that refine the output.\n3. **Relationship Mapping** — The components of ${topic} do not exist in isolation. Each one influences the others, and understanding these relationships is what separates surface-level knowledge from true mastery.\n4. **Boundary Conditions** — Knowing when ${topic} applies and when it does **not** apply is just as important as knowing the definition. Many exam and interview mistakes come from applying a concept outside its valid scope.\n\n**Why does this matter?**\n\nIf you only memorize the definition of ${topic}, you will struggle when a problem presents the concept in a slightly different form. But if you understand the **principles** underneath, you can recognize ${topic} even when it is disguised in an unfamiliar scenario. That is the difference between a student who recalls and a student who understands.`,
+        mediaType: 'markdown',
+        estimatedMinutes: 8,
+      },
+      {
+        type: 'concept',
+        title: `Key Components & Sub-Concepts of ${topic}`,
+        content: `Now that we have the big picture, let's break **${topic}** into its key building blocks. Every complex concept can be decomposed into smaller, more manageable pieces.\n\n**Component 1: Inputs & Prerequisites**\nBefore ${topic} can be applied, certain conditions must be met. These are the inputs — the data, the context, or the initial state that the process requires. Understanding what goes *in* helps you predict what comes *out*.\n\n**Component 2: Core Mechanism**\nThis is the heart of ${topic} — the actual process, algorithm, rule, or transformation that takes the inputs and produces a result. When your teacher or textbook describes "how ${topic} works," they are usually describing this mechanism.\n\n**Component 3: Outputs & Outcomes**\nWhat does ${topic} produce? What changes after it is applied? Being able to articulate the expected outcome is critical for both exam answers and real-world application.\n\n**Component 4: Constraints & Limitations**\nNo concept works everywhere. **${topic}** has specific constraints — situations where it breaks down, edge cases that produce unexpected results, or assumptions that must hold true for the concept to be valid.\n\n**Component 5: Connections to Other Concepts**\n${topic} does not exist alone in ${subjectCtx}. It connects to related ideas, builds on prerequisite knowledge, and feeds into more advanced topics. Mapping these connections is essential for deep understanding.\n\n**Pro Tip:** When studying, always ask yourself: *What are the inputs? What is the mechanism? What is the output? When does it fail?* This four-question framework works for almost any concept in ${subjectCtx}.`,
+        mediaType: 'markdown',
+        estimatedMinutes: 8,
+      },
+      {
+        type: 'example',
+        title: `Real-World Scenario: ${topic} in Action`,
+        content: `Let's see **${topic}** applied in a realistic situation. Theory is important, but you truly learn a concept when you watch it work.\n\n**The Scenario:**\nImagine you are working on a project in ${subjectCtx}. You encounter a problem that requires you to decide how to structure your approach. The stakes are real — a wrong decision could lead to wasted effort, incorrect results, or a system that does not meet requirements.\n\n**Step 1: Identify the Need**\nYou recognize that the problem matches the pattern where **${topic}** applies. The inputs are present, the conditions are met, and the expected outcome aligns with your goal. This is the *recognition* phase — knowing **when** to use the concept.\n\n**Step 2: Apply the Core Mechanism**\nYou follow the structured approach that ${topic} prescribes. You process the inputs according to the rules and principles we discussed earlier. At each step, you check that the constraints are satisfied.\n\n**Step 3: Evaluate the Output**\nThe result is produced. You compare it against the expected outcome. Does it meet the criteria? Does it satisfy the requirements? If yes, the application was successful. If not, you go back and check which constraint was violated or which input was incorrect.\n\n**Step 4: Learn from Edge Cases**\nIn this scenario, suppose one of the assumptions did not perfectly hold. The output was *mostly* correct but had a subtle flaw. This is where deep understanding of ${topic} pays off — you can diagnose *why* it went slightly wrong and adjust.\n\n**Key Takeaway:** The ability to apply ${topic} step-by-step, check your work at each stage, and diagnose problems when things go wrong — that is what separates a student who truly understands the concept from one who only memorized the definition.`,
+        mediaType: 'markdown',
+        estimatedMinutes: 7,
+      },
+      {
+        type: 'visual',
+        title: `Concept Map: How ${topic} Fits Together`,
+        content: `Below is a visual concept map of **${topic}** showing how its components relate to each other. The central node represents the topic itself, and the surrounding nodes represent key components, inputs, outputs, and connections.\n\n**How to read this map:**\n- The **main node** (${topic}) is the central concept.\n- **Sub nodes** represent the major building blocks — inputs, core mechanism, outputs, and constraints.\n- **Detail nodes** represent specific examples, edge cases, or connections to related concepts.\n- The **edges** (arrows) describe the relationship between connected nodes.\n\nWhen you study, try to recreate this map from memory. If you can draw the relationships between all the pieces without looking, you have a strong grasp of ${topic}. If a connection feels unclear, that is exactly the area to review.`,
+        mediaType: activeTeachingMode === 'audio' ? 'audio_script' : 'diagram',
+        diagramData: {
+          nodes: [
+            { id: '1', label: topic, type: 'main' },
+            { id: '2', label: `${topic} Inputs`, type: 'sub' },
+            { id: '3', label: `Core Mechanism`, type: 'sub' },
+            { id: '4', label: `Expected Outputs`, type: 'sub' },
+            { id: '5', label: `Constraints & Limits`, type: 'sub' },
+            { id: '6', label: `Related Concepts in ${subjectCtx}`, type: 'sub' },
+            { id: '7', label: `Common Mistakes`, type: 'detail' },
+            { id: '8', label: `Real-World Applications`, type: 'detail' },
+          ],
+          edges: [
+            { from: '1', to: '2', label: 'requires' },
+            { from: '2', to: '3', label: 'feeds into' },
+            { from: '3', to: '4', label: 'produces' },
+            { from: '3', to: '5', label: 'bounded by' },
+            { from: '1', to: '6', label: 'connects to' },
+            { from: '5', to: '7', label: 'leads to' },
+            { from: '4', to: '8', label: 'enables' },
+            { from: '6', to: '3', label: 'informs' },
+          ],
+        },
+        estimatedMinutes: 5,
+      },
+      {
+        type: 'interactive_check',
+        title: `Check Your Understanding of ${topic}`,
+        content: `Let's pause and see how well you have absorbed the material so far. This is not a graded quiz — it is a self-check to help you identify any gaps before we move on.\n\n**Exercise:** In your own words, answer the following questions:\n\n1. **Define ${topic}** in 2-3 sentences without looking at your notes. Focus on the *purpose* of the concept, not just a textbook phrase.\n2. **Name at least three key components** of ${topic} and explain what each one does.\n3. **Describe one scenario** where ${topic} would be the correct approach, and one scenario where it would **not** apply.\n4. **Identify one common mistake** students make when applying ${topic}, and explain why it is wrong.\n\nTake your time with this. Writing out your answers — even in rough form — forces your brain to organize the information actively rather than passively reading it. If you get stuck on any question, scroll back to the relevant section and re-read it before trying again.`,
+        mediaType: 'challenge',
+        interactionPrompt: `Explain ${topic} in your own words: What is it, what are its key parts, and when would you use it in ${subjectCtx}?`,
+        estimatedMinutes: 5,
+      },
+      {
+        type: 'revision',
+        title: `Quick Revision: ${topic} Essentials`,
+        content: `Let's consolidate everything we covered about **${topic}** into a concise revision summary.\n\n**🔑 Key Points to Remember:**\n\n- **Definition:** ${topic} is a structured approach within ${subjectCtx} that addresses specific challenges by following defined principles and producing predictable outcomes.\n- **Core Components:** Inputs → Core Mechanism → Outputs, all bounded by Constraints.\n- **When to Apply:** Use ${topic} when the problem matches its input pattern and the constraints are satisfied.\n- **When NOT to Apply:** Do not force ${topic} onto problems that violate its assumptions — this is the most common exam mistake.\n- **Connections:** ${topic} is related to other concepts in ${subjectCtx}; understanding these links helps you build a complete mental model.\n\n**📝 Revision Strategy:**\n1. Close your notes and try to write the definition from memory.\n2. Draw the concept map from memory — label every node and edge.\n3. Walk through the real-world example step by step without looking.\n4. If anything feels shaky, revisit just that section — do not re-read everything.\n\nYou are building strong foundations here. In the next phase, we will test this knowledge with adaptive questions that push you to *apply* what you have learned, not just recall it.`,
+        mediaType: 'markdown',
+        estimatedMinutes: 4,
+      },
+    ],
+  };
+};
 
 const buildFallbackQuestion = ({ session, questionNumber, previous }) => {
   const weak = previous && previous.score < 60;

@@ -4,6 +4,18 @@ import { diagnostic } from '../services/diagnosticApi';
 import { aiTeacherApi } from '../services/studyPlanApi';
 import { getApiErrorMessage } from '../services/api';
 import SubjectTopicSelector from '../components/studyplan/SubjectTopicSelector';
+import KnowledgeGraphViewer from '../components/common/KnowledgeGraphViewer';
+import ReactMarkdown from 'react-markdown';
+import {
+  AcademicCapIcon,
+  BookOpenIcon,
+  LightBulbIcon,
+  CubeTransparentIcon,
+  ChatBubbleLeftRightIcon,
+  ArrowPathIcon,
+  ClipboardDocumentCheckIcon,
+  SparklesIcon,
+} from '@heroicons/react/24/outline';
 
 const modeLabels = {
   visual: 'Visual studio',
@@ -197,13 +209,16 @@ export default function AITeacherSession() {
       </section>
 
       <main className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-        <div className="grid lg:grid-cols-[360px_1fr] gap-6">
-          <aside className="space-y-4">
-            <div className="bg-white border border-slate-200 rounded-lg p-4">
-              <div className="flex items-center justify-between gap-3 mb-4">
+        {error && <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
+
+        {/* ── Pre-session: clean single-column centered layout ──────── */}
+        {!session && (
+          <div className="max-w-2xl mx-auto space-y-5">
+            <div className="bg-white border border-slate-200 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h2 className="font-semibold">Start topic</h2>
-                  <p className="text-xs text-slate-500">{learningStyle}</p>
+                  <h2 className="text-lg font-bold text-slate-900">Select a topic</h2>
+                  <p className="text-xs text-slate-500 mt-1">{learningStyle}</p>
                 </div>
                 <ConfidencePicker value={confidence} onChange={setConfidence} />
               </div>
@@ -211,87 +226,74 @@ export default function AITeacherSession() {
               <button
                 onClick={startSession}
                 disabled={working || !selected.subjectSlug || !selected.topic}
-                className="mt-4 w-full h-11 rounded-md bg-cyan-700 text-white text-sm font-semibold hover:bg-cyan-800 disabled:opacity-50"
+                className="mt-5 w-full h-12 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 disabled:opacity-40 transition-colors"
               >
-                {working && !session ? 'Preparing classroom...' : 'Start AI Teacher'}
+                {working && !session ? 'Preparing session...' : 'Start learning session'}
               </button>
             </div>
 
-            <div className="bg-white border border-slate-200 rounded-lg p-4">
-              <h2 className="font-semibold">Revision center</h2>
-              <div className="mt-3 space-y-2">
-                {(revisionCenter?.weakProgress || []).slice(0, 5).map((item) => (
-                  <button
-                    key={item._id}
-                    onClick={() => setSelected({ subjectSlug: item.subjectSlug, subjectName: item.subject, topic: item.topic, subtopic: item.subtopic || '' })}
-                    className="w-full text-left rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950"
-                  >
-                    <span className="font-medium">{item.topic}</span>
-                    <span className="block text-xs">{item.masteryPercent}% mastery</span>
-                  </button>
-                ))}
-                {!revisionCenter?.weakProgress?.length && (
-                  <p className="text-sm text-slate-500">No urgent revision topics yet.</p>
-                )}
-              </div>
-            </div>
-          </aside>
-
-          <section ref={lessonRef} className="space-y-4">
-            {error && <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">{error}</div>}
-
-            {!session && (
-              <div className="bg-white border border-slate-200 rounded-lg p-8 min-h-[420px] flex items-center">
-                <div className="max-w-xl">
-                  <p className="text-sm font-semibold text-slate-500">Waiting for a topic</p>
-                  <h2 className="mt-2 text-2xl font-bold">Choose a topic and let the AI teach it like a real class.</h2>
-                  <p className="mt-3 text-slate-600">
-                    The system will generate the lesson flow, then ask adaptive questions one by one based on your answers,
-                    confidence, speed, weak concepts, and previous progress.
-                  </p>
+            {/* Revision queue */}
+            {(revisionCenter?.weakProgress?.length > 0) && (
+              <div className="bg-white border border-slate-200 rounded-xl p-5">
+                <h3 className="text-sm font-bold text-slate-900 mb-3">Topics needing revision</h3>
+                <div className="grid sm:grid-cols-2 gap-2">
+                  {revisionCenter.weakProgress.slice(0, 6).map((item) => (
+                    <button
+                      key={item._id}
+                      onClick={() => setSelected({ subjectSlug: item.subjectSlug, subjectName: item.subject, topic: item.topic, subtopic: item.subtopic || '' })}
+                      className="text-left rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm hover:border-cyan-300 hover:bg-cyan-50/50 transition-colors"
+                    >
+                      <span className="font-semibold text-slate-900">{item.topic}</span>
+                      <span className="block text-xs text-slate-500 mt-0.5">{item.masteryPercent}% mastery</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
+          </div>
+        )}
 
-            {session && (
-              <>
-                <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-                  <div className="border-b border-slate-200 p-5">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                      <div>
-                        <p className="text-sm text-cyan-700 font-semibold">{session.subject}</p>
-                        <h2 className="text-2xl font-bold mt-1">{session.topic}</h2>
-                        {openingMessage && <p className="text-slate-600 mt-2">{openingMessage}</p>}
-                      </div>
-                      <div className="grid grid-cols-2 gap-2 min-w-[260px]">
-                        {classroomStats.map((item) => <Metric key={item.label} label={item.label} value={item.value} compact />)}
-                      </div>
+        {/* ── Active session: full width ────────────────────────────── */}
+        {session && (
+          <div className="space-y-5">
+            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+              <div className="border-b border-slate-200 p-5">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-3">
+                      <button onClick={() => setSession(null)} className="text-sm font-semibold text-cyan-700 hover:underline">&larr; Change topic</button>
+                      <p className="text-sm text-slate-500 font-semibold">&bull; {session.subject}</p>
                     </div>
+                    <h2 className="text-2xl font-bold mt-1">{session.topic}</h2>
+                    {openingMessage && <p className="text-slate-600 mt-2 md-content"><ReactMarkdown>{openingMessage}</ReactMarkdown></p>}
                   </div>
-                  <TeachingFlow blocks={session.teachingFlow || []} />
+                  <div className="grid grid-cols-2 gap-2 min-w-[260px]">
+                    {classroomStats.map((item) => <Metric key={item.label} label={item.label} value={item.value} compact />)}
+                  </div>
                 </div>
+              </div>
+              <TeachingFlow blocks={session.teachingFlow || []} />
+            </div>
 
-                <QuestionPanel
-                  question={question}
-                  answerText={answerText}
-                  selectedOption={selectedOption}
-                  confidence={confidence}
-                  feedback={feedback}
-                  working={working}
-                  answered={answered}
-                  canSubmit={canSubmit}
-                  onNextQuestion={nextQuestion}
-                  onAnswerText={setAnswerText}
-                  onSelectedOption={setSelectedOption}
-                  onConfidence={setConfidence}
-                  onSubmit={submitAnswer}
-                  onComplete={completeSession}
-                  report={report}
-                />
-              </>
-            )}
-          </section>
-        </div>
+            <QuestionPanel
+              question={question}
+              answerText={answerText}
+              selectedOption={selectedOption}
+              confidence={confidence}
+              feedback={feedback}
+              working={working}
+              answered={answered}
+              canSubmit={canSubmit}
+              onNextQuestion={nextQuestion}
+              onAnswerText={setAnswerText}
+              onSelectedOption={setSelectedOption}
+              onConfidence={setConfidence}
+              onSubmit={submitAnswer}
+              onComplete={completeSession}
+              report={report}
+            />
+          </div>
+        )}
       </main>
     </div>
   );
@@ -323,51 +325,79 @@ function ConfidencePicker({ value, onChange }) {
   );
 }
 
+const BLOCK_META = {
+  introduction:     { Icon: AcademicCapIcon,              color: '#059669', bg: '#ecfdf5', border: '#a7f3d0', label: 'Introduction' },
+  concept:          { Icon: BookOpenIcon,                  color: '#2563eb', bg: '#eff6ff', border: '#bfdbfe', label: 'Core Concept' },
+  example:          { Icon: LightBulbIcon,                 color: '#d97706', bg: '#fffbeb', border: '#fde68a', label: 'Worked Example' },
+  visual:           { Icon: CubeTransparentIcon,           color: '#7c3aed', bg: '#f5f3ff', border: '#ddd6fe', label: 'Visual Model' },
+  interactive_check:{ Icon: ChatBubbleLeftRightIcon,        color: '#0891b2', bg: '#ecfeff', border: '#a5f3fc', label: 'Comprehension Check' },
+  revision:         { Icon: ArrowPathIcon,                 color: '#e11d48', bg: '#fff1f2', border: '#fecdd3', label: 'Key Revision' },
+  summary:          { Icon: ClipboardDocumentCheckIcon,     color: '#4f46e5', bg: '#eef2ff', border: '#c7d2fe', label: 'Summary' },
+  teacher_note:     { Icon: SparklesIcon,                  color: '#0f766e', bg: '#f0fdfa', border: '#99f6e4', label: 'Instructor Insight' },
+};
+
 function TeachingFlow({ blocks }) {
   return (
-    <div className="divide-y divide-slate-100">
-      {blocks.map((block, index) => (
-        <article key={block._id || index} className="p-5 grid lg:grid-cols-[170px_1fr] gap-4">
-          <div>
-            <p className="text-xs font-semibold uppercase text-slate-400">{block.type?.replaceAll('_', ' ')}</p>
-            <h3 className="mt-1 font-semibold text-slate-950">{block.title}</h3>
-            <p className="mt-1 text-xs text-slate-500">{block.estimatedMinutes || 5} min</p>
-          </div>
-          <div>
-            <div className="whitespace-pre-wrap leading-7 text-slate-700">{block.content}</div>
-            {block.diagramData?.nodes?.length > 0 && <MiniConceptMap data={block.diagramData} />}
-            {block.interactionPrompt && (
-              <div className="mt-4 rounded-lg border border-cyan-200 bg-cyan-50 p-3 text-sm text-cyan-950">
-                <span className="font-semibold">Try now: </span>{block.interactionPrompt}
+    <div className="tf-container">
+      {blocks.map((block, index) => {
+        const meta = BLOCK_META[block.type] || BLOCK_META.concept;
+        const { Icon, color, bg, border, label } = meta;
+        const isLast = index === blocks.length - 1;
+
+        return (
+          <div key={block._id || index} className="tf-block" style={{ '--accent': color, '--accent-bg': bg, '--accent-border': border }}>
+            {/* Timeline connector */}
+            <div className="tf-timeline">
+              <div className="tf-dot" style={{ background: color, boxShadow: `0 0 0 4px ${bg}` }}>
+                <Icon style={{ width: 16, height: 16, color: '#fff' }} />
               </div>
-            )}
+              {!isLast && <div className="tf-line" style={{ background: `linear-gradient(to bottom, ${color}33, transparent)` }} />}
+            </div>
+
+            {/* Content card */}
+            <div className="tf-card" style={{ borderColor: border, background: bg }}>
+              {/* Card header */}
+              <div className="tf-card-header">
+                <div>
+                  <span className="tf-label" style={{ color }}>{label}</span>
+                  <h3 className="tf-title">{block.title}</h3>
+                </div>
+                <div className="tf-meta">
+                  <span className="tf-step" style={{ color, borderColor: border }}>{index + 1}/{blocks.length}</span>
+                  <span className="tf-time">{block.estimatedMinutes || 5} min</span>
+                </div>
+              </div>
+
+              {/* Markdown content */}
+              <div className="md-content">
+                <ReactMarkdown>{block.content || ''}</ReactMarkdown>
+              </div>
+
+              {/* Knowledge graph */}
+              {block.diagramData?.nodes?.length > 0 && (
+                <div style={{ marginTop: 24 }}>
+                  <KnowledgeGraphViewer
+                    nodes={block.diagramData.nodes}
+                    edges={block.diagramData.edges || []}
+                    className="rounded-xl shadow-lg overflow-hidden"
+                  />
+                </div>
+              )}
+
+              {/* Interaction prompt */}
+              {block.interactionPrompt && (
+                <div className="tf-prompt">
+                  <ChatBubbleLeftRightIcon style={{ width: 20, height: 20, color: '#0891b2', flexShrink: 0, marginTop: 2 }} />
+                  <div>
+                    <p className="tf-prompt-label">Reflection Prompt</p>
+                    <p className="tf-prompt-text">{block.interactionPrompt}</p>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
-        </article>
-      ))}
-    </div>
-  );
-}
-
-function MiniConceptMap({ data }) {
-  const nodes = data.nodes || [];
-  const edges = data.edges || [];
-  const root = nodes.find((node) => node.type === 'main') || nodes[0];
-  if (!root) return null;
-  const children = edges
-    .filter((edge) => edge.from === root.id)
-    .map((edge) => nodes.find((node) => node.id === edge.to))
-    .filter(Boolean);
-
-  return (
-    <div className="mt-4 rounded-lg bg-slate-100 p-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white">{root.label}</span>
-        {children.map((child) => (
-          <span key={child.id} className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700">
-            {child.label}
-          </span>
-        ))}
-      </div>
+        );
+      })}
     </div>
   );
 }
@@ -389,122 +419,163 @@ function QuestionPanel({
   onComplete,
   report,
 }) {
+  const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
+  const difficultyColors = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
+  const diffColor = difficultyColors[question?.difficultyLevel] || '#64748b';
+
   return (
-    <div className="bg-white border border-slate-200 rounded-lg p-5 space-y-5">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+    <div className="quiz-panel">
+      {/* Header */}
+      <div className="quiz-header">
         <div>
-          <p className="text-sm font-semibold text-cyan-700">Live adaptive quiz</p>
-          <h2 className="text-xl font-bold">One question at a time</h2>
+          <p className="quiz-header-label">Adaptive Assessment</p>
+          <h2 className="quiz-header-title">
+            {question ? `Question ${question.questionNumber}` : 'Ready to assess'}
+          </h2>
         </div>
-        <div className="flex gap-2">
+        <div className="quiz-header-actions">
           <button
             onClick={onNextQuestion}
             disabled={working || (question && !answered)}
-            className="h-10 rounded-md border border-cyan-200 px-4 text-sm font-semibold text-cyan-800 hover:bg-cyan-50 disabled:opacity-50"
+            className="quiz-btn-outline"
           >
-            {question ? 'Generate next' : 'Start quiz'}
+            {question ? 'Next question' : 'Begin quiz'}
           </button>
-          <button
-            onClick={onComplete}
-            disabled={working}
-            className="h-10 rounded-md bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 disabled:opacity-50"
-          >
-            Finish report
+          <button onClick={onComplete} disabled={working} className="quiz-btn-solid">
+            Finish & report
           </button>
         </div>
       </div>
 
+      {/* Question card */}
       {question && (
-        <div className="rounded-lg border border-slate-200 p-4">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase text-slate-400">
-                Question {question.questionNumber} / {question.difficultyLevel} / {question.type}
-              </p>
-              <p className="mt-2 text-lg font-semibold text-slate-950">{question.prompt}</p>
-              {question.teacherPurpose && <p className="mt-2 text-sm text-slate-500">{question.teacherPurpose}</p>}
-            </div>
+        <div className="quiz-question-card">
+          {/* Question meta bar */}
+          <div className="quiz-meta-bar">
+            <span className="quiz-meta-badge" style={{ color: diffColor, borderColor: `${diffColor}33`, background: `${diffColor}0a` }}>
+              {question.difficultyLevel}
+            </span>
+            <span className="quiz-meta-badge" style={{ color: '#475569', borderColor: '#e2e8f0' }}>
+              {question.type?.replace('_', ' ')}
+            </span>
+            <div style={{ flex: 1 }} />
             <ConfidencePicker value={confidence} onChange={onConfidence} />
           </div>
 
+          {/* Prompt */}
+          <p className="quiz-prompt">{question.prompt}</p>
+          {question.teacherPurpose && (
+            <p className="quiz-purpose">{question.teacherPurpose}</p>
+          )}
+
+          {/* Options or textarea */}
           {question.options?.length > 0 ? (
-            <div className="mt-4 grid gap-2">
-              {question.options.map((option) => (
-                <button
-                  key={option}
-                  disabled={answered}
-                  onClick={() => onSelectedOption(option)}
-                  className={`text-left rounded-md border px-3 py-3 text-sm ${selectedOption === option ? 'border-cyan-600 bg-cyan-50 text-cyan-950' : 'border-slate-200 hover:border-cyan-300'} disabled:opacity-70`}
-                >
-                  {option}
-                </button>
-              ))}
+            <div className="quiz-options">
+              {question.options.map((option, idx) => {
+                const isSelected = selectedOption === option;
+                const letter = optionLetters[idx] || String(idx + 1);
+                return (
+                  <button
+                    key={option}
+                    disabled={answered}
+                    onClick={() => onSelectedOption(option)}
+                    className={`quiz-option ${isSelected ? 'quiz-option-selected' : ''} ${answered ? 'quiz-option-locked' : ''}`}
+                  >
+                    <span className={`quiz-option-letter ${isSelected ? 'quiz-option-letter-active' : ''}`}>
+                      {letter}
+                    </span>
+                    <span className="quiz-option-text">{option}</span>
+                  </button>
+                );
+              })}
             </div>
           ) : (
             <textarea
               value={answerText}
               disabled={answered}
-              onChange={(event) => onAnswerText(event.target.value)}
+              onChange={(e) => onAnswerText(e.target.value)}
               rows={5}
-              className="mt-4 w-full rounded-md border border-slate-200 p-3 text-sm outline-none focus:border-cyan-500"
-              placeholder="Explain your answer..."
+              className="quiz-textarea"
+              placeholder="Write your answer here..."
             />
           )}
 
+          {/* Hint */}
           {question.hint && !answered && (
-            <details className="mt-4 rounded-md bg-amber-50 p-3 text-sm text-amber-950">
-              <summary className="cursor-pointer font-semibold">Need a hint?</summary>
-              <p className="mt-2">{question.hint}</p>
+            <details className="quiz-hint">
+              <summary>Show hint</summary>
+              <p>{question.hint}</p>
             </details>
           )}
 
+          {/* Submit */}
           {!answered && (
             <button
               onClick={onSubmit}
               disabled={working || !canSubmit}
-              className="mt-4 h-11 w-full rounded-md bg-cyan-700 text-sm font-semibold text-white hover:bg-cyan-800 disabled:opacity-50"
+              className="quiz-submit"
             >
-              {working ? 'Analyzing understanding...' : 'Submit answer'}
+              {working ? 'Evaluating...' : 'Submit answer'}
             </button>
           )}
         </div>
       )}
 
+      {/* Feedback */}
       {feedback && (
-        <div className={`rounded-lg border p-4 ${feedback.score >= 70 ? 'border-emerald-200 bg-emerald-50 text-emerald-950' : 'border-amber-200 bg-amber-50 text-amber-950'}`}>
-          <p className="font-semibold">Teacher feedback: {feedback.score}% / {feedback.understandingLevel}</p>
-          <p className="mt-2 text-sm">{feedback.feedback}</p>
-          {feedback.misconceptionDetected && <p className="mt-2 text-sm">Misconception: {feedback.misconceptionDetected}</p>}
+        <div className={`quiz-feedback ${feedback.score >= 70 ? 'quiz-feedback-pass' : 'quiz-feedback-review'}`}>
+          <div className="quiz-feedback-header">
+            <div className="quiz-feedback-score-ring" style={{
+              background: `conic-gradient(${feedback.score >= 70 ? '#059669' : '#d97706'} ${feedback.score * 3.6}deg, #e2e8f0 0deg)`,
+            }}>
+              <span className="quiz-feedback-score-inner">{feedback.score}%</span>
+            </div>
+            <div>
+              <p className="quiz-feedback-level">{feedback.understandingLevel}</p>
+              <p className="quiz-feedback-text">{feedback.feedback}</p>
+            </div>
+          </div>
+          {feedback.misconceptionDetected && (
+            <div className="quiz-misconception">
+              <p className="quiz-misconception-label">Misconception identified</p>
+              <p>{feedback.misconceptionDetected}</p>
+            </div>
+          )}
           {feedback.reteachBlock?.content && (
-            <div className="mt-3 rounded-md bg-white/70 p-3 text-sm">
-              <p className="font-semibold">{feedback.reteachBlock.title}</p>
-              <p className="mt-1">{feedback.reteachBlock.content}</p>
+            <div className="quiz-reteach">
+              <p className="quiz-reteach-title">{feedback.reteachBlock.title}</p>
+              <div className="md-content"><ReactMarkdown>{feedback.reteachBlock.content}</ReactMarkdown></div>
             </div>
           )}
         </div>
       )}
 
+      {/* Report */}
       {report && (
-        <div className="rounded-lg border border-indigo-200 bg-indigo-50 p-4 text-indigo-950">
-          <p className="font-semibold">Progress report</p>
-          <p className="mt-2 text-sm">{report.summary}</p>
-          <div className="mt-4 grid sm:grid-cols-3 gap-3">
+        <div className="quiz-report">
+          <h3 className="quiz-report-title">Session Report</h3>
+          <p className="quiz-report-summary">{report.summary}</p>
+          <div className="quiz-report-metrics">
             <Metric label="Mastery" value={`${report.conceptMastery}%`} compact />
             <Metric label="Quiz accuracy" value={`${report.quizAccuracy}%`} compact />
             <Metric label="Confidence" value={`${report.confidenceLevel}/5`} compact />
           </div>
           {report.recommendedNextSteps?.length > 0 && (
-            <ul className="mt-4 list-disc list-inside text-sm space-y-1">
-              {report.recommendedNextSteps.map((step, index) => <li key={index}>{step}</li>)}
-            </ul>
+            <div className="quiz-report-steps">
+              <p className="quiz-report-steps-label">Recommended next steps</p>
+              <ul>
+                {report.recommendedNextSteps.map((step, idx) => <li key={idx}>{step}</li>)}
+              </ul>
+            </div>
           )}
           {report.planModification?.required && (
-            <p className="mt-3 rounded-md bg-white/70 p-3 text-sm font-medium">
+            <div className="quiz-plan-note">
               Study plan adapted: {report.planModification.reason}
-            </p>
+            </div>
           )}
         </div>
       )}
     </div>
   );
 }
+

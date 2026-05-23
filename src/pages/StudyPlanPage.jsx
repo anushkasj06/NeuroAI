@@ -1,7 +1,14 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import {
+  ArrowPathIcon,
+  CalendarDaysIcon,
+  Squares2X2Icon,
+} from '@heroicons/react/24/outline';
 import { useStudyPlan } from '../hooks/useStudyPlan';
 import { studyPlanApi } from '../services/studyPlanApi';
+import './AIDashboard.css';
+import './StudyPlanPage.css';
 
 const SESSION_TYPE_EMOJI = { learn: '📘', revise: '🔄', practice: '✏️', quiz: '🧪', rest: '☕' };
 const DIFF_COLOR = { easy: 'text-emerald-600 bg-emerald-50', medium: 'text-amber-600 bg-amber-50', hard: 'text-red-600 bg-red-50' };
@@ -21,18 +28,33 @@ export default function StudyPlanPage() {
   const [completing, setCompleting] = useState(null);
   const [view, setView] = useState('weekly'); // 'weekly' | 'monthly'
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-600 border-t-transparent" /></div>;
+  if (loading) {
+    return (
+      <div className="ai-dashboard min-h-screen study-plan">
+        <div className="ai-shell">
+          <div className="plan-loading">Loading your study plan...</div>
+        </div>
+      </div>
+    );
+  }
 
   if (!plan) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 via-white to-purple-50 p-6">
-        <div className="bg-white rounded-3xl shadow-xl p-10 text-center max-w-md">
-          <div className="text-5xl mb-4">📅</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Study Plan Yet</h2>
-          <p className="text-gray-500 mb-6">Generate your AI-powered personalized study plan.</p>
-          <Link to="/study-plan/generate" className="inline-block px-6 py-3 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium">
-            ✨ Generate Plan
-          </Link>
+      <div className="ai-dashboard min-h-screen study-plan">
+        <div className="ai-shell">
+          <div className="plan-empty ai-rail ai-fade-up">
+            <div>
+              <div className="ai-chip">
+                <CalendarDaysIcon className="h-4 w-4" />
+                Study plan
+              </div>
+              <h2 className="plan-empty__title">No study plan yet</h2>
+              <p className="ai-muted">Generate your AI-powered personalized study plan.</p>
+            </div>
+            <Link to="/study-plan/generate" className="ai-btn ai-btn--primary">
+              Generate plan
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -49,121 +71,172 @@ export default function StudyPlanPage() {
   };
 
   const currentWeek = plan.weeklyPlan?.[activeWeek];
+  const overallPercent = analytics?.overallCompletionPercent ?? plan.overallCompletionPercent ?? 0;
+  const completedHours = analytics?.totalCompletedHours ?? plan.totalCompletedHours ?? 0;
+  const plannedHours = analytics?.totalPlannedHours ?? plan.totalPlannedHours ?? 0;
+  const daysLeft = analytics?.daysUntilExam;
+  const examDate = plan.examDeadline ? new Date(plan.examDeadline).toLocaleDateString() : '';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50 py-8 px-4">
-      <div className="max-w-5xl mx-auto space-y-6">
-
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">{plan.planName}</h1>
-            <p className="text-sm text-gray-500 mt-0.5">
-              {plan.examName} · {plan.examDeadline ? new Date(plan.examDeadline).toLocaleDateString() : ''}
-              {analytics?.daysUntilExam != null && <span className="ml-2 text-indigo-600 font-medium">{analytics.daysUntilExam} days left</span>}
+    <div className="ai-dashboard min-h-screen study-plan">
+      <div className="ai-shell space-y-8">
+        <header className="ai-hero plan-hero ai-fade-up">
+          <div className="plan-hero__meta">
+            <div className="ai-chip">
+              <CalendarDaysIcon className="h-4 w-4" />
+              Study plan
+            </div>
+            <h1 className="ai-hero__title text-slate-900 mt-3">{plan.planName}</h1>
+            <p className="plan-hero__sub ai-muted">
+              <span>{plan.examName || 'Exam plan'}</span>
+              {examDate ? <span className="plan-divider">•</span> : null}
+              {examDate ? <span>{examDate}</span> : null}
+              {daysLeft != null && <span className="plan-days">{daysLeft} days left</span>}
             </p>
           </div>
-          <div className="flex gap-3">
-            <Link to="/study-plan/generate" className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50">
+          <div className="plan-hero__actions">
+            <Link to="/study-plan/generate" className="ai-btn">
+              <ArrowPathIcon className="h-4 w-4" />
               Regenerate
             </Link>
-            <Link to="/ai-dashboard" className="px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-medium hover:opacity-90">
+            <Link to="/ai-dashboard" className="ai-btn ai-btn--primary">
+              <Squares2X2Icon className="h-4 w-4" />
               Dashboard
             </Link>
           </div>
-        </div>
+        </header>
 
-        {/* Overall progress */}
-        <div className="bg-white rounded-2xl shadow-md p-5 border border-gray-50">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-sm text-gray-500">Overall Progress</p>
-              <p className="text-2xl font-bold text-indigo-600">{plan.overallCompletionPercent ?? 0}%</p>
+        <section className="ai-section ai-fade-up" style={{ animationDelay: '0.05s' }}>
+          <div className="ai-kpi-strip plan-kpi">
+            <div className="ai-kpi">
+              <p className="plan-kpi__label">Overall progress</p>
+              <p className="plan-kpi__value">{overallPercent}%</p>
+              <p className="plan-kpi__sub">Completion rate</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Streak</p>
-              <p className="text-2xl font-bold text-amber-500">🔥 {plan.currentStreak ?? 0}</p>
+            <div className="ai-kpi">
+              <p className="plan-kpi__label">Study streak</p>
+              <p className="plan-kpi__value">{plan.currentStreak ?? 0} days</p>
+              <p className="plan-kpi__sub">Consistency</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-500">Completed</p>
-              <p className="text-2xl font-bold text-emerald-600">{plan.totalCompletedHours ?? 0}h</p>
+            <div className="ai-kpi">
+              <p className="plan-kpi__label">Completed hours</p>
+              <p className="plan-kpi__value">{completedHours}h</p>
+              <p className="plan-kpi__sub">Logged so far</p>
+            </div>
+            <div className="ai-kpi">
+              <p className="plan-kpi__label">Planned hours</p>
+              <p className="plan-kpi__value">{plannedHours}h</p>
+              <p className="plan-kpi__sub">Total plan</p>
             </div>
           </div>
-          <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-700" style={{ width: `${plan.overallCompletionPercent ?? 0}%` }} />
-          </div>
-        </div>
 
-        {/* AI Summary */}
+          <div className="plan-progress">
+            <div className="plan-progress__track">
+              <span style={{ width: `${overallPercent}%` }} />
+            </div>
+            <div className="plan-progress__meta">
+              <span>{completedHours}h completed</span>
+              <span>{plannedHours}h planned</span>
+            </div>
+          </div>
+        </section>
+
         {plan.aiSummary && (
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 rounded-2xl p-5 text-white">
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/70 mb-1">🤖 AI Summary</p>
-            <p className="text-sm leading-relaxed">{plan.aiSummary}</p>
-          </div>
-        )}
-
-        {/* View toggle */}
-        <div className="flex gap-2">
-          {['weekly', 'monthly'].map((v) => (
-            <button key={v} onClick={() => setView(v)} className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${view === v ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
-              {v === 'weekly' ? '📅 Weekly Plan' : '🗓️ Monthly Roadmap'}
-            </button>
-          ))}
-        </div>
-
-        {/* Weekly view */}
-        {view === 'weekly' && (
-          <div>
-            {/* Week tabs */}
-            <div className="flex gap-2 overflow-x-auto pb-2 mb-4">
-              {plan.weeklyPlan?.map((w, i) => (
-                <button key={i} onClick={() => setActiveWeek(i)} className={`shrink-0 px-4 py-2 rounded-xl text-sm font-medium transition-all ${activeWeek === i ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-gray-600 border border-gray-200 hover:bg-gray-50'}`}>
-                  {w.weekLabel || `Week ${w.weekNumber}`}
-                  <span className="ml-2 text-xs opacity-70">{w.completionPercent ?? 0}%</span>
-                </button>
-              ))}
+          <section className="ai-section ai-fade-up" style={{ animationDelay: '0.08s' }}>
+            <div className="plan-summary">
+              <p className="plan-summary__label">AI Summary</p>
+              <p className="plan-summary__text">{plan.aiSummary}</p>
             </div>
-
-            {currentWeek && (
-              <div>
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <h3 className="font-bold text-gray-900">{currentWeek.weekLabel}</h3>
-                    <p className="text-sm text-gray-500">{currentWeek.weeklyGoal}</p>
-                  </div>
-                  <span className="text-sm font-semibold text-indigo-600">{currentWeek.totalHours}h total</span>
-                </div>
-
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                  {currentWeek.days?.map((day, di) => (
-                    <DayCard key={di} day={day} weekNumber={currentWeek.weekNumber} onComplete={handleComplete} completing={completing} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+          </section>
         )}
 
-        {/* Monthly view */}
-        {view === 'monthly' && (
-          <div className="space-y-4">
-            {plan.monthlyRoadmap?.map((month, i) => (
-              <div key={i} className="bg-white rounded-2xl shadow-md p-6 border border-gray-50">
-                <h3 className="font-bold text-gray-900 mb-3">{month.monthLabel || `Month ${month.month}`}</h3>
-                <div className="grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-xs font-semibold text-indigo-600 mb-2">🎯 Goals</p>
-                    <ul className="space-y-1">{(month.goals || []).map((g, j) => <li key={j} className="text-sm text-gray-600 flex gap-2"><span className="text-indigo-400">→</span>{g}</li>)}</ul>
-                  </div>
-                  <div>
-                    <p className="text-xs font-semibold text-amber-600 mb-2">🔄 Revision Topics</p>
-                    <div className="flex flex-wrap gap-1">{(month.revisionTopics || []).map((t, j) => <span key={j} className="px-2 py-0.5 bg-amber-50 text-amber-700 rounded-full text-xs">{t}</span>)}</div>
-                  </div>
-                </div>
-              </div>
+        <section className="ai-section ai-fade-up" style={{ animationDelay: '0.12s' }}>
+          <div className="plan-toggle">
+            {['weekly', 'monthly'].map((v) => (
+              <button
+                key={v}
+                type="button"
+                onClick={() => setView(v)}
+                className={`plan-toggle__btn ${view === v ? 'is-active' : ''}`}
+              >
+                {v === 'weekly' ? 'Weekly plan' : 'Monthly roadmap'}
+              </button>
             ))}
           </div>
-        )}
+
+          {view === 'weekly' && (
+            <div className="plan-week-view">
+              <div className="plan-week-tabs">
+                {plan.weeklyPlan?.map((w, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setActiveWeek(i)}
+                    className={`plan-week-tab ${activeWeek === i ? 'is-active' : ''}`}
+                  >
+                    <span>{w.weekLabel || `Week ${w.weekNumber}`}</span>
+                    <span className="plan-week-tab__meta">{w.completionPercent ?? 0}%</span>
+                  </button>
+                ))}
+              </div>
+
+              {currentWeek && (
+                <div>
+                  <div className="plan-week-header ai-rail">
+                    <div>
+                      <p className="plan-week-title">{currentWeek.weekLabel}</p>
+                      <p className="ai-muted">{currentWeek.weeklyGoal}</p>
+                    </div>
+                    <span className="plan-week-hours">{currentWeek.totalHours}h total</span>
+                  </div>
+
+                  <div className="plan-day-grid">
+                    {currentWeek.days?.map((day, di) => (
+                      <DayCard
+                        key={di}
+                        day={day}
+                        weekNumber={currentWeek.weekNumber}
+                        onComplete={handleComplete}
+                        completing={completing}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {view === 'monthly' && (
+            <div className="plan-month-grid">
+              {plan.monthlyRoadmap?.map((month, i) => (
+                <div key={i} className="plan-month-card ai-rail">
+                  <div className="plan-month-header">
+                    <p className="plan-month-title">{month.monthLabel || `Month ${month.month}`}</p>
+                    <span className="plan-month-chip">Focus window</span>
+                  </div>
+                  <div className="plan-month-body">
+                    <div>
+                      <p className="plan-month-label">Goals</p>
+                      <ul className="plan-month-list">
+                        {(month.goals || []).map((g, j) => (
+                          <li key={j}>{g}</li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <p className="plan-month-label is-warm">Revision topics</p>
+                      <div className="plan-month-tags">
+                        {(month.revisionTopics || []).map((t, j) => (
+                          <span key={j} className="plan-tag">{t}</span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
       </div>
     </div>
   );
@@ -172,35 +245,52 @@ export default function StudyPlanPage() {
 function DayCard({ day, weekNumber, onComplete, completing }) {
   const isToday = day.date && new Date(day.date).toDateString() === new Date().toDateString();
   return (
-    <div className={`bg-white rounded-2xl border shadow-sm p-4 ${isToday ? 'border-indigo-300 ring-2 ring-indigo-100' : 'border-gray-100'}`}>
-      <div className="flex items-center justify-between mb-3">
+    <div className={`plan-day-card ${isToday ? 'is-today' : ''}`}>
+      <div className="plan-day-header">
         <div>
-          <p className={`text-sm font-bold ${isToday ? 'text-indigo-600' : 'text-gray-800'}`}>{day.dayLabel}{isToday && ' 📍'}</p>
-          {day.date && <p className="text-xs text-gray-400">{new Date(day.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</p>}
+          <p className={`plan-day-title ${isToday ? 'is-today' : ''}`}>{day.dayLabel}{isToday ? ' today' : ''}</p>
+          {day.date && (
+            <p className="plan-day-date">
+              {new Date(day.date).toLocaleDateString('en', { month: 'short', day: 'numeric' })}
+            </p>
+          )}
         </div>
-        <span className="text-xs font-semibold text-gray-500">{day.completionPercent ?? 0}%</span>
+        <span className="plan-day-chip">{day.completionPercent ?? 0}%</span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-3">
-        <div className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full" style={{ width: `${day.completionPercent ?? 0}%` }} />
+
+      <div className="plan-day-progress">
+        <span style={{ width: `${day.completionPercent ?? 0}%` }} />
       </div>
-      <div className="space-y-1.5">
+
+      <div className="plan-session-list">
         {(day.sessions || []).map((s) => (
-          <div key={s._id} className={`flex items-center gap-2 p-2 rounded-lg text-xs ${s.completed ? 'opacity-50' : 'hover:bg-gray-50'}`}>
-            <span>{SESSION_TYPE_EMOJI[s.sessionType] || '📘'}</span>
-            <Link to={buildSessionLink(s)} className="flex-1 min-w-0 pr-2">
-              <p className={`font-medium truncate ${s.completed ? 'line-through text-gray-400' : 'text-gray-700'}`}>{s.topic}{s.subtopic ? ` — ${s.subtopic}` : ''}</p>
-              <p className="text-gray-400 truncate">{s.subject} · {s.durationMinutes}m{(s.resources?.length) ? ` · ${s.resources.length} resource${s.resources.length === 1 ? '' : 's'}` : ''}</p>
+          <div key={s._id} className={`plan-session ${s.completed ? 'is-complete' : ''}`}>
+            <span className="plan-session-emoji">{SESSION_TYPE_EMOJI[s.sessionType] || '📘'}</span>
+            <Link to={buildSessionLink(s)} className="plan-session-link">
+              <p className={`plan-session-title ${s.completed ? 'is-complete' : ''}`}>
+                {s.topic}{s.subtopic ? ` — ${s.subtopic}` : ''}
+              </p>
+              <p className="plan-session-meta">
+                {s.subject} · {s.durationMinutes}m
+                {(s.resources?.length) ? ` · ${s.resources.length} resource${s.resources.length === 1 ? '' : 's'}` : ''}
+              </p>
             </Link>
             {!s.completed && (
-              <button onClick={() => onComplete(weekNumber, day.dayLabel, s._id)} disabled={completing === s._id} className="shrink-0 w-5 h-5 rounded-full border-2 border-gray-300 hover:border-emerald-500 hover:bg-emerald-50 transition-all flex items-center justify-center disabled:opacity-50">
-                {completing === s._id ? <span className="animate-spin text-xs">⟳</span> : null}
+              <button
+                type="button"
+                onClick={() => onComplete(weekNumber, day.dayLabel, s._id)}
+                disabled={completing === s._id}
+                className="plan-check"
+              >
+                {completing === s._id ? '...' : 'Done'}
               </button>
             )}
-            {s.completed && <span className="text-emerald-500 shrink-0">✓</span>}
+            {s.completed && <span className="plan-check is-complete">Done</span>}
           </div>
         ))}
       </div>
-      {day.motivationalNote && <p className="mt-2 text-xs text-indigo-500 italic">{day.motivationalNote}</p>}
+
+      {day.motivationalNote && <p className="plan-day-note">{day.motivationalNote}</p>}
     </div>
   );
 }
