@@ -28,15 +28,16 @@ const getHomePath = (user) => {
 };
 
 const studentLinksBase = [
-  { to: '/ai-dashboard', label: 'Dashboard', icon: Squares2X2Icon },
+  { to: '/ai-dashboard', label: 'Dashboard',    icon: Squares2X2Icon },
   // { to: '/learn', label: 'Learn', icon: AcademicCapIcon },
-  { to: '/progress', label: 'Progress', icon: PresentationChartLineIcon },
-  { to: '/materials', label: 'Materials', icon: ClipboardDocumentListIcon },
-  { to: '/battle', label: 'Battle Arena', icon: SparklesIcon },
-  { to: '/community', label: 'Community', icon: ChatBubbleLeftRightIcon },
-  { to: '/diagnostic', label: 'Diagnostic', icon: BeakerIcon },
+  { to: '/progress',     label: 'Progress',     icon: PresentationChartLineIcon },
+  { to: '/materials',    label: 'Materials',    icon: ClipboardDocumentListIcon },
+  { to: '/battle',       label: 'Battle Arena', icon: SparklesIcon },
+  { to: '/community',    label: 'Community',    icon: ChatBubbleLeftRightIcon },
+  { to: '/diagnostic',   label: 'Diagnostic',   icon: BeakerIcon },
   // { to: '/prediction', label: 'Predictions', icon: ChartBarSquareIcon },
-  { to: '/profile', label: 'Profile', icon: UserCircleIcon },
+  { to: '/socket-test',  label: 'Socket Test',  icon: PuzzlePieceIcon },
+  { to: '/profile',      label: 'Profile',      icon: UserCircleIcon },
 ];
 
 const teacherLinks = [
