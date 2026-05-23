@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import './Community.css';
 import { Link } from 'react-router-dom';
 
 const Community = () => {
@@ -251,7 +250,7 @@ const Community = () => {
       case 'am': return 'bg-green-500';
       case 'java': return 'bg-amber-500';
       case 'dbms': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      default: return 'bg-slate-500';
     }
   };
 
@@ -268,26 +267,26 @@ const Community = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-indigo-500"></div>
+      <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-teal-500"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
-        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full text-center">
+      <div className="min-h-screen bg-slate-50 py-8 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="bg-white p-8 rounded-3xl shadow-lg max-w-md w-full text-center border border-slate-200">
           <div className="text-red-500 mb-4">
             <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
             </svg>
           </div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Something went wrong</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Something went wrong</h2>
+          <p className="text-slate-600 mb-6">{error}</p>
           <button 
             onClick={() => window.location.reload()}
-            className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 transition-colors"
+            className="bg-teal-700 text-white px-6 py-2 rounded-2xl hover:bg-teal-800 transition-colors"
           >
             Try Again
           </button>
@@ -297,10 +296,10 @@ const Community = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
-          <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-8 sm:px-8">
+    <div className="min-h-screen bg-slate-50 text-slate-950 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        <div className="bg-white rounded-3xl shadow-xl overflow-hidden border border-slate-200">
+          <div className="bg-gradient-to-r from-teal-700 to-sky-600 px-6 py-8 sm:px-8">
             <h1 className="text-3xl font-extrabold text-white mb-2">Community Hub</h1>
             <p className="text-white/80 text-lg">Share your doubts, help others, and learn together</p>
           </div>
@@ -309,9 +308,9 @@ const Community = () => {
             {!isCreatingPost ? (
               <button
                 onClick={() => setIsCreatingPost(true)}
-                className="mb-8 bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-3 rounded-lg 
-                hover:from-indigo-700 hover:to-purple-700 transition-all duration-200 flex items-center gap-2
-                shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                className="mb-8 bg-gradient-to-r from-teal-700 to-sky-600 text-white px-6 py-3 rounded-2xl
+                hover:from-teal-800 hover:to-sky-700 transition-all duration-200 flex items-center gap-2
+                shadow-sm hover:shadow-md transform hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
@@ -319,14 +318,14 @@ const Community = () => {
                 Create New Post
               </button>
             ) : (
-              <div className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100 mb-8">
-                <div className="bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-4">
+              <div className="bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-200 mb-8">
+                <div className="bg-gradient-to-r from-teal-700 to-sky-600 px-6 py-5">
                   <h2 className="text-xl font-bold text-white">Create a New Post</h2>
                 </div>
                 <div className="p-6">
                   <form onSubmit={handleCreatePost}>
                     <div className="mb-4">
-                      <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-1">
                         Title
                       </label>
                       <input
@@ -334,21 +333,21 @@ const Community = () => {
                         id="title"
                         value={newPost.title}
                         onChange={(e) => setNewPost({...newPost, title: e.target.value})}
-                        className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full px-4 py-2 border border-slate-200 rounded-2xl focus:ring-teal-500 focus:border-teal-500"
                         placeholder="What's your question?"
                         required
                       />
                     </div>
                     
                     <div className="mb-4">
-                      <label htmlFor="subject" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="subject" className="block text-sm font-medium text-slate-700 mb-1">
                         Subject
                       </label>
                       <select
                         id="subject"
                         value={newPost.subject}
                         onChange={(e) => setNewPost({...newPost, subject: e.target.value})}
-                        className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full px-4 py-2 border border-slate-200 rounded-2xl focus:ring-teal-500 focus:border-teal-500"
                         required
                       >
                         <option value="">Select a subject</option>
@@ -361,14 +360,14 @@ const Community = () => {
                     </div>
                     
                     <div className="mb-4">
-                      <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="content" className="block text-sm font-medium text-slate-700 mb-1">
                         Content
                       </label>
                       <textarea
                         id="content"
                         value={newPost.content}
                         onChange={(e) => setNewPost({...newPost, content: e.target.value})}
-                        className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full px-4 py-2 border border-slate-200 rounded-2xl focus:ring-teal-500 focus:border-teal-500"
                         rows="4"
                         placeholder="Describe your doubt in detail..."
                         required
@@ -376,7 +375,7 @@ const Community = () => {
                     </div>
                     
                     <div className="mb-6">
-                      <label htmlFor="tags" className="block text-sm font-medium text-gray-700 mb-1">
+                      <label htmlFor="tags" className="block text-sm font-medium text-slate-700 mb-1">
                         Tags (comma separated)
                       </label>
                       <input
@@ -384,7 +383,7 @@ const Community = () => {
                         id="tags"
                         value={newPost.tags.join(', ')}
                         onChange={(e) => setNewPost({...newPost, tags: e.target.value.split(',').map(tag => tag.trim()).filter(tag => tag)})}
-                        className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                        className="block w-full px-4 py-2 border border-slate-200 rounded-2xl focus:ring-teal-500 focus:border-teal-500"
                         placeholder="e.g. algorithms, debugging, optimization"
                       />
                     </div>
@@ -393,14 +392,14 @@ const Community = () => {
                       <button
                         type="button"
                         onClick={() => setIsCreatingPost(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                        className="px-4 py-2 border border-slate-200 rounded-2xl text-slate-700 hover:bg-slate-50 transition-colors"
                       >
                         Cancel
                       </button>
                       <button
                         type="submit"
-                        className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2 rounded-lg 
-                        hover:from-indigo-700 hover:to-purple-700 transition-all duration-200
+                        className="bg-gradient-to-r from-teal-700 to-sky-600 text-white px-6 py-2 rounded-2xl
+                        hover:from-teal-800 hover:to-sky-700 transition-all duration-200
                         shadow-sm hover:shadow-md"
                       >
                         Post
@@ -414,16 +413,16 @@ const Community = () => {
             <div className="space-y-6">
               {posts.length === 0 ? (
                 <div className="text-center py-12">
-                  <svg className="w-16 h-16 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                  <svg className="w-16 h-16 mx-auto text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
                   </svg>
-                  <h3 className="text-xl font-medium text-gray-900 mb-2">No posts yet</h3>
-                  <p className="text-gray-500">Be the first to share your doubt with the community!</p>
+                  <h3 className="text-xl font-medium text-slate-900 mb-2">No posts yet</h3>
+                  <p className="text-slate-500">Be the first to share your doubt with the community!</p>
                 </div>
               ) : (
                 posts.map(post => (
-                  <div key={post.id} className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100">
-                    <div className="p-6">
+                  <div key={post.id} className="bg-white rounded-3xl shadow-sm overflow-hidden border border-slate-200 hover:shadow-md transition-shadow duration-200">
+                    <div className="p-6 sm:p-7">
                       <div className="flex items-start justify-between mb-4">
                         <div className="flex items-center">
                           <img 
@@ -432,8 +431,8 @@ const Community = () => {
                             className="w-10 h-10 rounded-full mr-3"
                           />
                           <div>
-                            <h3 className="text-lg font-semibold text-gray-900">{post.author.name}</h3>
-                            <p className="text-sm text-gray-500">{formatDate(post.createdAt)}</p>
+                            <h3 className="text-lg font-semibold text-slate-900">{post.author.name}</h3>
+                            <p className="text-sm text-slate-500">{formatDate(post.createdAt)}</p>
                           </div>
                         </div>
                         <span className={`px-3 py-1 rounded-full text-xs font-bold text-white ${getSubjectColor(post.subject)}`}>
@@ -441,23 +440,23 @@ const Community = () => {
                         </span>
                       </div>
                       
-                      <h2 className="text-xl font-bold text-gray-900 mb-3">{post.title}</h2>
-                      <p className="text-gray-700 mb-4 whitespace-pre-line">{post.content}</p>
+                      <h2 className="text-xl font-bold text-slate-900 mb-3">{post.title}</h2>
+                      <p className="text-slate-700 mb-4 whitespace-pre-line">{post.content}</p>
                       
                       {post.tags && post.tags.length > 0 && (
                         <div className="flex flex-wrap gap-2 mb-4">
                           {post.tags.map((tag, index) => (
-                            <span key={index} className="px-2 py-1 bg-gray-100 text-gray-700 rounded-md text-xs">
+                            <span key={index} className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md text-xs">
                               #{tag}
                             </span>
                           ))}
                         </div>
                       )}
                       
-                      <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+                      <div className="flex items-center justify-between border-t border-slate-200 pt-4">
                         <button 
                           onClick={() => handleLikePost(post.id)}
-                          className="flex items-center text-gray-500 hover:text-indigo-600 transition-colors"
+                          className="flex items-center text-slate-500 hover:text-teal-700 transition-colors"
                         >
                           <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
@@ -467,7 +466,7 @@ const Community = () => {
                         
                         <button 
                           onClick={() => setSelectedPost(selectedPost === post.id ? null : post.id)}
-                          className="flex items-center text-gray-500 hover:text-indigo-600 transition-colors"
+                          className="flex items-center text-slate-500 hover:text-teal-700 transition-colors"
                         >
                           <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
@@ -477,15 +476,15 @@ const Community = () => {
                       </div>
                       
                       {selectedPost === post.id && (
-                        <div className="mt-4 border-t border-gray-100 pt-4">
-                          <h4 className="text-lg font-semibold text-gray-900 mb-3">Comments</h4>
+                        <div className="mt-4 border-t border-slate-200 pt-4">
+                          <h4 className="text-lg font-semibold text-slate-900 mb-3">Comments</h4>
                           
                           {post.comments.length === 0 ? (
-                            <p className="text-gray-500 text-center py-4">No comments yet. Be the first to respond!</p>
+                            <p className="text-slate-500 text-center py-4">No comments yet. Be the first to respond!</p>
                           ) : (
                             <div className="space-y-4 mb-4">
                               {post.comments.map(comment => (
-                                <div key={comment.id} className="bg-gray-50 rounded-lg p-4">
+                                <div key={comment.id} className="bg-slate-50 rounded-2xl p-4">
                                   <div className="flex items-center mb-2">
                                     <img 
                                       src={comment.author.avatar} 
@@ -493,14 +492,14 @@ const Community = () => {
                                       className="w-8 h-8 rounded-full mr-2"
                                     />
                                     <div>
-                                      <h5 className="text-sm font-medium text-gray-900">{comment.author.name}</h5>
-                                      <p className="text-xs text-gray-500">{formatDate(comment.createdAt)}</p>
+                                      <h5 className="text-sm font-medium text-slate-900">{comment.author.name}</h5>
+                                      <p className="text-xs text-slate-500">{formatDate(comment.createdAt)}</p>
                                     </div>
                                   </div>
-                                  <p className="text-gray-700 mb-2">{comment.content}</p>
+                                  <p className="text-slate-700 mb-2">{comment.content}</p>
                                   <button 
                                     onClick={() => handleLikeComment(post.id, comment.id)}
-                                    className="flex items-center text-gray-500 hover:text-indigo-600 transition-colors text-xs"
+                                    className="flex items-center text-slate-500 hover:text-teal-700 transition-colors text-xs"
                                   >
                                     <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"></path>
@@ -522,14 +521,14 @@ const Community = () => {
                               <textarea
                                 value={comment}
                                 onChange={(e) => setComment(e.target.value)}
-                                className="block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
+                                className="block w-full px-4 py-2 border border-slate-200 rounded-2xl focus:ring-teal-500 focus:border-teal-500"
                                 rows="2"
                                 placeholder="Write a comment..."
                               ></textarea>
                               <div className="flex justify-end mt-2">
                                 <button
                                   onClick={() => handleAddComment(post.id)}
-                                  className="bg-indigo-600 text-white px-4 py-1 rounded-lg hover:bg-indigo-700 transition-colors text-sm"
+                                  className="bg-teal-700 text-white px-4 py-1 rounded-2xl hover:bg-teal-800 transition-colors text-sm"
                                 >
                                   Comment
                                 </button>

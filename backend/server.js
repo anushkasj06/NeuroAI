@@ -1,21 +1,24 @@
 const express = require('express');
-const path = require('path');
+const http    = require('http');
+const path    = require('path');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
-const authRoutes = require('./routes/authRoutes');
-const profileRoutes = require('./routes/profileRoutes');
-const quizRoutes = require('./routes/quizRoutes');
-const diagnosticRoutes = require('./routes/diagnosticRoutes');
-const rapidBattleRoutes = require('./routes/rapidBattleRoutes');
-const studyPlanRoutes = require('./routes/studyPlanRoutes');
+const authRoutes            = require('./routes/authRoutes');
+const profileRoutes         = require('./routes/profileRoutes');
+const quizRoutes            = require('./routes/quizRoutes');
+const diagnosticRoutes      = require('./routes/diagnosticRoutes');
+const rapidBattleRoutes     = require('./routes/rapidBattleRoutes');
+const studyPlanRoutes       = require('./routes/studyPlanRoutes');
 const learningMaterialRoutes = require('./routes/learningMaterialRoutes');
 const adaptiveTeacherRoutes = require('./routes/adaptiveTeacherRoutes');
-const chatbotRoutes = require('./routes/chatbotRoutes');
-const teacherRoutes = require('./routes/teacherRoutes');
-const contentRoutes = require('./routes/contentRoutes');
+const chatbotRoutes         = require('./routes/chatbotRoutes');
+const teacherRoutes         = require('./routes/teacherRoutes');
+const contentRoutes         = require('./routes/contentRoutes');
+
+const { initSocket } = require('./sockets');
 
 const app = express();
 
@@ -34,21 +37,15 @@ app.use(cors({
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.get('/api/health', (req, res) => {
+  const { getOnlineCount } = require('./sockets/socketManager');
   res.json({
     status: 'ok',
-    mongo: mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    mongo:  mongoose.connection.readyState === 1 ? 'connected' : 'disconnected',
+    socket: { enabled: true, onlineUsers: getOnlineCount() },
     routes: [
-      'auth',
-      'profile',
-      'quiz',
-      'diagnostic',
-      'rapid-battle',
-      'study-plan',
-      'learning-material',
-      'ai-teacher',
-      'chatbot',
-      'teacher',
-      'content',
+      'auth', 'profile', 'quiz', 'diagnostic', 'rapid-battle',
+      'study-plan', 'learning-material', 'ai-teacher',
+      'chatbot', 'teacher', 'content',
     ],
   });
 });
@@ -96,16 +93,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-const server = app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+// ── HTTP server + Socket.IO ───────────────────────────────────────────────────
+const PORT   = process.env.PORT || 5000;
+const server = http.createServer(app);
+
+// Attach Socket.IO to the same HTTP server
+initSocket(server);
+
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+  console.log(`REST  → http://localhost:${PORT}/api`);
+  console.log(`WS    → ws://localhost:${PORT}`);
 }).on('error', (err) => {
   if (err.code === 'EADDRINUSE') {
-    console.error(`Port ${PORT} is already in use. Trying port ${PORT + 1}`);
-    app.listen(PORT + 1, () => {
-      console.log(`Server is running on port ${PORT + 1}`);
-    });
+    console.error(`Port ${PORT} in use — trying ${PORT + 1}`);
+    server.listen(PORT + 1);
   } else {
     console.error('Server error:', err);
   }

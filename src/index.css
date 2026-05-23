@@ -81,6 +81,30 @@ body {
   box-shadow: none !important;
 }
 
+/* ── Socket test page utility classes ─────────────────────────────────────── */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500
+           text-white text-sm font-medium transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-secondary {
+    @apply px-4 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600
+           text-white text-sm font-medium transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-danger {
+    @apply px-4 py-2.5 rounded-xl bg-red-700 hover:bg-red-600
+           text-white text-sm font-medium transition-colors
+           disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .input {
+    @apply px-3 py-2.5 rounded-xl bg-gray-800 border border-gray-700
+           text-gray-100 text-sm placeholder-gray-500
+           focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
+  }
+}
+
 /* ── Rich Markdown Content (.md-content) ─────────────────────────────── */
 /* Used in AI Teacher and anywhere ReactMarkdown renders lesson content  */
 
@@ -762,9 +786,3 @@ body {
     grid-template-columns: 1fr;
   }
 }
-
-/* ── Progress Page badges ────────────────────────────────────────────── */
-.pg-badge--muted   { background: #f1f5f9; color: #64748b; }
-.pg-badge--info    { background: #dbeafe; color: #1d4ed8; }
-.pg-badge--success { background: #dcfce7; color: #15803d; }
-.pg-badge--warn    { background: #fef3c7; color: #b45309; }

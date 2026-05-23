@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import { SocketProvider } from './context/SocketContext';
 import PrivateRoute from './components/PrivateRoute';
 import Navbar from './components/Navbar';
 import { useAuth } from './context/AuthContext';
@@ -21,11 +22,16 @@ import AITeacherSession from './pages/AITeacherSession';
 import ProgressPage from './pages/ProgressPage';
 import Community from './pages/Community';
 import BattleArena from './pages/BattleArena';
+import BattleHome from './pages/BattleHome';
+import BattleLobby from './pages/BattleLobby';
+import BattleGame from './pages/BattleGame';
 import Test from './pages/Test';
 import TeacherDashboard from './pages/TeacherDashboard';
 import StudyMaterial from './pages/StudyMaterial';
 import TeacherContentStudio from './pages/TeacherContentStudio';
 import Chatbot from './components/Chatbot';
+
+import SocketTestPage from './pages/SocketTestPage';
 
 const P = ({ children, allowedRoles = [] }) => (
   <PrivateRoute allowedRoles={allowedRoles}>{children}</PrivateRoute>
@@ -63,10 +69,14 @@ function AppShell() {
           <Route path="/prediction" element={<P allowedRoles={['student']}><Prediction /></P>} />
           <Route path="/test" element={<P allowedRoles={['student']}><Test /></P>} />
           <Route path="/battle" element={<P allowedRoles={['student']}><BattleArena /></P>} />
+          <Route path="/battle/home" element={<P allowedRoles={['student']}><BattleHome /></P>} />
+          <Route path="/battle/lobby" element={<P allowedRoles={['student']}><BattleLobby /></P>} />
+          <Route path="/battle/game/:roomCode" element={<P allowedRoles={['student']}><BattleGame /></P>} />
           <Route path="/community" element={<P allowedRoles={['student']}><Community /></P>} />
           <Route path="/materials" element={<P allowedRoles={['student']}><StudyMaterial /></P>} />
           <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
           <Route path="/teacher/content" element={<P allowedRoles={['teacher']}><TeacherContentStudio /></P>} />
+          <Route path="/socket-test" element={<P><SocketTestPage /></P>} />
         </Routes>
       </main>
       <Chatbot />
@@ -78,7 +88,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppShell />
+        <SocketProvider>
+          <AppShell />
+        </SocketProvider>
       </Router>
     </AuthProvider>
   );

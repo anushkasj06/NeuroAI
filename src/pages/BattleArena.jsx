@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -59,6 +60,7 @@ const BattleArena = () => {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  const navigate = useNavigate();
   const startedAtRef = useRef(null);
   const preset = PRESET_CONFIG[presetId] || PRESET_CONFIG.rush;
   const secondsPerQuestion = preset.secondsPerQuestion;
@@ -611,7 +613,7 @@ const BattleArena = () => {
                     <p className="battle-mode__title">Challenge Friend</p>
                     <p className="battle-mode__desc">Head-to-head rooms and private invites.</p>
                   </div>
-                  <span className="battle-badge battle-badge--muted">Soon</span>
+                  <span className="battle-badge battle-badge--muted">New</span>
                 </button>
               </div>
 
@@ -695,8 +697,15 @@ const BattleArena = () => {
                 </div>
               ) : (
                 <div className="battle-coming-soon">
-                  <p className="battle-mode__title">Challenge Mode Coming Soon</p>
-                  <p className="battle-mode__desc">For now, use Solo Mode to practice and build your ranking.</p>
+                  <p className="battle-mode__title">Challenge a Friend</p>
+                  <p className="battle-mode__desc">Create a private room or join with a code. Real-time head-to-head battles.</p>
+                  <button
+                    onClick={() => navigate('/battle/home')}
+                    className="arena-launch mt-4"
+                  >
+                    <UserGroupIcon className="h-4 w-4" />
+                    Open Multiplayer Lobby
+                  </button>
                 </div>
               )}
             </div>
