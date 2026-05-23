@@ -13,6 +13,7 @@ router.get('/analytics/dashboard', ctrl.getDashboardAnalytics);
 router.post('/recommendations/generate', ctrl.generateRecommendations);
 router.patch('/recommendations/:id/dismiss', ctrl.dismissRecommendation);
 router.post('/progress/update', ctrl.updateTopicProgress);
+router.get('/progress/dashboard', ctrl.getProgressDashboard);
 router.get('/progress', ctrl.getTopicProgress);
 router.post('/test/generate', ctrl.generateStrictTopicTest);
 router.post('/test/submit', ctrl.submitStrictTopicTest);
