@@ -1,5 +1,5 @@
-const BattleRoom = require('../../models/BattleRoom');
-const { generateBattleQuestions } = require('../../services/battleQuizService');
+const BattleRoom = require('../models/BattleRoom');
+const { generateBattleQuestions } = require('../services/battleQuizService');
 
 // In-memory battle state map
 const activeBattles = new Map(); // roomCode -> BattleState
