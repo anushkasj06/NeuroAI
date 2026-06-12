@@ -11,6 +11,12 @@ dist/
 .vscode/
 venv/
 
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.log
+
 # Environment variables
 .env
 .env.local
