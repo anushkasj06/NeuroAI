@@ -1,10 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { studyPlanApi } from '../services/studyPlanApi';
 import { Link } from 'react-router-dom';
-<<<<<<< HEAD
-import { useAdaptiveHistory } from '../hooks/useAdaptiveLearning';
-import { adaptive } from '../services/api';
-=======
 import {
   Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -17,7 +13,6 @@ import {
   SignalIcon, BoltIcon,
 } from '@heroicons/react/24/outline';
 import './AIDashboard.css'; // reuse design tokens
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
 
 const STATUS_CONFIG = {
   not_started:    { label: 'Not Started',     cls: 'pg-badge--muted' },
@@ -26,15 +21,6 @@ const STATUS_CONFIG = {
   needs_revision: { label: 'Needs Revision',  cls: 'pg-badge--warn' },
 };
 
-<<<<<<< HEAD
-const CASE_CHIP = {
-  advance_topic:        { label: '→ Advance',  color: 'bg-emerald-100 text-emerald-700' },
-  more_practice:        { label: '✏ Practice', color: 'bg-blue-100 text-blue-700' },
-  simpler_explanation:  { label: '↩ Simplify', color: 'bg-amber-100 text-amber-700' },
-  change_format:        { label: '⇄ Change format', color: 'bg-violet-100 text-violet-700' },
-};
-
-=======
 const DIFF_COLORS = { easy: '#059669', medium: '#d97706', hard: '#dc2626' };
 
 const SUBJECT_COLORS = [
@@ -63,50 +49,30 @@ function masteryColor(pct) {
 }
 
 /* ── Main Page ──────────────────────────────────────────────────────── */
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
 export default function ProgressPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-<<<<<<< HEAD
-  const [evaluating, setEvaluating] = useState(null);
-
-  // Load adaptive history (all subjects)
-  const { data: adaptiveData, refetch: refetchAdaptive } = useAdaptiveHistory(null, 50);
-  // Build a lookup: subjectSlug+topic → latest record
-  const adaptiveMap = {};
-  for (const rec of (adaptiveData?.records ?? [])) {
-    const key = `${rec.subjectSlug}::${rec.topic}`;
-    if (!adaptiveMap[key]) adaptiveMap[key] = rec;
-  }
-=======
   const [expandedSubject, setExpandedSubject] = useState(null);
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
 
   useEffect(() => {
     (async () => {
-      try {
-        const res = await studyPlanApi.getProgressDashboard();
-        setData(res.data.data);
-      } catch (e) {
-        console.error('Progress dashboard error:', e);
-      }
-      setLoading(false);
-    })();
-  }, []);
+      }, []);
 
-<<<<<<< HEAD
-  const handleEvaluate = async (p) => {
-    setEvaluating(p.topic);
-    try {
-      await adaptive.evaluate({
-        subjectSlug:  p.subjectSlug,
-        subject:      p.subject,
-        topic:        p.topic,
-        subtopic:     p.subtopic || '',
-        triggerEvent: 'manual_request',
-        quizMarks:    p.lastQuizScore || 0,
-        completionRate: p.sessionsCompleted ? Math.min(100, p.sessionsCompleted * 25) : 0,
-      });
+      if (loading) {
+        return (
+          <div className="ai-dashboard" style={{ minHeight: '100vh' }}>
+            <div className="ai-shell">
+              <div className="animate-pulse space-y-6">
+                <div className="h-10 bg-slate-100 rounded-lg w-1/3" />
+                <div className="ai-kpi-strip" style={{ gridTemplateColumns: 'repeat(6,1fr)', minHeight: 80 }}>
+                  {[...Array(6)].map((_, i) => <div key={i} className="ai-kpi"><div className="h-5 bg-slate-100 rounded w-12" /><div className="h-3 bg-slate-50 rounded w-16 mt-1" /></div>)}
+                </div>
+                <div className="h-64 bg-slate-100 rounded-lg" />
+              </div>
+            </div>
+          </div>
+        );
+      }
       await refetchAdaptive();
     } catch {}
     setEvaluating(null);
