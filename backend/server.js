@@ -17,6 +17,7 @@ const adaptiveTeacherRoutes = require('./routes/adaptiveTeacherRoutes');
 const chatbotRoutes         = require('./routes/chatbotRoutes');
 const teacherRoutes         = require('./routes/teacherRoutes');
 const contentRoutes         = require('./routes/contentRoutes');
+const careerRoutes          = require('./routes/careerRoutes');
 
 const { initSocket } = require('./sockets');
 
@@ -62,6 +63,7 @@ app.use('/api/ai-teacher', adaptiveTeacherRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/career', careerRoutes);
 
 // Connect to MongoDB
 mongoose

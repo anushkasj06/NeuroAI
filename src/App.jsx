@@ -30,6 +30,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudyMaterial from './pages/StudyMaterial';
 import TeacherContentStudio from './pages/TeacherContentStudio';
 import Chatbot from './components/Chatbot';
+import CareerRecommendation from './pages/CareerRecommendation';
 
 import SocketTestPage from './pages/SocketTestPage';
 
@@ -76,6 +77,7 @@ function AppShell() {
           <Route path="/materials" element={<P allowedRoles={['student']}><StudyMaterial /></P>} />
           <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
           <Route path="/teacher/content" element={<P allowedRoles={['teacher']}><TeacherContentStudio /></P>} />
+          <Route path="/career-recommendation" element={<P allowedRoles={['student']}><CareerRecommendation /></P>} />
           <Route path="/socket-test" element={<P><SocketTestPage /></P>} />
         </Routes>
       </main>

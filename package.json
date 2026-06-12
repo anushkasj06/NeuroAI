@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "backend": "cd backend && npm run dev",
-    "predictor": "cd predictor && python src/api/app.py"
+    "predictor": "source venv/bin/activate && cd predictor && pip install -r requirements.txt && python src/api/app.py",
+    "ml-service": "cd ml_service && python3 -B -m uvicorn ml_service.main:app --port 8000 --reload"
   },
   "dependencies": {
     "@google/generative-ai": "^0.24.0",
