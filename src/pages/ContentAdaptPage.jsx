@@ -9,13 +9,14 @@
  *   • Format distribution bar chart
  */
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import {
   SparklesIcon, ArrowPathIcon, FunnelIcon,
   PlayCircleIcon, DocumentTextIcon, PhotoIcon,
   RectangleStackIcon, QuestionMarkCircleIcon, CodeBracketIcon,
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 import {
   useContentAdaptDashboard,
@@ -23,6 +24,7 @@ import {
   useContentAdaptStats,
 } from '../hooks/useContentAdaptation';
 import { contentAdapt } from '../services/api';
+import { aiTeacherApi } from '../services/studyPlanApi';
 import ContentFormatCard from '../components/common/ContentFormatCard';
 
 // ── Format meta ───────────────────────────────────────────────────────────────
@@ -34,6 +36,24 @@ const FORMAT_META = {
   interactive_quiz: { label: 'Quiz',            emoji: '🧩', color: '#10b981', icon: QuestionMarkCircleIcon },
   coding_practice:  { label: 'Coding',          emoji: '💻', color: '#0ea5e9', icon: CodeBracketIcon },
 };
+
+const SESSION_MODE_LABELS = {
+  visual: 'Visual',
+  audio: 'Audio',
+  reading: 'Reading',
+  interactive: 'Interactive',
+  mixed: 'Mixed',
+};
+
+function formatSessionDate(value) {
+  if (!value) return 'No date';
+  return new Date(value).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
 
 function KpiTile({ label, value, sub, color = '#6366f1' }) {
   return (
@@ -47,16 +67,36 @@ function KpiTile({ label, value, sub, color = '#6366f1' }) {
 
 export default function ContentAdaptPage() {
   const [filterSubject, setFilterSubject] = useState('');
-  const [filterStatus,  setFilterStatus]  = useState('active');
+  const [filterStatus,  setFilterStatus]  = useState('');
+  const [sessionHistory, setSessionHistory] = useState([]);
+  const [sessionHistoryLoading, setSessionHistoryLoading] = useState(false);
+  const [sessionHistoryError, setSessionHistoryError] = useState('');
 
   const { data: dashData,  loading: dashLoad,  refetch: refetchDash } = useContentAdaptDashboard();
-  const { data: histData,  loading: histLoad,  refetch: refetchHist } = useContentAdaptHistory(filterSubject || null, 40);
+  const { data: histData,  loading: histLoad,  refetch: refetchHist } = useContentAdaptHistory(filterSubject || null, 80);
   const { data: statsData, loading: statsLoad, refetch: refetchStats } = useContentAdaptStats(30);
+
+  const loadSessionHistory = useCallback(async () => {
+    setSessionHistoryLoading(true);
+    setSessionHistoryError('');
+    try {
+      const res = await aiTeacherApi.getAnalytics();
+      setSessionHistory(res.data?.data?.recentSessions || []);
+    } catch (err) {
+      setSessionHistoryError(err.response?.data?.message || 'Failed to load session history');
+    } finally {
+      setSessionHistoryLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSessionHistory();
+  }, [loadSessionHistory]);
 
   const dashRecs   = dashData?.records  ?? [];
   const histRecs   = (histData?.records ?? []).filter(r => !filterStatus || r.status === filterStatus);
   const stats      = statsData?.stats;
-  const isLoading  = dashLoad || histLoad || statsLoad;
+  const isLoading  = dashLoad || histLoad || statsLoad || sessionHistoryLoading;
 
   const allSubjects = [...new Set((histData?.records ?? []).map(r => r.subjectSlug).filter(Boolean))];
 
@@ -76,7 +116,7 @@ export default function ContentAdaptPage() {
     try { await contentAdapt.dismiss(id); refetchDash(); refetchHist(); } catch {}
   }, [refetchDash, refetchHist]);
 
-  const refreshAll = () => { refetchDash(); refetchHist(); refetchStats(); };
+  const refreshAll = () => { refetchDash(); refetchHist(); refetchStats(); loadSessionHistory(); };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-emerald-50 py-8 px-4">
@@ -164,6 +204,44 @@ export default function ContentAdaptPage() {
             <div className="grid sm:grid-cols-2 gap-4">
               {dashRecs.map(rec => (
                 <ContentFormatCard key={rec._id} record={rec} onApply={handleApply} onDismiss={handleDismiss} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* Session history */}
+        <section>
+          <div className="flex items-center justify-between flex-wrap gap-3 mb-3">
+            <div>
+              <h2 className="text-base font-semibold text-slate-800">Learning session history</h2>
+              <p className="text-xs text-slate-400 mt-0.5">Recent AI Teacher sessions remain available after new sessions start.</p>
+            </div>
+            <Link to="/ai-teacher" className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-600 hover:bg-slate-50">
+              Start new session
+            </Link>
+          </div>
+
+          {sessionHistoryLoading && (
+            <div className="flex items-center justify-center py-8 text-slate-400">
+              <ArrowPathIcon className="h-5 w-5 animate-spin mr-2" />
+              <span className="text-sm">Loading session history...</span>
+            </div>
+          )}
+          {!sessionHistoryLoading && sessionHistoryError && (
+            <div className="bg-amber-50 border border-amber-100 rounded-xl p-4 text-sm text-amber-700">
+              {sessionHistoryError}
+            </div>
+          )}
+          {!sessionHistoryLoading && !sessionHistoryError && sessionHistory.length === 0 && (
+            <div className="bg-white rounded-2xl border border-slate-100 p-8 text-center text-slate-400">
+              <ClockIcon className="h-9 w-9 mx-auto mb-2 text-slate-300" />
+              <p className="text-sm">No learning sessions yet.</p>
+            </div>
+          )}
+          {!sessionHistoryLoading && sessionHistory.length > 0 && (
+            <div className="grid md:grid-cols-2 gap-3">
+              {sessionHistory.slice(0, 10).map((item) => (
+                <SessionHistoryRow key={item._id} session={item} />
               ))}
             </div>
           )}
@@ -261,6 +339,53 @@ function HistoryRow({ record, onApply, onDismiss }) {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+function SessionHistoryRow({ session }) {
+  const isCompleted = session.status === 'completed';
+  const statusClass = isCompleted
+    ? 'bg-emerald-100 text-emerald-700'
+    : session.status === 'active'
+      ? 'bg-cyan-100 text-cyan-700'
+      : 'bg-slate-100 text-slate-500';
+  const mastery = isCompleted ? session.masteryAfter : session.masteryBefore;
+  const mode = SESSION_MODE_LABELS[session.activeTeachingMode] || 'Mixed';
+
+  return (
+    <div className="bg-white border border-slate-100 rounded-xl p-4 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-semibold text-slate-800 truncate">{session.topic}</p>
+          <p className="text-[10px] text-slate-400 mt-0.5 truncate">
+            {session.subject || session.subjectSlug} · {formatSessionDate(session.createdAt)}
+          </p>
+        </div>
+        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${statusClass}`}>
+          {session.status}
+        </span>
+      </div>
+      <div className="grid grid-cols-3 gap-2 mt-3">
+        <MiniStat label="Mode" value={mode} />
+        <MiniStat label="Difficulty" value={session.difficultyLevel || 'medium'} />
+        <MiniStat label="Mastery" value={`${Math.round(mastery || 0)}%`} />
+      </div>
+      <Link
+        to={`/ai-teacher?sessionId=${session._id}`}
+        className="mt-3 inline-flex w-full items-center justify-center rounded-lg bg-slate-900 px-3 py-2 text-xs font-semibold text-white hover:bg-slate-800"
+      >
+        {isCompleted ? 'Review session' : 'Resume session'}
+      </Link>
+    </div>
+  );
+}
+
+function MiniStat({ label, value }) {
+  return (
+    <div className="rounded-lg border border-slate-100 bg-slate-50 px-2 py-2">
+      <p className="text-[10px] text-slate-400">{label}</p>
+      <p className="text-xs font-bold text-slate-700 truncate capitalize">{value}</p>
     </div>
   );
 }

@@ -53,9 +53,22 @@ const attentionSnapshotSchema = new mongoose.Schema({
   distractionEvents: [
     {
       type: String,
-      enum: ['face_missing', 'looking_away', 'tab_switch', 'head_turned'],
+      enum: ['face_missing', 'looking_away', 'tab_switch', 'head_turned', 'window_blur', 'cursor_left'],
     },
   ],
+
+  // ── Browser Interaction Telemetry ───────────────────────────────────────────
+  browserTelemetry: {
+    cursorMoveCount: { type: Number, default: 0 },
+    clickCount: { type: Number, default: 0 },
+    keyPressCount: { type: Number, default: 0 },
+    scrollCount: { type: Number, default: 0 },
+    tabSwitchCount: { type: Number, default: 0 },
+    windowBlurCount: { type: Number, default: 0 },
+    cursorLeaveCount: { type: Number, default: 0 },
+    windowBlurDurationMs: { type: Number, default: 0 },
+    isIdle: { type: Boolean, default: false },
+  },
 });
 
 // Query indexes

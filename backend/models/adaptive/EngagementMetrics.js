@@ -134,6 +134,19 @@ const engagementMetricsSchema = new mongoose.Schema(
     interactionEvents: { type: [interactionEventSchema], default: [] },
     activeInteractionMinutes: { type: Number, default: 0, min: 0 },
 
+    // ── Browser Telemetry ─────────────────────────────────────────────────
+    browserTelemetry: {
+      cursorMoves: { type: Number, default: 0 },
+      clicks: { type: Number, default: 0 },
+      keyPresses: { type: Number, default: 0 },
+      scrolls: { type: Number, default: 0 },
+      tabSwitches: { type: Number, default: 0 },
+      windowBlurs: { type: Number, default: 0 },
+      cursorLeaves: { type: Number, default: 0 },
+      windowBlurDurationMs: { type: Number, default: 0 },
+      idleRate: { type: Number, default: 0, min: 0, max: 100 },
+    },
+
     // ── Focus index (legacy compat field — kept, derived from presence×attention) ──
     focusIndex: { type: Number, min: 0, max: 100, default: 0 },
   },

@@ -64,13 +64,34 @@ export default function AITeacherSession() {
         setAnalytics(analyticsRes?.data?.data || null);
         setRevisionCenter(revisionRes?.data?.data || null);
 
-        const slug = searchParams.get('subject');
-        const topic = searchParams.get('topic');
-        const subtopic = searchParams.get('subtopic') || '';
-        if (slug && topic) {
-          const subject = (subjectList || []).find((item) => item.subjectSlug === slug);
-          if (subject) {
-            setSelected({ subjectSlug: slug, subjectName: subject.subjectName, topic, subtopic });
+        const sessionId = searchParams.get('sessionId');
+        if (sessionId) {
+          const sessionRes = await aiTeacherApi.getSession(sessionId);
+          const payload = sessionRes.data?.data || {};
+          const loadedSession = payload.session;
+          if (loadedSession) {
+            const pendingQuestion = (payload.questions || []).find((item) => !item.answered) || null;
+            setSession(loadedSession);
+            setSelected({
+              subjectSlug: loadedSession.subjectSlug,
+              subjectName: loadedSession.subject,
+              topic: loadedSession.topic,
+              subtopic: loadedSession.subtopic || '',
+            });
+            setOpeningMessage(loadedSession.rawAiResponse?.openingMessage || '');
+            setQuestion(pendingQuestion);
+            setReport(payload.report || null);
+            if (pendingQuestion) setAnswerStartedAt(Date.now());
+          }
+        } else {
+          const slug = searchParams.get('subject');
+          const topic = searchParams.get('topic');
+          const subtopic = searchParams.get('subtopic') || '';
+          if (slug && topic) {
+            const subject = (subjectList || []).find((item) => item.subjectSlug === slug);
+            if (subject) {
+              setSelected({ subjectSlug: slug, subjectName: subject.subjectName, topic, subtopic });
+            }
           }
         }
       } catch (err) {
@@ -111,6 +132,7 @@ export default function AITeacherSession() {
         topic: selected.topic,
         subtopic: selected.subtopic,
         confidenceStart: confidence,
+        forceMode: searchParams.get('mode') || undefined,
       });
       setSession(res.data.data.session);
       setOpeningMessage(res.data.data.openingMessage || '');
