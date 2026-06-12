@@ -6,6 +6,10 @@ const SubjectPerformance = require('../models/SubjectPerformance');
 const LearningStyleReport = require('../models/LearningStyleReport');
 const StudyTestAttempt = require('../models/StudyTestAttempt');
 const LearningMaterial = require('../models/LearningMaterial');
+const ConceptMastery = require('../models/ConceptMastery');
+const LearningSession = require('../models/LearningSession');
+const StudentAnswer = require('../models/StudentAnswer');
+const ProgressReport = require('../models/ProgressReport');
 const { generateStudyPlan, generateAdaptiveRecommendations, generateTopicTest } = require('../services/grokService');
 
 // ── Generate / regenerate study plan ─────────────────────────────────────────
@@ -735,6 +739,264 @@ exports.adaptPlanFromPerformance = async (req, res) => {
     res.status(200).json({ status: 'success', data: { plan } });
   } catch (error) {
     console.error('Adapt plan error:', error);
+    res.status(500).json({ status: 'error', message: error.message });
+  }
+};
+
+// ── Progress Dashboard (rich aggregation) ─────────────────────────────────────
+exports.getProgressDashboard = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const [
+      topicProgress,
+      conceptMastery,
+      sessions,
+      plan,
+      testAttempts,
+      progressReports,
+      learningReport,
+    ] = await Promise.all([
+      TopicProgress.find({ userId }).lean(),
+      ConceptMastery.find({ userId }).lean(),
+      LearningSession.find({ userId }).sort({ createdAt: -1 }).limit(50).lean(),
+      StudyPlan.findOne({ userId, status: 'active' }).lean(),
+      StudyTestAttempt.find({ userId }).sort({ createdAt: -1 }).limit(30).lean(),
+      ProgressReport.find({ userId }).sort({ createdAt: -1 }).limit(20).lean(),
+      LearningStyleReport.findOne({ userId }).lean(),
+    ]);
+
+    // ── Overview KPIs ─────────────────────────────────────────────────────
+    const totalTopics = topicProgress.length;
+    const completedTopics = topicProgress.filter((t) => t.status === 'completed').length;
+    const inProgress = topicProgress.filter((t) => t.status === 'in_progress').length;
+    const needsRevision = topicProgress.filter((t) => t.status === 'needs_revision').length;
+    const overallMastery = totalTopics
+      ? Math.round(topicProgress.reduce((s, t) => s + t.masteryPercent, 0) / totalTopics)
+      : 0;
+    const totalStudyMinutes = topicProgress.reduce((s, t) => s + (t.totalStudyMinutes || 0), 0);
+
+    // ── Subject breakdown ─────────────────────────────────────────────────
+    const subjectMap = {};
+    for (const tp of topicProgress) {
+      if (!subjectMap[tp.subjectSlug]) {
+        subjectMap[tp.subjectSlug] = {
+          subjectSlug: tp.subjectSlug,
+          subjectName: tp.subject,
+          topics: [],
+          totalMinutes: 0,
+          quizAttempts: 0,
+          quizScoreSum: 0,
+          quizScoreCount: 0,
+        };
+      }
+      const entry = subjectMap[tp.subjectSlug];
+      entry.topics.push(tp);
+      entry.totalMinutes += tp.totalStudyMinutes || 0;
+      entry.quizAttempts += tp.quizAttempts || 0;
+      if (tp.bestQuizScore > 0) {
+        entry.quizScoreSum += tp.bestQuizScore;
+        entry.quizScoreCount += 1;
+      }
+    }
+
+    const subjectBreakdown = Object.values(subjectMap).map((sub) => {
+      const avgMastery = sub.topics.length
+        ? Math.round(sub.topics.reduce((s, t) => s + t.masteryPercent, 0) / sub.topics.length)
+        : 0;
+      const avgQuizScore = sub.quizScoreCount
+        ? Math.round(sub.quizScoreSum / sub.quizScoreCount)
+        : 0;
+      const conceptsForSubject = conceptMastery.filter((c) => c.subjectSlug === sub.subjectSlug);
+
+      return {
+        subjectSlug: sub.subjectSlug,
+        subjectName: sub.subjectName,
+        topicCount: sub.topics.length,
+        completedCount: sub.topics.filter((t) => t.status === 'completed').length,
+        avgMastery,
+        avgQuizScore,
+        totalMinutes: sub.totalMinutes,
+        conceptCount: conceptsForSubject.length,
+        topics: sub.topics.map((t) => ({
+          topic: t.topic,
+          subtopic: t.subtopic,
+          masteryPercent: t.masteryPercent,
+          status: t.status,
+          bestQuizScore: t.bestQuizScore,
+          quizAttempts: t.quizAttempts,
+          totalStudyMinutes: t.totalStudyMinutes,
+          sessionsCompleted: t.sessionsCompleted,
+          currentDifficulty: t.currentDifficulty,
+          lastRevisedAt: t.lastRevisedAt,
+          nextRevisionDue: t.nextRevisionDue,
+        })),
+      };
+    });
+
+    // ── Radar data (per subject, multi-axis) ──────────────────────────────
+    const completedSessions = sessions.filter((s) => s.status === 'completed');
+    const radarData = subjectBreakdown.map((sub) => {
+      const subSessions = completedSessions.filter((s) => s.subjectSlug === sub.subjectSlug);
+      const avgConfidence = subSessions.length
+        ? Math.round(subSessions.reduce((s, se) => s + ((se.confidenceEnd || 3) * 20), 0) / subSessions.length)
+        : 50;
+      const consistency = sub.topicCount
+        ? Math.round((sub.completedCount / sub.topicCount) * 100)
+        : 0;
+
+      return {
+        subject: sub.subjectName,
+        mastery: sub.avgMastery,
+        confidence: Math.min(100, avgConfidence),
+        consistency,
+        quizAccuracy: sub.avgQuizScore,
+        timeInvested: Math.min(100, Math.round((sub.totalMinutes / Math.max(1, totalStudyMinutes)) * 100)),
+      };
+    });
+
+    // ── Mastery trend (from completed sessions, daily) ────────────────────
+    const masteryTrend = [];
+    const trendMap = {};
+    for (const sess of completedSessions) {
+      const day = new Date(sess.completedAt || sess.createdAt).toISOString().slice(0, 10);
+      if (!trendMap[day]) trendMap[day] = { date: day, sessions: 0, masterySum: 0 };
+      trendMap[day].sessions += 1;
+      trendMap[day].masterySum += sess.masteryAfter || 0;
+    }
+    for (const [date, data] of Object.entries(trendMap).sort((a, b) => a[0].localeCompare(b[0]))) {
+      masteryTrend.push({
+        date,
+        avgMastery: Math.round(data.masterySum / data.sessions),
+        sessions: data.sessions,
+      });
+    }
+
+    // ── Activity heatmap (90 days of study minutes) ───────────────────────
+    const now = new Date();
+    const ninetyDaysAgo = new Date(now);
+    ninetyDaysAgo.setDate(now.getDate() - 90);
+
+    const activityHeatmap = [];
+    const dayStudy = {};
+    for (const sess of sessions) {
+      const d = new Date(sess.createdAt);
+      if (d < ninetyDaysAgo) continue;
+      const key = d.toISOString().slice(0, 10);
+      if (!dayStudy[key]) dayStudy[key] = 0;
+      // Estimate ~30min per session if no explicit duration
+      dayStudy[key] += 30;
+    }
+    for (let i = 0; i < 90; i++) {
+      const d = new Date(ninetyDaysAgo);
+      d.setDate(d.getDate() + i);
+      const key = d.toISOString().slice(0, 10);
+      activityHeatmap.push({ date: key, minutes: dayStudy[key] || 0 });
+    }
+
+    // ── Recent sessions with mastery delta ────────────────────────────────
+    const recentSessions = completedSessions.slice(0, 10).map((s) => ({
+      _id: s._id,
+      subject: s.subject,
+      topic: s.topic,
+      masteryBefore: s.masteryBefore || 0,
+      masteryAfter: s.masteryAfter || 0,
+      delta: (s.masteryAfter || 0) - (s.masteryBefore || 0),
+      confidenceStart: s.confidenceStart,
+      confidenceEnd: s.confidenceEnd,
+      difficultyLevel: s.difficultyLevel,
+      completedAt: s.completedAt || s.createdAt,
+    }));
+
+    // ── Concept mastery (weak + strong) ───────────────────────────────────
+    const sortedConcepts = [...conceptMastery].sort((a, b) => a.masteryPercent - b.masteryPercent);
+    const weakConcepts = sortedConcepts
+      .filter((c) => c.masteryPercent < 60)
+      .slice(0, 10)
+      .map((c) => ({
+        concept: c.concept,
+        topic: c.topic,
+        subject: c.subject,
+        masteryPercent: c.masteryPercent,
+        attempts: c.attempts,
+        correctAttempts: c.correctAttempts,
+        confidenceAverage: c.confidenceAverage,
+        weakSignals: c.weakSignals,
+      }));
+
+    const strongConcepts = sortedConcepts
+      .filter((c) => c.masteryPercent >= 80)
+      .slice(-5)
+      .reverse()
+      .map((c) => ({
+        concept: c.concept,
+        topic: c.topic,
+        subject: c.subject,
+        masteryPercent: c.masteryPercent,
+      }));
+
+    // ── Revision schedule ─────────────────────────────────────────────────
+    const revisionSchedule = topicProgress
+      .filter((t) => t.nextRevisionDue)
+      .sort((a, b) => new Date(a.nextRevisionDue) - new Date(b.nextRevisionDue))
+      .slice(0, 8)
+      .map((t) => ({
+        topic: t.topic,
+        subject: t.subject,
+        masteryPercent: t.masteryPercent,
+        nextRevisionDue: t.nextRevisionDue,
+        lastRevisedAt: t.lastRevisedAt,
+        revisionCount: t.revisionCount,
+      }));
+
+    // ── Quiz performance ──────────────────────────────────────────────────
+    const quizPerformance = {
+      totalAttempts: testAttempts.length,
+      avgScore: testAttempts.length
+        ? Math.round(testAttempts.reduce((s, t) => s + (t.scorePercent || 0), 0) / testAttempts.length)
+        : 0,
+      passed: testAttempts.filter((t) => t.passed).length,
+      trend: testAttempts.slice(0, 10).reverse().map((t) => ({
+        date: new Date(t.createdAt).toISOString().slice(0, 10),
+        score: t.scorePercent,
+        topic: t.topic,
+      })),
+    };
+
+    // ── Difficulty distribution ───────────────────────────────────────────
+    const difficultyDistribution = { easy: 0, medium: 0, hard: 0 };
+    for (const tp of topicProgress) {
+      const d = tp.currentDifficulty || 'medium';
+      difficultyDistribution[d] = (difficultyDistribution[d] || 0) + 1;
+    }
+
+    res.status(200).json({
+      status: 'success',
+      data: {
+        overview: {
+          totalTopics,
+          completedTopics,
+          inProgress,
+          needsRevision,
+          overallMastery,
+          totalStudyMinutes,
+          currentStreak: plan?.currentStreak || 0,
+          longestStreak: plan?.longestStreak || 0,
+        },
+        subjectBreakdown,
+        radarData,
+        masteryTrend,
+        activityHeatmap,
+        recentSessions,
+        weakConcepts,
+        strongConcepts,
+        revisionSchedule,
+        quizPerformance,
+        difficultyDistribution,
+      },
+    });
+  } catch (error) {
+    console.error('Progress dashboard error:', error);
     res.status(500).json({ status: 'error', message: error.message });
   }
 };

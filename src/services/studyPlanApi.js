@@ -18,6 +18,7 @@ export const studyPlanApi = {
   updateTopicProgress: (data) => api.post('/study-plan/progress/update', data),
   getTopicProgress: (subjectSlug) =>
     api.get('/study-plan/progress', { params: subjectSlug ? { subjectSlug } : {} }),
+  getProgressDashboard: () => api.get('/study-plan/progress/dashboard'),
 
   // Strict tests and adaptive report
   generateStrictTest: (data) => api.post('/study-plan/test/generate', data),
