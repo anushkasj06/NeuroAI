@@ -40,7 +40,7 @@ const studentLinksBase = [
   { to: '/career-recommendation', label: 'Career Recommendation', icon: ChartBarSquareIcon },
   // { to: '/prediction', label: 'Predictions', icon: ChartBarSquareIcon },
   // { to: '/socket-test',  label: 'Socket Test',  icon: PuzzlePieceIcon },
-  { to: '/profile',      label: 'Profile',      icon: UserCircleIcon },
+  { to: '/profile',       label: 'Profile',      icon: UserCircleIcon },
 ];
 
 const teacherLinks = [
