@@ -8,6 +8,9 @@ const StudentProfile = require('../models/StudentProfile');
 const LearningStyleReport = require('../models/LearningStyleReport');
 const StudyPlan = require('../models/StudyPlan');
 const TopicProgress = require('../models/TopicProgress');
+const analyticsService = require('../services/learningAnalyticsService');
+const adaptiveLearningService = require('../services/adaptiveLearningService');
+const contentAdaptationService = require('../services/contentAdaptationService');
 const {
   generateTeachingSession,
   generateAdaptiveQuestion,
@@ -400,6 +403,36 @@ exports.completeTeachingSession = async (req, res) => {
     session.finalReportId = report._id;
     session.completedAt = new Date();
     await session.save();
+
+    // ── Fire-and-forget engagement computation ────────────────────────────
+    analyticsService.computeAndSave(session._id, userId).catch((err) =>
+      console.warn('[Analytics] Auto-compute failed for session', session._id, err.message)
+    );
+
+    // ── Fire-and-forget adaptive learning evaluation ───────────────────────
+    adaptiveLearningService.evaluate({
+      userId,
+      sessionId:    session._id,
+      subjectSlug:  session.subjectSlug,
+      subject:      session.subject,
+      topic:        session.topic,
+      subtopic:     session.subtopic || '',
+      triggerEvent: 'session_completed',
+    }).catch((err) =>
+      console.warn('[Adaptive] Auto-evaluate failed for session', session._id, err.message)
+    );
+
+    // ── Fire-and-forget content format recommendation ──────────────────────
+    contentAdaptationService.recommend({
+      userId,
+      sessionId:   session._id,
+      subjectSlug: session.subjectSlug,
+      subject:     session.subject,
+      topic:       session.topic,
+      subtopic:    session.subtopic || '',
+    }).catch((err) =>
+      console.warn('[ContentAdapt] Auto-recommend failed for session', session._id, err.message)
+    );
 
     const planUpdate = modifyStudyPlan({ plan, session, report });
     if (planUpdate.changed) {

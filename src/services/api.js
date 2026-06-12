@@ -102,5 +102,66 @@ export const chatbot = {
   sendMessage: (data) => api.post('/chatbot/message', data),
 };
 
+export const emotion = {
+  logEmotion: (data) => api.post('/emotion', data),
+};
+
+export const attention = {
+  saveSnapshot: (data) => api.post('/attention/snapshot', data),
+  getSessionAttention: (sessionId) => api.get(`/attention/session/${sessionId}`),
+  getAnalytics: (days = 7) => api.get('/attention/analytics', { params: { days } }),
+  getRecentSummary: () => api.get('/attention/summary'),
+};
+
+export const analytics = {
+  computeSession:  (sessionId) => api.post(`/analytics/session/${sessionId}/compute`),
+  getSession:      (sessionId, recompute = false) =>
+    api.get(`/analytics/session/${sessionId}`, { params: { recompute } }),
+  getUser:         (days = 30, subjectSlug) =>
+    api.get('/analytics/user', { params: { days, ...(subjectSlug ? { subjectSlug } : {}) } }),
+  getCourse:       (subjectSlug, days = 30) =>
+    api.get(`/analytics/course/${subjectSlug}`, { params: { days } }),
+  getDashboard:    () => api.get('/analytics/dashboard'),
+};
+
+export const adaptive = {
+  evaluate:        (data) => api.post('/adaptive/evaluate', data),
+  getTopic:        (subjectSlug, topic) =>
+    api.get(`/adaptive/topic/${subjectSlug}/${encodeURIComponent(topic)}`),
+  getHistory:      (subjectSlug, limit = 20) =>
+    api.get('/adaptive/history', { params: { subjectSlug, limit } }),
+  getDashboard:    () => api.get('/adaptive/dashboard'),
+  apply:           (recordId) => api.patch(`/adaptive/${recordId}/apply`),
+  dismiss:         (recordId) => api.patch(`/adaptive/${recordId}/dismiss`),
+};
+
+export const assessmentMonitor = {
+  start:        (attemptId) => api.post('/assessment-monitor/start', { attemptId }),
+  logViolation: (data)      => api.post('/assessment-monitor/violation', data),
+  logBatch:     (data)      => api.post('/assessment-monitor/batch', data),
+  getRecord:    (attemptId) => api.get(`/assessment-monitor/${attemptId}`),
+  finish:       (attemptId) => api.patch(`/assessment-monitor/${attemptId}/finish`),
+  getHistory:   (limit = 20) => api.get('/assessment-monitor/history', { params: { limit } }),
+};
+
+export const contentAdapt = {
+  /** Generate a content format recommendation for a topic */
+  recommend:    (data) => api.post('/content-adapt/recommend', data),
+  /** Latest recommendation for one topic */
+  getTopic:     (subjectSlug, topic) =>
+    api.get(`/content-adapt/topic/${subjectSlug}/${encodeURIComponent(topic)}`),
+  /** User history (?subjectSlug&limit) */
+  getHistory:   (subjectSlug, limit = 20) =>
+    api.get('/content-adapt/history', { params: { subjectSlug, limit } }),
+  /** Latest rec per topic — dashboard widget */
+  getDashboard: () => api.get('/content-adapt/dashboard'),
+  /** Format usage stats (?days=30) */
+  getStats:     (days = 30) => api.get('/content-adapt/stats', { params: { days } }),
+  /** Mark recommendation as applied */
+  apply:        (recordId) => api.patch(`/content-adapt/${recordId}/apply`),
+  /** Dismiss a recommendation */
+  dismiss:      (recordId) => api.patch(`/content-adapt/${recordId}/dismiss`),
+};
+
 export { API_BASE };
 export default api;

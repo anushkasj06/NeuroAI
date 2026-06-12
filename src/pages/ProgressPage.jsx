@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { studyPlanApi } from '../services/studyPlanApi';
 import { diagnostic } from '../services/diagnosticApi';
 import { Link } from 'react-router-dom';
+import { useAdaptiveHistory } from '../hooks/useAdaptiveLearning';
+import { adaptive } from '../services/api';
 
 const STATUS_CONFIG = {
   not_started:    { label: 'Not Started', color: 'bg-gray-100 text-gray-500' },
@@ -10,11 +12,28 @@ const STATUS_CONFIG = {
   needs_revision: { label: 'Needs Revision', color: 'bg-amber-100 text-amber-700' },
 };
 
+const CASE_CHIP = {
+  advance_topic:        { label: '→ Advance',  color: 'bg-emerald-100 text-emerald-700' },
+  more_practice:        { label: '✏ Practice', color: 'bg-blue-100 text-blue-700' },
+  simpler_explanation:  { label: '↩ Simplify', color: 'bg-amber-100 text-amber-700' },
+  change_format:        { label: '⇄ Change format', color: 'bg-violet-100 text-violet-700' },
+};
+
 export default function ProgressPage() {
   const [progress, setProgress] = useState([]);
   const [subjects, setSubjects] = useState([]);
   const [activeSubject, setActiveSubject] = useState('all');
   const [loading, setLoading] = useState(true);
+  const [evaluating, setEvaluating] = useState(null);
+
+  // Load adaptive history (all subjects)
+  const { data: adaptiveData, refetch: refetchAdaptive } = useAdaptiveHistory(null, 50);
+  // Build a lookup: subjectSlug+topic → latest record
+  const adaptiveMap = {};
+  for (const rec of (adaptiveData?.records ?? [])) {
+    const key = `${rec.subjectSlug}::${rec.topic}`;
+    if (!adaptiveMap[key]) adaptiveMap[key] = rec;
+  }
 
   useEffect(() => {
     (async () => {
@@ -29,6 +48,23 @@ export default function ProgressPage() {
       setLoading(false);
     })();
   }, []);
+
+  const handleEvaluate = async (p) => {
+    setEvaluating(p.topic);
+    try {
+      await adaptive.evaluate({
+        subjectSlug:  p.subjectSlug,
+        subject:      p.subject,
+        topic:        p.topic,
+        subtopic:     p.subtopic || '',
+        triggerEvent: 'manual_request',
+        quizMarks:    p.lastQuizScore || 0,
+        completionRate: p.sessionsCompleted ? Math.min(100, p.sessionsCompleted * 25) : 0,
+      });
+      await refetchAdaptive();
+    } catch {}
+    setEvaluating(null);
+  };
 
   const filtered = activeSubject === 'all' ? progress : progress.filter((p) => p.subjectSlug === activeSubject);
 
@@ -109,19 +145,37 @@ export default function ProgressPage() {
                 <div className="divide-y divide-gray-50">
                   {group.items.map((p) => {
                     const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.not_started;
+                    const adaptiveRec = adaptiveMap[`${p.subjectSlug}::${p.topic}`];
+                    const caseChip = adaptiveRec ? CASE_CHIP[adaptiveRec.decisionCase] : null;
                     return (
                       <div key={p._id} className="px-6 py-3 flex items-center gap-4">
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium text-gray-800 truncate">{p.topic}</p>
                           {p.subtopic && <p className="text-xs text-gray-400">{p.subtopic}</p>}
                         </div>
-                        <div className="flex items-center gap-3 shrink-0">
+                        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
                           <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
                             <div className={`h-full rounded-full ${p.masteryPercent >= 70 ? 'bg-emerald-500' : p.masteryPercent >= 40 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${p.masteryPercent}%` }} />
                           </div>
                           <span className="text-xs font-semibold text-gray-600 w-8 text-right">{p.masteryPercent}%</span>
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sc.color}`}>{sc.label}</span>
                           {p.bestQuizScore > 0 && <span className="text-xs text-gray-400">Best: {p.bestQuizScore}%</span>}
+                          {/* Adaptive chip */}
+                          {caseChip ? (
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${caseChip.color}`}>
+                              {caseChip.label}
+                            </span>
+                          ) : (
+                            p.status !== 'not_started' && (
+                              <button
+                                onClick={() => handleEvaluate(p)}
+                                disabled={evaluating === p.topic}
+                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 hover:bg-violet-100 disabled:opacity-40"
+                              >
+                                {evaluating === p.topic ? '…' : '⚡ Evaluate'}
+                              </button>
+                            )
+                          )}
                         </div>
                       </div>
                     );

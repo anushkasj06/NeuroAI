@@ -81,7 +81,7 @@ body {
   box-shadow: none !important;
 }
 
-<<<<<<< HEAD
+
 /* ── Socket test page utility classes ─────────────────────────────────────── */
 @layer components {
   .btn-primary {
@@ -105,7 +105,7 @@ body {
            focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent;
   }
 }
-=======
+
 /* ── Rich Markdown Content (.md-content) ─────────────────────────────── */
 /* Used in AI Teacher and anywhere ReactMarkdown renders lesson content  */
 

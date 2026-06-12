@@ -7,6 +7,8 @@ import { getApiErrorMessage } from '../services/api';
 import { getTopicsForSubject } from '../constants/topicCurriculum';
 import MaterialViewer from '../components/studyplan/MaterialViewer';
 import SubjectTopicSelector from '../components/studyplan/SubjectTopicSelector';
+import { useSecureAssessment } from '../hooks/useSecureAssessment';
+import SecureAssessmentWrapper from '../components/common/SecureAssessmentWrapper';
 
 export default function LearnPage() {
   const [searchParams] = useSearchParams();
@@ -28,6 +30,12 @@ export default function LearnPage() {
   const [testLoading, setTestLoading] = useState(false);
   const [adapting, setAdapting] = useState(false);
   const [personalityMode, setPersonalityMode] = useState('balanced coach');
+
+  // ── Secure Assessment ────────────────────────────────────────────────────
+  const secureAssessment = useSecureAssessment({
+    attemptId: strictAttemptId,
+    enabled: !!strictTest && !strictSubmitted,
+  });
 
   useEffect(() => {
     (async () => {
@@ -97,6 +105,8 @@ export default function LearnPage() {
     if (!strictAttemptId || !strictTest?.questions?.length) return;
     setTestLoading(true); setError('');
     try {
+      // finish monitoring before submitting
+      await secureAssessment.finishMonitoring();
       const answers = strictTest.questions.map((_, i) => strictAnswers[i] || {});
       const res = await studyPlanApi.submitStrictTest({ attemptId: strictAttemptId, answers });
       setStrictReport(res.data.data.report);
@@ -198,17 +208,24 @@ export default function LearnPage() {
         {testLoading && <div className="bg-white rounded-2xl p-6 text-center text-indigo-600 font-medium">Generating or scoring your strict test...</div>}
 
         {strictTest && (
-          <StrictTestSection
-            test={strictTest}
-            answers={strictAnswers}
-            submitted={strictSubmitted}
-            report={strictReport}
-            adapting={adapting}
-            onAnswer={(i, patch) => setStrictAnswers((p) => ({ ...p, [i]: { ...(p[i] || {}), ...patch } }))}
-            onSubmit={handleStrictSubmit}
-            onRetake={handleGenerateStrictTest}
-            onAdaptPlan={handleAdaptPlan}
-          />
+          <SecureAssessmentWrapper
+            secure={secureAssessment}
+            onForceSubmit={handleStrictSubmit}
+          >
+            <StrictTestSection
+              test={strictTest}
+              answers={strictAnswers}
+              submitted={strictSubmitted}
+              report={strictReport}
+              adapting={adapting}
+              proctorStatus={secureAssessment.proctorStatus}
+              totalViolations={secureAssessment.totalViolations}
+              onAnswer={(i, patch) => setStrictAnswers((p) => ({ ...p, [i]: { ...(p[i] || {}), ...patch } }))}
+              onSubmit={handleStrictSubmit}
+              onRetake={handleGenerateStrictTest}
+              onAdaptPlan={handleAdaptPlan}
+            />
+          </SecureAssessmentWrapper>
         )}
 
         {/* Quiz mode */}
@@ -227,7 +244,7 @@ export default function LearnPage() {
   );
 }
 
-function StrictTestSection({ test, answers, submitted, report, adapting, onAnswer, onSubmit, onRetake, onAdaptPlan }) {
+function StrictTestSection({ test, answers, submitted, report, adapting, proctorStatus, totalViolations, onAnswer, onSubmit, onRetake, onAdaptPlan }) {
   const questions = test.questions || [];
   const answeredCount = questions.filter((_, i) => answers[i]?.selectedAnswer).length;
   const canSubmit = answeredCount === questions.length && questions.every((_, i) => answers[i]?.confidenceBefore);
@@ -240,7 +257,18 @@ function StrictTestSection({ test, answers, submitted, report, adapting, onAnswe
           <h2 className="text-xl font-bold text-gray-900 mt-1">{test.title}</h2>
           <p className="text-sm text-gray-500 mt-1">{test.timeLimitMinutes || 15} minutes · pass at {test.passingScore || 75}% · +{test.xpPerCorrect || 10} XP/correct</p>
         </div>
-        <div className="text-sm font-semibold text-indigo-600">{answeredCount}/{questions.length} answered</div>
+        <div className="flex flex-col items-end gap-1">
+          <div className="text-sm font-semibold text-indigo-600">{answeredCount}/{questions.length} answered</div>
+          {proctorStatus && proctorStatus !== 'clean' && (
+            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${
+              proctorStatus === 'disqualified' ? 'bg-rose-100 text-rose-700' :
+              proctorStatus === 'suspicious'   ? 'bg-orange-100 text-orange-700' :
+              'bg-amber-100 text-amber-700'
+            }`}>
+              ⚠ {proctorStatus} · {totalViolations} violation{totalViolations !== 1 ? 's' : ''}
+            </span>
+          )}
+        </div>
       </div>
 
       {test.rules?.length > 0 && (

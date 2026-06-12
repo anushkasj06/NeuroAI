@@ -30,6 +30,9 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import StudyMaterial from './pages/StudyMaterial';
 import TeacherContentStudio from './pages/TeacherContentStudio';
 import Chatbot from './components/Chatbot';
+import AdaptiveInsightsPage from './pages/AdaptiveInsightsPage';
+import ContentAdaptPage from './pages/ContentAdaptPage';
+
 
 import SocketTestPage from './pages/SocketTestPage';
 
@@ -64,6 +67,8 @@ function AppShell() {
           <Route path="/ai-teacher/feedback" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
           <Route path="/ai-teacher/revision" element={<P allowedRoles={['student']}><AITeacherSession /></P>} />
           <Route path="/progress" element={<P allowedRoles={['student']}><ProgressPage /></P>} />
+          <Route path="/adaptive" element={<P allowedRoles={['student']}><AdaptiveInsightsPage /></P>} />
+          <Route path="/content-adapt" element={<P allowedRoles={['student']}><ContentAdaptPage /></P>} />
           <Route path="/study-plan/generate" element={<P allowedRoles={['student']}><StudyPlanGenerator /></P>} />
           <Route path="/study-plan" element={<P allowedRoles={['student']}><StudyPlanPage /></P>} />
           <Route path="/prediction" element={<P allowedRoles={['student']}><Prediction /></P>} />

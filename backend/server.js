@@ -17,13 +17,19 @@ const adaptiveTeacherRoutes = require('./routes/adaptiveTeacherRoutes');
 const chatbotRoutes         = require('./routes/chatbotRoutes');
 const teacherRoutes         = require('./routes/teacherRoutes');
 const contentRoutes         = require('./routes/contentRoutes');
+const emotionRoutes         = require('./routes/emotionRoutes');
+const attentionRoutes       = require('./routes/attentionRoutes');
+const analyticsRoutes       = require('./routes/analyticsRoutes');
+const adaptiveLearningRoutes  = require('./routes/adaptiveLearningRoutes');
+const contentAdaptationRoutes = require('./routes/contentAdaptationRoutes');
+const assessmentMonitoringRoutes = require('./routes/assessmentMonitoringRoutes');
 
 const { initSocket } = require('./sockets');
 
 const app = express();
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '25mb' })); // ensure base64 frames fit
 app.use(cookieParser());
 const corsOrigins = (process.env.CORS_ORIGINS || 'http://localhost:5173,http://localhost:5174,http://127.0.0.1:5173')
   .split(',')
@@ -45,7 +51,8 @@ app.get('/api/health', (req, res) => {
     routes: [
       'auth', 'profile', 'quiz', 'diagnostic', 'rapid-battle',
       'study-plan', 'learning-material', 'ai-teacher',
-      'chatbot', 'teacher', 'content',
+      'chatbot', 'teacher', 'content', 'emotion', 'attention',
+      'analytics', 'adaptive', 'content-adapt', 'assessment-monitor'
     ],
   });
 });
@@ -62,6 +69,12 @@ app.use('/api/ai-teacher', adaptiveTeacherRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/teacher', teacherRoutes);
 app.use('/api/content', contentRoutes);
+app.use('/api/emotion', emotionRoutes);
+app.use('/api/attention', attentionRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/adaptive',       adaptiveLearningRoutes);
+app.use('/api/content-adapt',        contentAdaptationRoutes);
+app.use('/api/assessment-monitor',   assessmentMonitoringRoutes);
 
 // Connect to MongoDB
 mongoose

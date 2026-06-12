@@ -16,6 +16,10 @@ import {
   ClipboardDocumentCheckIcon,
   SparklesIcon,
 } from '@heroicons/react/24/outline';
+import WebcamEmotionDetector from '../components/common/WebcamEmotionDetector';
+import AttentionTracker from '../components/common/AttentionTracker';
+import EngagementDrillDown from '../components/common/EngagementDrillDown';
+import AdaptiveSessionResult from '../components/common/AdaptiveSessionResult';
 
 const modeLabels = {
   visual: 'Visual studio',
@@ -253,45 +257,71 @@ export default function AITeacherSession() {
           </div>
         )}
 
-        {/* ── Active session: full width ────────────────────────────── */}
+        {/* ── Active session: split columns for tutoring & webcam ──────────────── */}
         {session && (
-          <div className="space-y-5">
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <div className="border-b border-slate-200 p-5">
-                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                  <div>
-                    <div className="flex items-center gap-3">
-                      <button onClick={() => setSession(null)} className="text-sm font-semibold text-cyan-700 hover:underline">&larr; Change topic</button>
-                      <p className="text-sm text-slate-500 font-semibold">&bull; {session.subject}</p>
+          <div className="grid lg:grid-cols-[1fr_350px] gap-6 items-start">
+            <div className="space-y-5">
+              <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                <div className="border-b border-slate-200 p-5">
+                  <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <div>
+                      <div className="flex items-center gap-3">
+                        <button onClick={() => setSession(null)} className="text-sm font-semibold text-cyan-700 hover:underline">&larr; Change topic</button>
+                        <p className="text-sm text-slate-500 font-semibold">&bull; {session.subject}</p>
+                      </div>
+                      <h2 className="text-2xl font-bold mt-1">{session.topic}</h2>
+                      {openingMessage && <p className="text-slate-600 mt-2 md-content"><ReactMarkdown>{openingMessage}</ReactMarkdown></p>}
                     </div>
-                    <h2 className="text-2xl font-bold mt-1">{session.topic}</h2>
-                    {openingMessage && <p className="text-slate-600 mt-2 md-content"><ReactMarkdown>{openingMessage}</ReactMarkdown></p>}
-                  </div>
-                  <div className="grid grid-cols-2 gap-2 min-w-[260px]">
-                    {classroomStats.map((item) => <Metric key={item.label} label={item.label} value={item.value} compact />)}
+                    <div className="grid grid-cols-2 gap-2 min-w-[260px]">
+                      {classroomStats.map((item) => <Metric key={item.label} label={item.label} value={item.value} compact />)}
+                    </div>
                   </div>
                 </div>
+                <TeachingFlow blocks={session.teachingFlow || []} />
               </div>
-              <TeachingFlow blocks={session.teachingFlow || []} />
+
+              <QuestionPanel
+                question={question}
+                answerText={answerText}
+                selectedOption={selectedOption}
+                confidence={confidence}
+                feedback={feedback}
+                working={working}
+                answered={answered}
+                canSubmit={canSubmit}
+                onNextQuestion={nextQuestion}
+                onAnswerText={setAnswerText}
+                onSelectedOption={setSelectedOption}
+                onConfidence={setConfidence}
+                onSubmit={submitAnswer}
+                onComplete={completeSession}
+                report={report}
+              />
             </div>
 
-            <QuestionPanel
-              question={question}
-              answerText={answerText}
-              selectedOption={selectedOption}
-              confidence={confidence}
-              feedback={feedback}
-              working={working}
-              answered={answered}
-              canSubmit={canSubmit}
-              onNextQuestion={nextQuestion}
-              onAnswerText={setAnswerText}
-              onSelectedOption={setSelectedOption}
-              onConfidence={setConfidence}
-              onSubmit={submitAnswer}
-              onComplete={completeSession}
-              report={report}
-            />
+            <div className="sticky top-6 space-y-6">
+              <WebcamEmotionDetector
+                sessionId={session._id}
+                triggerContext={{
+                  blockCount: session.teachingFlow?.length || 0,
+                  questionNumber: question?.questionNumber || 0,
+                  topic: session.topic
+                }}
+              />
+              <AttentionTracker
+                sessionId={session._id}
+                enabled={true}
+                showOverlay={true}
+              />
+              {/* Show engagement breakdown once session has a report */}
+              {report && (
+                <EngagementDrillDown sessionId={session._id} />
+              )}
+              {/* Adaptive learning recommendation — auto-evaluated on completion */}
+              {report && (
+                <AdaptiveSessionResult session={session} report={report} />
+              )}
+            </div>
           </div>
         )}
       </main>
