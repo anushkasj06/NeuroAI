@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { studyPlanApi } from '../services/studyPlanApi';
 import { Link } from 'react-router-dom';
 import {
@@ -12,7 +12,7 @@ import {
   ChevronDownIcon, ArrowPathIcon, BeakerIcon,
   SignalIcon, BoltIcon,
 } from '@heroicons/react/24/outline';
-import './AIDashboard.css'; // reuse design tokens
+import './AIDashboard.css';
 
 const STATUS_CONFIG = {
   not_started:    { label: 'Not Started',     cls: 'pg-badge--muted' },
@@ -28,7 +28,6 @@ const SUBJECT_COLORS = [
   '#d97706', '#059669', '#0ea5e9',
 ];
 
-/* ── Helpers ────────────────────────────────────────────────────────── */
 function formatMinutes(m) {
   if (!m) return '0m';
   const h = Math.floor(m / 60);
@@ -48,7 +47,6 @@ function masteryColor(pct) {
   return '#dc2626';
 }
 
-/* ── Main Page ──────────────────────────────────────────────────────── */
 export default function ProgressPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -56,30 +54,16 @@ export default function ProgressPage() {
 
   useEffect(() => {
     (async () => {
-      }, []);
-
-      if (loading) {
-        return (
-          <div className="ai-dashboard" style={{ minHeight: '100vh' }}>
-            <div className="ai-shell">
-              <div className="animate-pulse space-y-6">
-                <div className="h-10 bg-slate-100 rounded-lg w-1/3" />
-                <div className="ai-kpi-strip" style={{ gridTemplateColumns: 'repeat(6,1fr)', minHeight: 80 }}>
-                  {[...Array(6)].map((_, i) => <div key={i} className="ai-kpi"><div className="h-5 bg-slate-100 rounded w-12" /><div className="h-3 bg-slate-50 rounded w-16 mt-1" /></div>)}
-                </div>
-                <div className="h-64 bg-slate-100 rounded-lg" />
-              </div>
-            </div>
-          </div>
-        );
+      try {
+        const res = await studyPlanApi.getProgressDashboard();
+        setData(res.data.data);
+      } catch (e) {
+        console.error('Progress dashboard error:', e);
       }
-      await refetchAdaptive();
-    } catch {}
-    setEvaluating(null);
-  };
+      setLoading(false);
+    })();
+  }, []);
 
-  const filtered = activeSubject === 'all' ? progress : progress.filter((p) => p.subjectSlug === activeSubject);
-=======
   if (loading) {
     return (
       <div className="ai-dashboard" style={{ minHeight: '100vh' }}>
@@ -95,7 +79,6 @@ export default function ProgressPage() {
       </div>
     );
   }
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
 
   if (!data) {
     return (
@@ -122,7 +105,6 @@ export default function ProgressPage() {
   return (
     <div className="ai-dashboard" style={{ minHeight: '100vh' }}>
       <div className="ai-shell">
-        {/* ── Header ──────────────────────────────────────────── */}
         <header style={{ marginBottom: 24 }} className="ai-fade-up">
           <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ai-accent)' }}>
             Progress Intelligence
@@ -135,7 +117,6 @@ export default function ProgressPage() {
           </p>
         </header>
 
-        {/* ── KPI Strip ───────────────────────────────────────── */}
         <div className="ai-kpi-strip ai-fade-up" style={{ gridTemplateColumns: 'repeat(6, 1fr)', animationDelay: '0.05s' }}>
           <KPI icon={<AcademicCapIcon />} label="Overall mastery" value={`${overview.overallMastery}%`} accent />
           <KPI icon={<ClockIcon />} label="Study time" value={formatMinutes(overview.totalStudyMinutes)} />
@@ -145,11 +126,8 @@ export default function ProgressPage() {
           <KPI icon={<BeakerIcon />} label="Quiz avg" value={`${quizPerformance.avgScore}%`} />
         </div>
 
-        {/* ── Main Grid ───────────────────────────────────────── */}
         <div className="ai-grid-main" style={{ marginTop: 24 }}>
-          {/* LEFT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-            {/* Subject Breakdown */}
             <Section title="Subject Performance" icon={<SignalIcon />} delay="0.1s">
               {subjectBreakdown.length === 0 ? (
                 <p style={{ color: '#64748b', fontSize: 13 }}>No subjects tracked yet.</p>
@@ -165,17 +143,9 @@ export default function ProgressPage() {
                     />
                   ))}
                 </div>
-<<<<<<< HEAD
-                <div className="divide-y divide-gray-50">
-                  {group.items.map((p) => {
-                    const sc = STATUS_CONFIG[p.status] || STATUS_CONFIG.not_started;
-                    const adaptiveRec = adaptiveMap[`${p.subjectSlug}::${p.topic}`];
-                    const caseChip = adaptiveRec ? CASE_CHIP[adaptiveRec.decisionCase] : null;
-=======
               )}
             </Section>
 
-            {/* Mastery Trend Chart */}
             {masteryTrend.length > 1 && (
               <Section title="Mastery Trend" icon={<ArrowTrendingUpIcon />} delay="0.15s">
                 <div style={{ width: '100%', height: 260 }}>
@@ -196,7 +166,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Session Timeline */}
             {recentSessions.length > 0 && (
               <Section title="Recent Sessions" icon={<ClockIcon />} delay="0.2s">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -228,9 +197,7 @@ export default function ProgressPage() {
             )}
           </div>
 
-          {/* RIGHT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-            {/* Radar Chart */}
             {radarData.length > 0 && (
               <Section title="Strength Radar" icon={<BoltIcon />} delay="0.1s">
                 <div style={{ width: '100%', height: 280 }}>
@@ -250,13 +217,11 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Activity Heatmap */}
             <Section title="Study Activity" icon={<FireIcon />} delay="0.15s"
               badge={`${activityHeatmap.filter(d => d.minutes > 0).length} active days`}>
               <ActivityHeatmap data={activityHeatmap} />
             </Section>
 
-            {/* Revision Schedule */}
             {revisionSchedule.length > 0 && (
               <Section title="Revision Schedule" icon={<ArrowPathIcon />} delay="0.2s">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -264,7 +229,6 @@ export default function ProgressPage() {
                     const days = daysUntil(r.nextRevisionDue);
                     const isOverdue = days !== null && days < 0;
                     const isDueSoon = days !== null && days <= 2 && days >= 0;
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
                     return (
                       <div key={r.topic + i} style={{
                         display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0',
@@ -280,35 +244,9 @@ export default function ProgressPage() {
                             color: isOverdue ? '#dc2626' : isDueSoon ? '#d97706' : '#64748b',
                           }} />
                         </div>
-<<<<<<< HEAD
-                        <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
-                          <div className="w-20 h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${p.masteryPercent >= 70 ? 'bg-emerald-500' : p.masteryPercent >= 40 ? 'bg-amber-400' : 'bg-red-400'}`} style={{ width: `${p.masteryPercent}%` }} />
-                          </div>
-                          <span className="text-xs font-semibold text-gray-600 w-8 text-right">{p.masteryPercent}%</span>
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sc.color}`}>{sc.label}</span>
-                          {p.bestQuizScore > 0 && <span className="text-xs text-gray-400">Best: {p.bestQuizScore}%</span>}
-                          {/* Adaptive chip */}
-                          {caseChip ? (
-                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${caseChip.color}`}>
-                              {caseChip.label}
-                            </span>
-                          ) : (
-                            p.status !== 'not_started' && (
-                              <button
-                                onClick={() => handleEvaluate(p)}
-                                disabled={evaluating === p.topic}
-                                className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-violet-50 text-violet-600 border border-violet-200 hover:bg-violet-100 disabled:opacity-40"
-                              >
-                                {evaluating === p.topic ? '…' : '⚡ Evaluate'}
-                              </button>
-                            )
-                          )}
-=======
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--ai-ink)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.topic}</p>
                           <p style={{ fontSize: 10, color: '#94a3b8' }}>{r.subject} · {r.masteryPercent}% mastery</p>
->>>>>>> b615a31e88eb1ab6a51922d2f551ae53a92da3d4
                         </div>
                         <span style={{
                           fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 99,
@@ -324,7 +262,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Weak Concepts */}
             {weakConcepts.length > 0 && (
               <Section title="Concepts to Strengthen" icon={<ExclamationTriangleIcon />} delay="0.25s" warn>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -344,7 +281,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Difficulty Distribution */}
             <Section title="Difficulty Spread" icon={<BeakerIcon />} delay="0.3s">
               <div style={{ display: 'flex', gap: 8 }}>
                 {['easy', 'medium', 'hard'].map((d) => {
@@ -371,8 +307,7 @@ export default function ProgressPage() {
   );
 }
 
-/* ── Sub-components ─────────────────────────────────────────────────── */
-
+/* Sub-components */
 function KPI({ icon, label, value, accent, warn }) {
   return (
     <div className="ai-kpi">
@@ -467,7 +402,6 @@ function ActivityHeatmap({ data }) {
   const weeks = [];
   let currentWeek = [];
 
-  // Pad start to align to Monday
   const firstDay = new Date(data[0].date).getDay();
   const padDays = firstDay === 0 ? 6 : firstDay - 1;
   for (let i = 0; i < padDays; i++) currentWeek.push(null);
@@ -492,7 +426,6 @@ function ActivityHeatmap({ data }) {
   return (
     <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
       <svg width={svgW} height={svgH + 16} style={{ display: 'block' }}>
-        {/* Day labels */}
         {['M', '', 'W', '', 'F', '', 'S'].map((label, i) => (
           <text key={i} x={0} y={i * (cellSize + gap) + cellSize - 2} fontSize={8} fill="#94a3b8" textAnchor="start">
             {label}
