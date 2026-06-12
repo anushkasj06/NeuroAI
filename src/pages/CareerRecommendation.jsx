@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { career } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import './CareerRecommendation.css';
@@ -26,9 +27,10 @@ const mdComponents = {
   thead: ({children}) => <thead>{children}</thead>,
   tbody: ({children}) => <tbody>{children}</tbody>,
   tr:    ({children}) => <tr>{children}</tr>,
-  th:    ({children}) => <th>{children}</th>,
-  td:    ({children}) => <td>{children}</td>,
+  th:    ({children, style}) => <th style={style}>{children}</th>,
+  td:    ({children, style}) => <td style={style}>{children}</td>,
 };
+const MD_PLUGINS = [remarkGfm];
 
 // ─── Score bar ─────────────────────────────────────────────────────────────
 function ScoreBar({ value, color = '#0f766e', height = 6 }) {
@@ -531,7 +533,7 @@ function RecommendationsTab({ recs, explanation, selectedRole, setSelectedRole, 
           <div className="cr-card">
             <p className="cr-card-title">🤖 AI Analysis <span className="cr-badge" style={{marginLeft:6}}>llama3</span></p>
             <div className="cr-markdown">
-              <ReactMarkdown components={mdComponents}>{explanation}</ReactMarkdown>
+              <ReactMarkdown remarkPlugins={MD_PLUGINS} components={mdComponents}>{explanation}</ReactMarkdown>
             </div>
           </div>
         )}
@@ -733,7 +735,7 @@ function AdvisorsTab({ chats, onSend, onInputChange, targetRole }) {
             <div key={i} className={`cr-msg cr-msg-${m.speaker}`}>
               <div className="cr-msg-bubble">
                 {m.speaker==='assistant'
-                  ? <div className="cr-markdown cr-markdown-sm"><ReactMarkdown components={mdComponents}>{m.message}</ReactMarkdown></div>
+                  ? <div className="cr-markdown cr-markdown-sm"><ReactMarkdown remarkPlugins={MD_PLUGINS} components={mdComponents}>{m.message}</ReactMarkdown></div>
                   : m.message
                 }
               </div>

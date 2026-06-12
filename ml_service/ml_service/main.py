@@ -319,30 +319,16 @@ def live_jobs(role: str = "software engineer", location: str = "india", limit: i
             logging.getLogger(__name__).warning(f"Adzuna API failed: {e}")
             jobs = []
 
-    # Fallback 1: Jobicy (free, no auth, tech/remote focused)
+    # Fallback 1: JSearch via RapidAPI (aggregates LinkedIn + Indeed + Glassdoor, India-focused)
     if not jobs:
         try:
-            jobs = _fetch_jooble_jobs(role, location, limit)
+            jobs = _fetch_jsearch_jobs(role, location, limit)
         except Exception as e:
             import logging
-            logging.getLogger(__name__).warning(f"Jobicy API failed: {e}")
+            logging.getLogger(__name__).warning(f"JSearch API failed: {e}")
             jobs = []
 
-    # Fallback 2: Arbeitnow (free, no auth, tech-focused)
-    if not jobs:
-        try:
-            jobs = _fetch_arbeitnow_jobs(role, limit)
-        except Exception:
-            jobs = []
-
-    # Fallback 3: Remotive (remote jobs)
-    if not jobs:
-        try:
-            jobs = _fetch_remotive_jobs(role, limit)
-        except Exception:
-            jobs = []
-
-    # Fallback 4: Generate search links as a last resort so the user always sees something
+    # Fallback 2: India-specific job board search links (always works, no auth needed)
     if not jobs:
         jobs = _generate_job_search_links(role, location, limit)
 
@@ -427,59 +413,51 @@ def _fetch_adzuna_jobs(role: str, location: str, limit: int, app_id: str, app_ke
     return jobs
 
 
-def _fetch_remotive_jobs(role: str, limit: int) -> list[LiveJobItem]:
-    """Fallback: fetch remote jobs from Remotive API."""
-    query = quote_plus(f"{role}")
-    url = f"https://remotive.com/api/remote-jobs?search={query}&limit={limit}"
-    jobs: list[LiveJobItem] = []
+def _fetch_jsearch_jobs(role: str, location: str, limit: int) -> list[LiveJobItem]:
+    """Fetch jobs from JSearch API (RapidAPI) — aggregates LinkedIn, Indeed, Glassdoor with India support."""
+    rapidapi_key = os.getenv("RAPIDAPI_KEY", "").strip()
+    if not rapidapi_key:
+        return []
 
-    with urllib_request.urlopen(url, timeout=15) as response:
-        payload = json.loads(response.read().decode("utf-8"))
+    location_hint = location.strip() if location.strip().lower() not in ("", "open") else "India"
+    query = f"{role} in {location_hint}"
 
-    for row in payload.get("jobs", [])[:limit]:
-        jobs.append(
-            LiveJobItem(
-                title=str(row.get("title", "Unknown Role")),
-                company=str(row.get("company_name", "Unknown Company")),
-                location=str(row.get("candidate_required_location", "Remote")),
-                url=str(row.get("url", "")),
-                source="remotive",
-                role_hint=role,
-            )
-        )
-
-    return jobs
-
-
-def _fetch_jooble_jobs(role: str, location: str, limit: int) -> list[LiveJobItem]:
-    """Fetch jobs from Jobicy API (free, no auth, tech/remote focused)."""
-    # Map role to a tag keyword for Jobicy
-    role_lower = role.lower()
-    tag = role_lower.split()[0] if role_lower else "developer"
-    # Common tag mappings
-    tag_map = {
-        "java": "java", "python": "python", "react": "react", "javascript": "javascript",
-        "data": "data", "machine": "machine-learning", "backend": "backend",
-        "frontend": "frontend", "full": "full-stack", "devops": "devops",
-        "cloud": "cloud", "mobile": "mobile", "android": "android", "ios": "ios",
+    # India city names for filtering out non-Indian results
+    india_keywords = {
+        "india", "pune", "mumbai", "bangalore", "bengaluru", "hyderabad", "delhi",
+        "chennai", "noida", "gurgaon", "gurugram", "kolkata", "ahmedabad", "jaipur",
+        "kochi", "coimbatore", "indore", "bhopal", "remote",
     }
-    for keyword, mapped_tag in tag_map.items():
-        if keyword in role_lower:
-            tag = mapped_tag
-            break
 
-    url = f"https://jobicy.com/api/v2/remote-jobs?count={min(limit, 20)}&tag={quote_plus(tag)}"
-    req = urllib_request.Request(url, headers={"User-Agent": "CareerTwin/1.0"})
+    url = f"https://jsearch.p.rapidapi.com/search?query={quote_plus(query)}&page=1&num_pages=1&country=in"
+    req = urllib_request.Request(
+        url,
+        headers={
+            "X-RapidAPI-Key": rapidapi_key,
+            "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
+        },
+    )
 
-    with urllib_request.urlopen(req, timeout=12) as response:
+    with urllib_request.urlopen(req, timeout=15) as response:
         data = json.loads(response.read().decode("utf-8"))
 
     jobs: list[LiveJobItem] = []
-    for row in data.get("jobs", [])[:limit]:
-        title = str(row.get("jobTitle", "Unknown Role"))
-        company = str(row.get("companyName", "Unknown Company"))
-        job_location = str(row.get("jobGeo", "Remote"))
-        job_url = str(row.get("url", ""))
+    for row in data.get("data", []):
+        if len(jobs) >= limit:
+            break
+        title = str(row.get("job_title", "Unknown Role"))
+        company = str(row.get("employer_name", "Unknown Company"))
+        city = str(row.get("job_city") or "")
+        country = str(row.get("job_country") or "")
+        job_location = ", ".join(part for part in [city, country] if part) or location_hint
+        job_url = str(row.get("job_apply_link") or row.get("job_google_link") or "")
+        publisher = str(row.get("job_publisher") or "jsearch").lower()
+
+        # Filter to India-only results
+        loc_lower = job_location.lower()
+        country_lower = country.lower()
+        if country_lower and country_lower not in ("in", "india") and not any(k in loc_lower for k in india_keywords):
+            continue
 
         if title and job_url:
             jobs.append(
@@ -488,40 +466,7 @@ def _fetch_jooble_jobs(role: str, location: str, limit: int) -> list[LiveJobItem
                     company=company,
                     location=job_location,
                     url=job_url,
-                    source="jobicy",
-                    role_hint=role,
-                )
-            )
-
-    return jobs
-
-
-def _fetch_arbeitnow_jobs(role: str, limit: int) -> list[LiveJobItem]:
-    """Fetch jobs from Arbeitnow API (free, no auth, tech-focused)."""
-    query = quote_plus(role)
-    url = f"https://www.arbeitnow.com/api/job-board-api?search={query}"
-
-    req = urllib_request.Request(url, headers={"User-Agent": "CareerTwin/1.0"})
-    with urllib_request.urlopen(req, timeout=12) as response:
-        data = json.loads(response.read().decode("utf-8"))
-
-    jobs: list[LiveJobItem] = []
-    for row in data.get("data", [])[:limit]:
-        title = str(row.get("title", "Unknown Role"))
-        company = str(row.get("company_name", "Unknown Company"))
-        job_location = str(row.get("location", "Remote"))
-        job_url = str(row.get("url", ""))
-        remote = row.get("remote", False)
-
-        if title and job_url:
-            loc_display = f"{job_location}{' (Remote)' if remote else ''}"
-            jobs.append(
-                LiveJobItem(
-                    title=title,
-                    company=company,
-                    location=loc_display,
-                    url=job_url,
-                    source="arbeitnow",
+                    source=publisher,
                     role_hint=role,
                 )
             )
@@ -534,45 +479,57 @@ def _generate_job_search_links(role: str, location: str, limit: int) -> list[Liv
     encoded_role = quote_plus(role)
     encoded_location = quote_plus(location if location.lower() not in ("open", "") else "India")
 
+    loc_display = location if location.lower() not in ("open", "") else "India"
+    role_slug = encoded_role.replace("+", "-")
+    loc_slug = encoded_location.replace("+", "-")
+
     search_links = [
-        LiveJobItem(
-            title=f"{role} jobs on LinkedIn",
-            company="LinkedIn",
-            location=location or "India",
-            url=f"https://www.linkedin.com/jobs/search/?keywords={encoded_role}&location={encoded_location}",
-            source="search-link",
-            role_hint=role,
-        ),
-        LiveJobItem(
-            title=f"{role} jobs on Indeed",
-            company="Indeed",
-            location=location or "India",
-            url=f"https://www.indeed.co.in/jobs?q={encoded_role}&l={encoded_location}",
-            source="search-link",
-            role_hint=role,
-        ),
         LiveJobItem(
             title=f"{role} jobs on Naukri",
             company="Naukri.com",
-            location=location or "India",
-            url=f"https://www.naukri.com/{encoded_role.replace('+', '-')}-jobs-in-{encoded_location.replace('+', '-')}",
-            source="search-link",
+            location=loc_display,
+            url=f"https://www.naukri.com/{role_slug}-jobs-in-{loc_slug}",
+            source="naukri",
+            role_hint=role,
+        ),
+        LiveJobItem(
+            title=f"{role} jobs on LinkedIn India",
+            company="LinkedIn",
+            location=loc_display,
+            url=f"https://www.linkedin.com/jobs/search/?keywords={encoded_role}&location={encoded_location}&f_TPR=r86400",
+            source="linkedin",
+            role_hint=role,
+        ),
+        LiveJobItem(
+            title=f"{role} jobs on Indeed India",
+            company="Indeed",
+            location=loc_display,
+            url=f"https://www.indeed.co.in/jobs?q={encoded_role}&l={encoded_location}",
+            source="indeed",
             role_hint=role,
         ),
         LiveJobItem(
             title=f"{role} internships on Internshala",
             company="Internshala",
-            location=location or "India",
-            url=f"https://internshala.com/internships/{encoded_role.replace('+', '-')}-internship",
-            source="search-link",
+            location=loc_display,
+            url=f"https://internshala.com/internships/{role_slug}-internship-in-{loc_slug}",
+            source="internshala",
             role_hint=role,
         ),
         LiveJobItem(
-            title=f"{role} jobs on Glassdoor",
+            title=f"{role} jobs on Shine",
+            company="Shine.com",
+            location=loc_display,
+            url=f"https://www.shine.com/job-search/{role_slug}-jobs-in-{loc_slug}",
+            source="shine",
+            role_hint=role,
+        ),
+        LiveJobItem(
+            title=f"{role} jobs on Glassdoor India",
             company="Glassdoor",
-            location=location or "India",
-            url=f"https://www.glassdoor.co.in/Job/jobs.htm?sc.keyword={encoded_role}&locT=N&locId=115",
-            source="search-link",
+            location=loc_display,
+            url=f"https://www.glassdoor.co.in/Job/india-{role_slug}-jobs-SRCH_IL.0,5_IN115_KO6,{6 + len(role)}.htm",
+            source="glassdoor",
             role_hint=role,
         ),
     ]
