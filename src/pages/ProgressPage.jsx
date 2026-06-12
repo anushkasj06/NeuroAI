@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { studyPlanApi } from '../services/studyPlanApi';
 import { Link } from 'react-router-dom';
 import {
@@ -12,7 +12,7 @@ import {
   ChevronDownIcon, ArrowPathIcon, BeakerIcon,
   SignalIcon, BoltIcon,
 } from '@heroicons/react/24/outline';
-import './AIDashboard.css'; // reuse design tokens
+import './AIDashboard.css';
 
 const STATUS_CONFIG = {
   not_started:    { label: 'Not Started',     cls: 'pg-badge--muted' },
@@ -28,7 +28,6 @@ const SUBJECT_COLORS = [
   '#d97706', '#059669', '#0ea5e9',
 ];
 
-/* ── Helpers ────────────────────────────────────────────────────────── */
 function formatMinutes(m) {
   if (!m) return '0m';
   const h = Math.floor(m / 60);
@@ -48,7 +47,6 @@ function masteryColor(pct) {
   return '#dc2626';
 }
 
-/* ── Main Page ──────────────────────────────────────────────────────── */
 export default function ProgressPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -107,7 +105,6 @@ export default function ProgressPage() {
   return (
     <div className="ai-dashboard" style={{ minHeight: '100vh' }}>
       <div className="ai-shell">
-        {/* ── Header ──────────────────────────────────────────── */}
         <header style={{ marginBottom: 24 }} className="ai-fade-up">
           <p style={{ fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'var(--ai-accent)' }}>
             Progress Intelligence
@@ -120,7 +117,6 @@ export default function ProgressPage() {
           </p>
         </header>
 
-        {/* ── KPI Strip ───────────────────────────────────────── */}
         <div className="ai-kpi-strip ai-fade-up" style={{ gridTemplateColumns: 'repeat(6, 1fr)', animationDelay: '0.05s' }}>
           <KPI icon={<AcademicCapIcon />} label="Overall mastery" value={`${overview.overallMastery}%`} accent />
           <KPI icon={<ClockIcon />} label="Study time" value={formatMinutes(overview.totalStudyMinutes)} />
@@ -130,11 +126,8 @@ export default function ProgressPage() {
           <KPI icon={<BeakerIcon />} label="Quiz avg" value={`${quizPerformance.avgScore}%`} />
         </div>
 
-        {/* ── Main Grid ───────────────────────────────────────── */}
         <div className="ai-grid-main" style={{ marginTop: 24 }}>
-          {/* LEFT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-            {/* Subject Breakdown */}
             <Section title="Subject Performance" icon={<SignalIcon />} delay="0.1s">
               {subjectBreakdown.length === 0 ? (
                 <p style={{ color: '#64748b', fontSize: 13 }}>No subjects tracked yet.</p>
@@ -153,7 +146,6 @@ export default function ProgressPage() {
               )}
             </Section>
 
-            {/* Mastery Trend Chart */}
             {masteryTrend.length > 1 && (
               <Section title="Mastery Trend" icon={<ArrowTrendingUpIcon />} delay="0.15s">
                 <div style={{ width: '100%', height: 260 }}>
@@ -174,7 +166,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Session Timeline */}
             {recentSessions.length > 0 && (
               <Section title="Recent Sessions" icon={<ClockIcon />} delay="0.2s">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -206,9 +197,7 @@ export default function ProgressPage() {
             )}
           </div>
 
-          {/* RIGHT COLUMN */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-            {/* Radar Chart */}
             {radarData.length > 0 && (
               <Section title="Strength Radar" icon={<BoltIcon />} delay="0.1s">
                 <div style={{ width: '100%', height: 280 }}>
@@ -228,13 +217,11 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Activity Heatmap */}
             <Section title="Study Activity" icon={<FireIcon />} delay="0.15s"
               badge={`${activityHeatmap.filter(d => d.minutes > 0).length} active days`}>
               <ActivityHeatmap data={activityHeatmap} />
             </Section>
 
-            {/* Revision Schedule */}
             {revisionSchedule.length > 0 && (
               <Section title="Revision Schedule" icon={<ArrowPathIcon />} delay="0.2s">
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -275,7 +262,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Weak Concepts */}
             {weakConcepts.length > 0 && (
               <Section title="Concepts to Strengthen" icon={<ExclamationTriangleIcon />} delay="0.25s" warn>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -295,7 +281,6 @@ export default function ProgressPage() {
               </Section>
             )}
 
-            {/* Difficulty Distribution */}
             <Section title="Difficulty Spread" icon={<BeakerIcon />} delay="0.3s">
               <div style={{ display: 'flex', gap: 8 }}>
                 {['easy', 'medium', 'hard'].map((d) => {
@@ -322,8 +307,7 @@ export default function ProgressPage() {
   );
 }
 
-/* ── Sub-components ─────────────────────────────────────────────────── */
-
+/* Sub-components */
 function KPI({ icon, label, value, accent, warn }) {
   return (
     <div className="ai-kpi">
@@ -418,7 +402,6 @@ function ActivityHeatmap({ data }) {
   const weeks = [];
   let currentWeek = [];
 
-  // Pad start to align to Monday
   const firstDay = new Date(data[0].date).getDay();
   const padDays = firstDay === 0 ? 6 : firstDay - 1;
   for (let i = 0; i < padDays; i++) currentWeek.push(null);
@@ -443,7 +426,6 @@ function ActivityHeatmap({ data }) {
   return (
     <div style={{ overflowX: 'auto', paddingBottom: 4 }}>
       <svg width={svgW} height={svgH + 16} style={{ display: 'block' }}>
-        {/* Day labels */}
         {['M', '', 'W', '', 'F', '', 'S'].map((label, i) => (
           <text key={i} x={0} y={i * (cellSize + gap) + cellSize - 2} fontSize={8} fill="#94a3b8" textAnchor="start">
             {label}

@@ -29,6 +29,10 @@ import RecommendationCard from '../components/studyplan/RecommendationCard';
 import WeakTopicsAlert from '../components/studyplan/WeakTopicsAlert';
 import ModalityRadar from '../components/studyplan/ModalityRadar';
 import './AIDashboard.css';
+import AttentionAnalyticsPanel from '../components/common/AttentionAnalyticsPanel';
+import EngagementScoreCard from '../components/common/EngagementScoreCard';
+import AdaptiveDashboardPanel from '../components/common/AdaptiveDashboardPanel';
+import ContentAdaptDashboardPanel from '../components/common/ContentAdaptDashboardPanel';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, ArcElement, Title, Tooltip, Legend);
 
@@ -136,10 +140,12 @@ export default function AIDashboard() {
   };
 
   const quickActions = [
-    { to: '/ai-teacher', label: 'Start learning session', icon: BookOpenIcon },
+    { to: '/ai-teacher',       label: 'Start learning session', icon: BookOpenIcon },
     { to: '/study-plan/generate', label: 'Generate study plan', icon: SparklesIcon },
-    { to: '/progress', label: 'Review progress', icon: PresentationChartLineIcon },
-    { to: '/diagnostic', label: 'Redo diagnostic', icon: BeakerIcon },
+    { to: '/adaptive',         label: 'AI Insights',           icon: CpuChipIcon },
+    { to: '/content-adapt',    label: 'Content Formats',       icon: PresentationChartLineIcon },
+    { to: '/progress',         label: 'Review progress',       icon: PresentationChartLineIcon },
+    { to: '/diagnostic',       label: 'Redo diagnostic',       icon: BeakerIcon },
   ];
 
   return (
@@ -307,6 +313,26 @@ export default function AIDashboard() {
                 <ModalityRadar scores={a.modalityScores} />
               </div>
             )}
+
+            {/* ── Attention Analytics ───────────────────────────── */}
+            <div className="ai-fade-up" style={{ animationDelay: '0.13s' }}>
+              <AttentionAnalyticsPanel days={7} />
+            </div>
+
+            {/* ── Engagement Score ──────────────────────────────── */}
+            <div className="ai-fade-up" style={{ animationDelay: '0.15s' }}>
+              <EngagementScoreCard mode="dashboard" />
+            </div>
+
+            {/* ── Adaptive Engine recommendations ───────────────── */}
+            <div className="ai-fade-up" style={{ animationDelay: '0.17s' }}>
+              <AdaptiveDashboardPanel />
+            </div>
+
+            {/* ── Content Format recommendations ────────────────── */}
+            <div className="ai-fade-up" style={{ animationDelay: '0.19s' }}>
+              <ContentAdaptDashboardPanel />
+            </div>
 
             <div className="ai-rail ai-fade-up" style={{ animationDelay: '0.14s' }}>
               <div className="ai-panel__header">
