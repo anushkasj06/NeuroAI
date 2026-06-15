@@ -181,5 +181,31 @@ export const contentAdapt = {
   dismiss:      (recordId) => api.patch(`/content-adapt/${recordId}/dismiss`),
 };
 
+// ── AI Interview System ───────────────────────────────────────────────────────
+export const interview = {
+  /** Schedule a new interview */
+  schedule:       (data) => api.post('/interview/schedule', data),
+  /** Get all interviews for the logged-in user */
+  getAll:         (params = {}) => api.get('/interview', { params }),
+  /** Get a single interview by ID */
+  getOne:         (id) => api.get(`/interview/${id}`),
+  /** Generate questions and create Vapi assistant */
+  prepare:        (id) => api.post(`/interview/${id}/prepare`),
+  /** Start the interview (get Vapi call token) */
+  start:          (id) => api.post(`/interview/${id}/start`),
+  /** Append a transcript message during interview */
+  appendTranscript: (id, data) => api.post(`/interview/${id}/transcript`, data),
+  /** End interview and trigger analysis */
+  end:            (id, data = {}) => api.post(`/interview/${id}/end`, data),
+  /** Get analysis result */
+  getAnalysis:    (id) => api.get(`/interview/${id}/analysis`),
+  /** Get full report */
+  getReport:      (id) => api.get(`/interview/${id}/report`),
+  /** Get user interview analytics */
+  getAnalytics:   () => api.get('/interview/analytics'),
+  /** Delete an interview */
+  remove:         (id) => api.delete(`/interview/${id}`),
+};
+
 export { API_BASE };
 export default api;
