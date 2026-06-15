@@ -24,6 +24,7 @@ const analyticsRoutes       = require('./routes/analyticsRoutes');
 const adaptiveLearningRoutes  = require('./routes/adaptiveLearningRoutes');
 const contentAdaptationRoutes = require('./routes/contentAdaptationRoutes');
 const assessmentMonitoringRoutes = require('./routes/assessmentMonitoringRoutes');
+const interviewRoutes            = require('./routes/interviewRoutes');
 
 const { initSocket } = require('./sockets');
 
@@ -53,7 +54,7 @@ app.get('/api/health', (req, res) => {
       'auth', 'profile', 'quiz', 'diagnostic', 'rapid-battle',
       'study-plan', 'learning-material', 'ai-teacher',
       'chatbot', 'teacher', 'content', 'emotion', 'attention',
-      'analytics', 'adaptive', 'content-adapt', 'assessment-monitor'
+      'analytics', 'adaptive', 'content-adapt', 'assessment-monitor', 'interview'
     ],
   });
 });
@@ -77,6 +78,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/adaptive',       adaptiveLearningRoutes);
 app.use('/api/content-adapt',        contentAdaptationRoutes);
 app.use('/api/assessment-monitor',   assessmentMonitoringRoutes);
+app.use('/api/interview',            interviewRoutes);
 
 // Connect to MongoDB
 mongoose
