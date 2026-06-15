@@ -37,6 +37,8 @@ const studentLinksBase = [
   { to: '/battle',        label: 'Battle Arena', icon: PuzzlePieceIcon },
   { to: '/community',     label: 'Community',    icon: ChatBubbleLeftRightIcon },
   { to: '/diagnostic',    label: 'Diagnostic',   icon: BeakerIcon },
+  { to: '/career-recommendation', label: 'Career Recommendation', icon: ChartBarSquareIcon },
+  // { to: '/prediction', label: 'Predictions', icon: ChartBarSquareIcon },
   // { to: '/socket-test',  label: 'Socket Test',  icon: PuzzlePieceIcon },
   { to: '/profile',       label: 'Profile',      icon: UserCircleIcon },
 ];
