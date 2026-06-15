@@ -102,6 +102,24 @@ export const chatbot = {
   sendMessage: (data) => api.post('/chatbot/message', data),
 };
 
+export const career = {
+  uploadResume: (file) => {
+    const fd = new FormData();
+    fd.append('resume', file);
+    return api.post('/career/resume/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' }, timeout: 120000 });
+  },
+  getResumeData: () => api.get('/career/resume'),
+  viewResumeUrl: () => `${API_BASE}/api/career/resume/view`,
+  deleteResume: () => api.delete('/career/resume'),
+  recommend: (force = false) => api.post(`/career/recommend?force=${force}`),
+  simulate: (addedSkills, removedSkills) => api.post('/career/simulate', { addedSkills, removedSkills }),
+  skillGap: (role, goal) => api.post('/career/skill-gap', { role, goal }),
+  roleChat: (role, persona, message, history = []) => api.post('/career/role-chat', { role, persona, message, history }),
+  marketTrends: () => api.get('/career/market-trends'),
+  liveJobs: (role, location, limit = 20) =>
+    api.get(`/career/live-jobs?role=${encodeURIComponent(role)}&location=${encodeURIComponent(location || 'india')}&limit=${limit}`),
+};
+
 export const emotion = {
   logEmotion: (data) => api.post('/emotion', data),
 };

@@ -38,6 +38,32 @@ const userSchema = new mongoose.Schema({
     ref: 'User',
     default: null,
   },
+  resume: {
+    filePath: { type: String, default: null },
+    originalName: { type: String, default: null },
+    uploadedAt: { type: Date, default: null },
+  },
+  cachedRecommendations: {
+    recommendations: { type: mongoose.Schema.Types.Mixed, default: null },
+    explanation:     { type: String, default: null },
+    generatedAt:     { type: Date,   default: null },
+  },
+  resumeData: {
+    name: String,
+    email: String,
+    skills: [{ name: String, level: Number, category: String }],
+    interests: [String],
+    interestsText: String,
+    projects: [String],
+    experience: [String],
+    certifications: [String],
+    objective: String,
+    college: String,
+    branch: String,
+    year: Number,
+    resumeText: String,
+    extractedAt: { type: Date, default: null },
+  },
   profile: {
     collegeName: {
       type: String,
