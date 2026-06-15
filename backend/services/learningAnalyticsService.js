@@ -191,10 +191,7 @@ async function aggregateEmotion(sessionId, userId) {
  * @returns {{ interactionComponent, detail }}
  */
 async function aggregateInteractions(sessionId, sessionDurationMs) {
-  const [events, snaps] = await Promise.all([
-    TeachingHistory.find({ learningSessionId: sessionId }).lean(),
-    AttentionSnapshot.find({ sessionId }).lean()
-  ]);
+  const events = await TeachingHistory.find({ learningSessionId: sessionId }).lean();
 
   const interactionTypes = [
     'answer_analyzed',
@@ -207,35 +204,8 @@ async function aggregateInteractions(sessionId, sessionDurationMs) {
   const filtered = events.filter((e) => interactionTypes.includes(e.eventType));
   const count    = filtered.length;
 
-  let cursorMoves = 0, clicks = 0, keyPresses = 0, scrolls = 0;
-  let tabSwitches = 0, windowBlurs = 0, cursorLeaves = 0;
-  let windowBlurDurationMs = 0;
-  let totalIdleCount = 0;
-  let validSnaps = 0;
-
-  for (const snap of snaps) {
-    if (!snap.browserTelemetry) continue;
-    validSnaps++;
-    const bt = snap.browserTelemetry;
-    cursorMoves += bt.cursorMoveCount || 0;
-    clicks += bt.clickCount || 0;
-    keyPresses += bt.keyPressCount || 0;
-    scrolls += bt.scrollCount || 0;
-    tabSwitches += bt.tabSwitchCount || 0;
-    windowBlurs += bt.windowBlurCount || 0;
-    cursorLeaves += bt.cursorLeaveCount || 0;
-    windowBlurDurationMs += bt.windowBlurDurationMs || 0;
-    if (bt.isIdle) totalIdleCount++;
-  }
-
-  const idleRate = validSnaps > 0 ? (totalIdleCount / validSnaps) * 100 : 0;
-  
-  // Combine browser telemetry events with teaching history events
-  const browserEventCount = clicks + keyPresses + scrolls;
-  const equivalentEvents = count + (browserEventCount / 20); // 20 physical actions ~ 1 meaningful interaction
-
   const durationMinutes = Math.max(1, sessionDurationMs / 60_000);
-  const eventsPerMin    = equivalentEvents / durationMinutes;
+  const eventsPerMin    = count / durationMinutes;
 
   // Normalise: MAX_INTERACTIONS_PER_MIN → 100
   const interactionComponent = clamp((eventsPerMin / MAX_INTERACTIONS_PER_MIN) * 100);
@@ -254,17 +224,6 @@ async function aggregateInteractions(sessionId, sessionDurationMs) {
       eventsPerMin: round1(eventsPerMin),
       interactionEvents,
       activeInteractionMinutes: round1(Math.min(durationMinutes, count / MAX_INTERACTIONS_PER_MIN)),
-      browserTelemetry: {
-        cursorMoves,
-        clicks,
-        keyPresses,
-        scrolls,
-        tabSwitches,
-        windowBlurs,
-        cursorLeaves,
-        windowBlurDurationMs,
-        idleRate: round1(idleRate),
-      }
     },
   };
 }
@@ -368,7 +327,6 @@ exports.computeAndSave = async (sessionId, userId) => {
         // Interaction detail
         interactionEvents:         inter.detail.interactionEvents,
         activeInteractionMinutes:  inter.detail.activeInteractionMinutes,
-        browserTelemetry:          inter.detail.browserTelemetry,
       },
     },
     { upsert: true, new: true }

@@ -28,7 +28,6 @@ exports.saveSnapshot = async (req, res) => {
       attentionScore,
       focusPercentage,
       distractionEvents = [],
-      browserTelemetry = {},
     } = req.body;
 
     if (!sessionId) {
@@ -58,17 +57,6 @@ exports.saveSnapshot = async (req, res) => {
       attentionScore: clamp(attentionScore),
       focusPercentage: clamp(focusPercentage),
       distractionEvents: Array.isArray(distractionEvents) ? distractionEvents : [],
-      browserTelemetry: {
-        cursorMoveCount: Number(browserTelemetry.cursorMoveCount) || 0,
-        clickCount: Number(browserTelemetry.clickCount) || 0,
-        keyPressCount: Number(browserTelemetry.keyPressCount) || 0,
-        scrollCount: Number(browserTelemetry.scrollCount) || 0,
-        tabSwitchCount: Number(browserTelemetry.tabSwitchCount) || 0,
-        windowBlurCount: Number(browserTelemetry.windowBlurCount) || 0,
-        cursorLeaveCount: Number(browserTelemetry.cursorLeaveCount) || 0,
-        windowBlurDurationMs: Number(browserTelemetry.windowBlurDurationMs) || 0,
-        isIdle: Boolean(browserTelemetry.isIdle),
-      },
     });
 
     res.status(201).json({ status: 'success', data: snapshot });
@@ -192,12 +180,6 @@ function buildEmptySummary() {
     totalScreenUnfocusedMs: 0,
     facePresenceRate: 0,
     screenFocusRate: 0,
-    idleRate: 0,
-    interactionTotals: {
-      cursorMoves: 0,
-      clicks: 0,
-      keyPresses: 0,
-    },
     distractionBreakdown: {},
     snapshotCount: 0,
   };
@@ -214,10 +196,6 @@ function aggregateSnapshots(snapshots) {
   let totalScreenUnfocusedMs = 0;
   let faceDetectedCount = 0;
   let screenFocusedCount = 0;
-  let totalCursorIdleCount = 0;
-  let sumCursorMoves = 0;
-  let sumClicks = 0;
-  let sumKeyPresses = 0;
   const distractionBreakdown = {};
 
   for (const snap of snapshots) {
@@ -228,14 +206,6 @@ function aggregateSnapshots(snapshots) {
     totalScreenUnfocusedMs += snap.screenUnfocusedDurationMs || 0;
     if (snap.facePresent) faceDetectedCount++;
     if (snap.isScreenFocused) screenFocusedCount++;
-    
-    if (snap.browserTelemetry) {
-      if (snap.browserTelemetry.isIdle) totalCursorIdleCount++;
-      sumCursorMoves += snap.browserTelemetry.cursorMoveCount || 0;
-      sumClicks += snap.browserTelemetry.clickCount || 0;
-      sumKeyPresses += snap.browserTelemetry.keyPressCount || 0;
-    }
-
     for (const evt of snap.distractionEvents || []) {
       distractionBreakdown[evt] = (distractionBreakdown[evt] || 0) + 1;
     }
@@ -249,12 +219,6 @@ function aggregateSnapshots(snapshots) {
     totalScreenUnfocusedMs,
     facePresenceRate: Math.round((faceDetectedCount / n) * 100),
     screenFocusRate: Math.round((screenFocusedCount / n) * 100),
-    idleRate: Math.round((totalCursorIdleCount / n) * 100),
-    interactionTotals: {
-      cursorMoves: sumCursorMoves,
-      clicks: sumClicks,
-      keyPresses: sumKeyPresses,
-    },
     distractionBreakdown,
     snapshotCount: n,
   };

@@ -23,8 +23,6 @@ const SNAPSHOT_INTERVAL_MS = 3_000;  // 3 seconds — first telemetry snapshot a
 const HEAD_YAW_THRESHOLD   = 25;     // degrees — beyond this = head turned
 const HEAD_PITCH_THRESHOLD = 25;     // degrees
 const GAZE_THRESHOLD       = 0.12;   // normalised iris offset
-const CURSOR_IDLE_THRESHOLD_MS = 1_500;
-const POINTER_SAMPLE_MS = 100;
 
 // MediaPipe CDN load guard — only inject once per page
 let mediapipeLoading = false;
@@ -182,18 +180,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
       screenFocusedAtStart:    true,
       lastScreenBlurAt:        null,
       lastFaceMissingAt:       null,
-      lastPointerMoveAt:       Date.now(),
-      lastPointerSampleAt:     0,
-      lastInteractionAt:       Date.now(),
-      lastWindowBlurAt:        null,
-      cursorMoveCount:         0,
-      clickCount:              0,
-      keyPressCount:           0,
-      scrollCount:             0,
-      tabSwitchCount:          0,
-      windowBlurCount:         0,
-      cursorLeaveCount:        0,
-      windowBlurDurationMs:    0,
       headPoseAccum:           { yaw: 0, pitch: 0, roll: 0 },
       gazeAccum:               {},
       distractionEvents:       new Set(),
@@ -207,7 +193,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
       const w = windowRef.current;
       if (!focused) {
         w.lastScreenBlurAt = Date.now();
-        w.tabSwitchCount++;
         w.distractionEvents.add('tab_switch');
       } else if (w.lastScreenBlurAt) {
         w.screenUnfocusedMs += Date.now() - w.lastScreenBlurAt;
@@ -373,11 +358,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
       w.lastFaceMissingAt = now;
     }
 
-    if (w.lastWindowBlurAt) {
-      w.windowBlurDurationMs += now - w.lastWindowBlurAt;
-      w.lastWindowBlurAt = now;
-    }
-
     // Average pose
     const avgPose = {
       yaw:   Math.round(w.headPoseAccum.yaw   / n),
@@ -394,10 +374,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
     const facePresent = w.facePresentFrames > n / 2;
     const isScreenFocused = document.visibilityState === 'visible';
     const lookingAwayMs = Math.round((w.lookingAwayFrames / n) * SNAPSHOT_INTERVAL_MS);
-
-    // Compute idle time
-    const timeSinceInteraction = Date.now() - w.lastInteractionAt;
-    const isIdle = timeSinceInteraction > CURSOR_IDLE_THRESHOLD_MS;
 
     const attScore = computeAttentionScore({
       facePresent,
@@ -425,17 +401,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
       attentionScore: attScore,
       focusPercentage: focusPct,
       distractionEvents: [...w.distractionEvents],
-      browserTelemetry: {
-        cursorMoveCount: w.cursorMoveCount,
-        clickCount: w.clickCount,
-        keyPressCount: w.keyPressCount,
-        scrollCount: w.scrollCount,
-        tabSwitchCount: w.tabSwitchCount,
-        windowBlurCount: w.windowBlurCount,
-        cursorLeaveCount: w.cursorLeaveCount,
-        windowBlurDurationMs: w.windowBlurDurationMs,
-        isIdle,
-      }
     };
 
     // Reset window
@@ -448,81 +413,6 @@ export function useAttentionTracker({ sessionId, enabled = false }) {
       console.warn('[AttentionTracker] snapshot save failed:', err.message);
     }
   }, [sessionId, isActive]);
-
-  // ── Browser Interaction Tracking ─────────────────────────────────────────
-  useEffect(() => {
-    if (!enabled || !sessionId) return;
-
-    const onPointerMove = () => {
-      const now = Date.now();
-      const w = windowRef.current;
-      w.lastInteractionAt = now;
-      if (now - w.lastPointerSampleAt > POINTER_SAMPLE_MS) {
-        w.cursorMoveCount++;
-        w.lastPointerSampleAt = now;
-      }
-      w.lastPointerMoveAt = now;
-    };
-    
-    const onClick = () => {
-      const w = windowRef.current;
-      w.lastInteractionAt = Date.now();
-      w.clickCount++;
-    };
-    
-    const onKeydown = () => {
-      const w = windowRef.current;
-      w.lastInteractionAt = Date.now();
-      w.keyPressCount++;
-    };
-    
-    const onScroll = () => {
-      const w = windowRef.current;
-      w.lastInteractionAt = Date.now();
-      w.scrollCount++;
-    };
-    
-    const onMouseLeave = (e) => {
-      const w = windowRef.current;
-      if (!e.relatedTarget && !e.toElement) {
-        w.cursorLeaveCount++;
-        w.distractionEvents.add('cursor_left');
-      }
-    };
-    
-    const onWindowBlur = () => {
-      const w = windowRef.current;
-      w.windowBlurCount++;
-      w.lastWindowBlurAt = Date.now();
-      w.distractionEvents.add('window_blur');
-    };
-    
-    const onWindowFocus = () => {
-      const w = windowRef.current;
-      if (w.lastWindowBlurAt) {
-        w.windowBlurDurationMs += Date.now() - w.lastWindowBlurAt;
-        w.lastWindowBlurAt = null;
-      }
-    };
-
-    window.addEventListener('pointermove', onPointerMove, { passive: true });
-    window.addEventListener('click', onClick, { passive: true });
-    window.addEventListener('keydown', onKeydown, { passive: true });
-    window.addEventListener('scroll', onScroll, { passive: true });
-    document.addEventListener('mouseleave', onMouseLeave);
-    window.addEventListener('blur', onWindowBlur);
-    window.addEventListener('focus', onWindowFocus);
-
-    return () => {
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('click', onClick);
-      window.removeEventListener('keydown', onKeydown);
-      window.removeEventListener('scroll', onScroll);
-      document.removeEventListener('mouseleave', onMouseLeave);
-      window.removeEventListener('blur', onWindowBlur);
-      window.removeEventListener('focus', onWindowFocus);
-    };
-  }, [enabled, sessionId]);
 
   // ── Start/stop based on enabled + sessionId ──────────────────────────────
   useEffect(() => {

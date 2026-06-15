@@ -1,87 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { emotion } from '../../services/api';
 
-const EMOTION_KEYS = ['happy', 'neutral', 'confused', 'frustrated', 'sad', 'engaged'];
-const clamp01 = (value) => Math.max(0, Math.min(1, Number(value) || 0));
-
-function normalizeProbabilities(emotions = {}) {
-  const normalized = {};
-  let total = 0;
-  for (const key of EMOTION_KEYS) {
-    normalized[key] = clamp01(emotions[key]);
-    total += normalized[key];
-  }
-
-  if (total > 1.05) {
-    for (const key of EMOTION_KEYS) {
-      normalized[key] = Number((normalized[key] / total).toFixed(3));
-    }
-  }
-  return normalized;
-}
-
-function normalizeEstimate(raw) {
-  const total = EMOTION_KEYS.reduce((sum, key) => sum + clamp01(raw[key]), 0) || 1;
-  const emotions = {};
-  for (const key of EMOTION_KEYS) {
-    emotions[key] = Number((clamp01(raw[key]) / total).toFixed(3));
-  }
-  const dominantEmotion = Object.entries(emotions).sort((a, b) => b[1] - a[1])[0]?.[0] || 'neutral';
-  return { dominantEmotion, emotions, faceDetected: true };
-}
-
-function estimateLocalEmotion(canvas, previousSignatureRef) {
-  const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  const width = canvas.width;
-  const height = canvas.height;
-  if (!ctx || !width || !height) {
-    return { dominantEmotion: 'unavailable', emotions: null, faceDetected: false };
-  }
-
-  const data = ctx.getImageData(0, 0, width, height).data;
-  const step = Math.max(4, Math.floor(Math.min(width, height) / 40));
-  const signature = [];
-  let count = 0;
-  let sum = 0;
-  let sumSq = 0;
-
-  for (let y = 0; y < height; y += step) {
-    for (let x = 0; x < width; x += step) {
-      const index = (y * width + x) * 4;
-      const luma = (0.299 * data[index] + 0.587 * data[index + 1] + 0.114 * data[index + 2]) / 255;
-      signature.push(luma);
-      sum += luma;
-      sumSq += luma * luma;
-      count++;
-    }
-  }
-
-  const brightness = count ? sum / count : 0;
-  const contrast = count ? Math.sqrt(Math.max(0, sumSq / count - brightness * brightness)) : 0;
-  const previous = previousSignatureRef.current;
-  let motion = 0;
-  if (previous?.length === signature.length) {
-    for (let i = 0; i < signature.length; i++) {
-      motion += Math.abs(signature[i] - previous[i]);
-    }
-    motion /= signature.length;
-  }
-  previousSignatureRef.current = signature;
-
-  if (brightness < 0.05 || brightness > 0.97 || contrast < 0.015) {
-    return { dominantEmotion: 'unavailable', emotions: null, faceDetected: false };
-  }
-
-  return normalizeEstimate({
-    engaged: 0.22 + contrast * 1.4 + motion * 0.8,
-    happy: 0.08 + brightness * 0.16 + motion * 0.12,
-    confused: 0.10 + contrast * 0.55 - motion * 0.18,
-    frustrated: 0.05 + (brightness < 0.28 ? 0.06 : 0) + contrast * 0.15,
-    sad: 0.04 + (brightness < 0.30 ? 0.08 : 0),
-    neutral: 0.30 + Math.max(0, 0.08 - motion),
-  });
-}
-
 /**
  * WebcamEmotionDetector
  * Reusable React component that accesses the student's webcam using native browser APIs,
@@ -100,13 +19,9 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
   const [currentEmotion, setCurrentEmotion] = useState(null);
   const [emotionProbabilities, setEmotionProbabilities] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [analysisStatus, setAnalysisStatus] = useState('');
-  const [emotionSource, setEmotionSource] = useState('vision');
 
   // Reference stream to clean up when component unmounts
   const streamRef = useRef(null);
-  const analyzingRef = useRef(false);
-  const lastFrameSignatureRef = useRef(null);
 
   // Toggle webcam capture
   const handleToggle = async () => {
@@ -151,8 +66,6 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
     setIsActive(false);
     setCurrentEmotion(null);
     setEmotionProbabilities(null);
-    setAnalysisStatus('');
-    setEmotionSource('vision');
   };
 
   // Auto clean up camera stream on unmount
@@ -183,7 +96,7 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
     const video = videoRef.current;
     const canvas = canvasRef.current;
 
-    if (!video || !canvas || video.paused || video.ended || analyzingRef.current) return;
+    if (!video || !canvas || video.paused || video.ended) return;
 
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
@@ -195,9 +108,7 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
 
     // Convert frame to base64 JPEG with quality compression (0.7) to keep payload small
     const base64Image = canvas.toDataURL('image/jpeg', 0.7);
-    const localEstimate = estimateLocalEmotion(canvas, lastFrameSignatureRef);
 
-    analyzingRef.current = true;
     setIsAnalyzing(true);
     try {
       const response = await emotion.logEmotion({
@@ -208,31 +119,8 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
 
       if (response.data?.status === 'success' || response.data?.status === 'warning') {
         const payload = response.data.data;
-
-        if (payload.analysisUnavailable) {
-          setCurrentEmotion(localEstimate.dominantEmotion);
-          setEmotionProbabilities(localEstimate.emotions);
-          setEmotionSource('local');
-          setAnalysisStatus('Vision provider unavailable. Showing local camera estimate.');
-          if (onEmotionDetected) {
-            onEmotionDetected({ ...payload, ...localEstimate, source: 'local_estimate' });
-          }
-          return;
-        }
-
-        if (payload.faceDetected === false) {
-          setCurrentEmotion('no_face');
-          setEmotionProbabilities(null);
-          setEmotionSource('camera');
-          setAnalysisStatus('No face detected in the latest frame.');
-          if (onEmotionDetected) onEmotionDetected(payload);
-          return;
-        }
-
         setCurrentEmotion(payload.dominantEmotion);
-        setEmotionProbabilities(normalizeProbabilities(payload.emotions));
-        setEmotionSource('vision');
-        setAnalysisStatus('');
+        setEmotionProbabilities(payload.emotions);
         
         if (onEmotionDetected) {
           onEmotionDetected(payload);
@@ -240,13 +128,8 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
       }
     } catch (err) {
       console.error('Frame analysis failed:', err.message);
-      setCurrentEmotion(localEstimate.dominantEmotion);
-      setEmotionProbabilities(localEstimate.emotions);
-      setEmotionSource('local');
-      setAnalysisStatus('Emotion API failed. Showing local camera estimate.');
     } finally {
       setIsAnalyzing(false);
-      analyzingRef.current = false;
     }
   };
 
@@ -273,12 +156,6 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
       engaged: 'text-indigo-500 bg-indigo-50 border-indigo-200'
     };
     return map[emotion] || 'text-gray-400 bg-gray-50 border-gray-200';
-  };
-
-  const getEmotionLabel = (emotion) => {
-    if (emotion === 'no_face') return 'No face';
-    if (emotion === 'unavailable') return 'Unavailable';
-    return emotion;
   };
 
   return (
@@ -352,35 +229,27 @@ const WebcamEmotionDetector = ({ sessionId, triggerContext = {}, onEmotionDetect
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tutor Diagnostic</span>
                 <span className={`flex items-center space-x-1.5 px-3 py-1 rounded-full text-xs font-bold border ${getEmotionColor(currentEmotion)}`}>
                   <span>{getEmotionEmoji(currentEmotion)}</span>
-                  <span className="capitalize">{getEmotionLabel(currentEmotion)}</span>
+                  <span className="capitalize">{currentEmotion}</span>
                 </span>
               </div>
-              {(analysisStatus || emotionSource === 'local') && (
-                <p className="text-[10px] text-slate-500 mb-2">
-                  {analysisStatus || 'Local camera estimate'}
-                </p>
-              )}
 
               {/* Individual probability telemetry bars */}
               {emotionProbabilities && (
                 <div className="space-y-2.5 bg-slate-50 border border-slate-100 rounded-xl p-3.5">
-                  {Object.entries(emotionProbabilities).map(([key, val]) => {
-                    const pct = Math.round(clamp01(val) * 100);
-                    return (
-                      <div key={key} className="flex items-center space-x-3 text-xs">
-                        <span className="w-16 capitalize font-semibold text-slate-600">{key}</span>
-                        <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden shadow-inner">
-                          <div
-                            style={{ width: `${pct}%` }}
-                            className={`h-full rounded-full transition-all duration-500 ease-out ${
-                              key === currentEmotion ? 'bg-indigo-600' : 'bg-indigo-600/40'
-                            }`}
-                          />
-                        </div>
-                        <span className="w-8 text-right font-medium text-slate-600">{pct}%</span>
+                  {Object.entries(emotionProbabilities).map(([key, val]) => (
+                    <div key={key} className="flex items-center space-x-3 text-xs">
+                      <span className="w-16 capitalize font-semibold text-slate-600">{key}</span>
+                      <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden shadow-inner">
+                        <div
+                          style={{ width: `${val * 100}%` }}
+                          className={`h-full rounded-full transition-all duration-500 ease-out ${
+                            key === currentEmotion ? 'bg-indigo-600' : 'bg-indigo-600/40'
+                          }`}
+                        />
                       </div>
-                    );
-                  })}
+                      <span className="w-8 text-right font-medium text-slate-600">{Math.round(val * 100)}%</span>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
