@@ -31,5 +31,8 @@ router.post('/skill-gap', protect, careerController.skillGap);
 router.post('/role-chat', protect, careerController.roleChat);
 router.get('/market-trends', protect, careerController.marketTrends);
 router.get('/live-jobs', protect, careerController.liveJobs);
+router.post('/linkedin/scrape', protect, careerController.scrapeLinkedIn);
+router.get('/linkedin', protect, careerController.getLinkedInData);
+router.delete('/linkedin', protect, careerController.clearLinkedInData);
 
 module.exports = router;

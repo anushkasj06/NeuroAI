@@ -4,6 +4,7 @@ const https = require('https');
 const http = require('http');
 
 const User = require('../models/User');
+const { scrapeLinkedIn, normalizeLinkedInUrl } = require('../services/linkedinScraper');
 
 const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
 
@@ -49,28 +50,54 @@ function mlGet(endpoint) {
   });
 }
 
-/** Build ML profile payload from NeuroAI user + resumeData */
+/** Build ML profile payload from NeuroAI user + resumeData + linkedinData */
 function buildMlProfile(user) {
-  const rd = user.resumeData || {};
-  const p = user.profile || {};
-  const skills = (rd.skills && rd.skills.length)
-    ? rd.skills.map((s) => ({ name: s.name, level: s.level, category: s.category }))
-    : [];
-  const interests = rd.interests || [];
+  const rd = user.resumeData   || {};
+  const li = user.linkedinData || {};
+  const p  = user.profile      || {};
+
+  // Merge skills from all sources
+  const rdSkills = (rd.skills || []).map(s => ({ name: s.name, level: s.level, category: s.category }));
+  const liSkills = (li.skills || []).map(s => ({ name: typeof s === 'string' ? s : s.name }));
+  const skillMap = new Map();
+  [...rdSkills, ...liSkills].forEach(s => { if (s.name && !skillMap.has(s.name.toLowerCase())) skillMap.set(s.name.toLowerCase(), s); });
+  const skills = [...skillMap.values()];
+
+  // Merge experience
+  const rdExp = rd.experience || [];
+  const liExp = (li.experience || []).map(e => `${e.title || ''} at ${e.company || ''}`.trim()).filter(Boolean);
+  const experience = [...new Set([...rdExp, ...liExp])];
+
+  // Merge certifications
+  const certifications = [...new Set([...(rd.certifications || []), ...(li.certifications || [])])];
+
+  // Merge interests — include LinkedIn about + posts as interest context
+  const interests = [...new Set([...(rd.interests || [])])];
+  const interestsParts = [
+    rd.interestsText || '',
+    li.about         || '',
+    li.headline      || '',
+    (li.posts || []).slice(0, 3).join(' '),
+  ].filter(Boolean);
+  const interestsText = interestsParts.join(' | ') || interests.join(', ') || null;
+
+  // Merge projects
+  const projects = [...new Set([...(rd.projects || [])])];
+
   return {
-    name: user.name,
-    email: user.email,
-    college: rd.college || p.collegeName || null,
-    branch: rd.branch || p.branch || null,
-    year: rd.year || p.currentYear || null,
+    name:           user.name,
+    email:          user.email,
+    college:        rd.college  || li.education?.[0]?.school || p.collegeName || null,
+    branch:         rd.branch   || p.branch || null,
+    year:           rd.year     || p.currentYear || null,
     skills,
     interests,
-    interests_text: rd.interestsText || interests.join(', ') || null,
-    projects: rd.projects || [],
-    experience: rd.experience || [],
-    certifications: rd.certifications || [],
-    objective: rd.objective || null,
-    resumeText: rd.resumeText || null,
+    interests_text: interestsText,
+    projects,
+    experience,
+    certifications,
+    objective:      rd.objective || li.headline || null,
+    resumeText:     rd.resumeText || null,
   };
 }
 
@@ -304,5 +331,63 @@ exports.liveJobs = async (req, res) => {
     res.json({ status: 'success', data: result });
   } catch (err) {
     res.status(502).json({ status: 'error', message: err.message });
+  }
+};
+
+// ─── LinkedIn endpoints ────────────────────────────────────────────────────
+
+exports.scrapeLinkedIn = async (req, res) => {
+  const { linkedinUrl } = req.body;
+  if (!linkedinUrl) return res.status(400).json({ status: 'error', message: 'linkedinUrl is required' });
+
+  // Save URL immediately so UI shows "in progress"
+  await User.findByIdAndUpdate(req.user.id, {
+    linkedinUrl,
+    'linkedinData.scrapeError': null,
+    'linkedinData.scrapedAt': null,
+  });
+
+  try {
+    const data = await scrapeLinkedIn(linkedinUrl);
+    const user = await User.findByIdAndUpdate(
+      req.user.id,
+      { linkedinUrl, linkedinData: data },
+      { new: true }
+    ).select('-password');
+
+    // Invalidate recommendation cache so next load re-generates with LinkedIn context
+    await User.findByIdAndUpdate(req.user.id, {
+      'cachedRecommendations.generatedAt': null,
+    });
+
+    res.json({ status: 'success', data: { linkedinData: user.linkedinData } });
+  } catch (err) {
+    // Persist the error so the UI can show it
+    await User.findByIdAndUpdate(req.user.id, {
+      'linkedinData.scrapeError': err.message,
+      'linkedinData.scrapedAt': new Date(),
+    });
+    res.status(422).json({ status: 'error', message: err.message });
+  }
+};
+
+exports.getLinkedInData = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('linkedinUrl linkedinData');
+    res.json({ status: 'success', data: { linkedinUrl: user.linkedinUrl, linkedinData: user.linkedinData } });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
+  }
+};
+
+exports.clearLinkedInData = async (req, res) => {
+  try {
+    await User.findByIdAndUpdate(req.user.id, {
+      $unset: { linkedinUrl: '', linkedinData: '' },
+      'cachedRecommendations.generatedAt': null,
+    });
+    res.json({ status: 'success' });
+  } catch (err) {
+    res.status(500).json({ status: 'error', message: err.message });
   }
 };

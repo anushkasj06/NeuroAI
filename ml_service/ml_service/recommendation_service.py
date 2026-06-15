@@ -255,71 +255,46 @@ def role_chat_response(
         ),
     }.get(persona_key, "You are a role-specific career assistant.")
 
-    payload = {
-        "persona": persona,
-        "role": role,
-        "student_profile": {
-            "name": user_profile.name,
-            "college": user_profile.college,
-            "branch": user_profile.branch,
-            "year": user_profile.year,
-            "location_preference": user_profile.location_preference,
-            "salary_expectation": user_profile.salary_expectation,
-            "remote_preference": user_profile.remote_preference,
-            "skills": [{"name": skill.name, "level": skill.level, "category": skill.category} for skill in user_profile.skills],
-            "interests": user_profile.interests,
-            "interests_text": user_profile.interests_text,
-            "objective": getattr(user_profile, "objective", None),
-            "projects": getattr(user_profile, "projects", []) or [],
-            "experience": getattr(user_profile, "experience", []) or [],
-            "certifications": getattr(user_profile, "certifications", []) or [],
-        },
-        "user_message": message or "Give me your initial guidance for this role.",
-        "conversation": history or [],
-    }
-    prompt = (
-        "Respond as a chatbot. Be specific, structured, and helpful. "
-        "Start with a direct answer, then add bullet points for gaps, strengths, and next steps when relevant. "
-        "Reference the student's ACTUAL skills, college, projects, and background - never give generic advice. "
-        "When appropriate, include a mini roadmap (numbered steps with timeframes) or action plan. "
-        "Keep responses focused (200-400 words) but packed with actionable detail. "
-        "If the user asks follow-ups, stay in-character, build on previous context, and avoid repeating the same wording. "
-        "Always consider the student's career goal when giving advice. "
+    profile_context = (
+        f"Student: {user_profile.name} | College: {user_profile.college or 'N/A'} | "
+        f"Branch: {user_profile.branch or 'N/A'} | Year: {user_profile.year or 'N/A'}\n"
+        f"Skills: {', '.join(s.name for s in user_profile.skills[:20] if s.name)}\n"
+        f"Projects: {'; '.join((getattr(user_profile, 'projects', None) or [])[:3])}\n"
+        f"Experience: {'; '.join((getattr(user_profile, 'experience', None) or [])[:2])}\n"
+        f"Objective: {getattr(user_profile, 'objective', None) or 'N/A'}\n"
+        f"Discussing role: {role}"
     )
 
-    # Inject market data for recruiter and agent personas
+    # Build market context for recruiter/agent
+    market_context = ""
     if persona_key in ("recruiter", "agent"):
         try:
-            from .data_loader import load_candidate_roles
             from . import models as _models
-            market_roles = sorted(_models.role_frequency_prior.items(), key=lambda x: x[1], reverse=True)[:6]
-            market_context = "CURRENT MARKET DATA:\n"
-            market_context += "Top roles by demand: " + ", ".join(f"{r} ({int(s*100)}%)" for r, s in market_roles) + "\n"
-            # Try to get live jobs for the target role
-            try:
-                import urllib.request as _req
-                adzuna_id = os.getenv("ADZUNA_APP_ID", "")
-                adzuna_key = os.getenv("ADZUNA_APP_KEY", "")
-                if adzuna_id and adzuna_key:
-                    from urllib.parse import quote_plus as _qp
-                    _url = f"https://api.adzuna.com/v1/api/jobs/in/search/1?app_id={adzuna_id}&app_key={adzuna_key}&results_per_page=5&what={_qp(role)}&content-type=application/json"
-                    _rq = _req.Request(_url, headers={"User-Agent": "CareerTwin/1.0"})
-                    with _req.urlopen(_rq, timeout=8) as _resp:
-                        _jdata = json.loads(_resp.read().decode("utf-8"))
-                    job_count = _jdata.get("count", 0)
-                    market_context += f"Live job openings for '{role}' in India: {job_count}\n"
-                    for _j in _jdata.get("results", [])[:3]:
-                        _title = _j.get("title", "").replace("<strong>", "").replace("</strong>", "")
-                        _company = _j.get("company", {}).get("display_name", "")
-                        _loc = _j.get("location", {}).get("display_name", "")
-                        market_context += f"  - {_title} at {_company} ({_loc})\n"
-            except Exception:
-                pass
-            prompt += f"\n{market_context}\n"
+            market_roles = sorted(_models.role_frequency_prior.items(), key=lambda x: x[1], reverse=True)[:5]
+            market_context = "\nMarket data — top roles by demand: " + ", ".join(f"{r} ({int(s*100)}%)" for r, s in market_roles)
         except Exception:
             pass
 
-    prompt += f"\n\nContext:\n{json.dumps(payload, ensure_ascii=False)}"
+    # Build the conversation thread as plain text so the LLM sees actual history
+    history_text = ""
+    for turn in (history or [])[-6:]:  # last 6 turns to stay within context
+        speaker = turn.get("speaker", "user")
+        msg = turn.get("message", "").strip()
+        if speaker == "user":
+            history_text += f"\nUser: {msg}"
+        else:
+            history_text += f"\nAssistant: {msg}"
+
+    current_message = (message or "Give me your initial guidance for this role.").strip()
+
+    prompt = (
+        f"STUDENT PROFILE:\n{profile_context}{market_context}\n"
+        f"{'CONVERSATION SO FAR:' + history_text if history_text else ''}\n"
+        f"\nUser: {current_message}\n"
+        "\nAssistant (respond ONLY to the user's latest message above, staying in character, "
+        "using the conversation history for context — do NOT repeat your opening introduction if one was already given):"
+    )
+
     reply = call_llm(system_prompt, prompt, temperature=0.35)
 
     # Generate contextual follow-up suggestions based on persona and role

@@ -114,7 +114,7 @@ export const career = {
   recommend: (force = false) => api.post(`/career/recommend?force=${force}`),
   simulate: (addedSkills, removedSkills) => api.post('/career/simulate', { addedSkills, removedSkills }),
   skillGap: (role, goal) => api.post('/career/skill-gap', { role, goal }),
-  roleChat: (role, persona, message, history = []) => api.post('/career/role-chat', { role, persona, message, history }),
+  roleChat: (role, persona, message, history = []) => api.post('/career/role-chat', { role, persona, message, history }, { timeout: 120000 }),
   marketTrends: () => api.get('/career/market-trends'),
   liveJobs: (role, location, limit = 20) =>
     api.get(`/career/live-jobs?role=${encodeURIComponent(role)}&location=${encodeURIComponent(location || 'india')}&limit=${limit}`),

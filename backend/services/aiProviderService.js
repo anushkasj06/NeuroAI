@@ -16,98 +16,98 @@ const cleanBase64 = (base64Str) => {
 };
 
 // ── 1. Gemini Completion ─────────────────────────────────────────────────────
-const geminiVisionCompletion = async (base64Image, promptText) => {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) throw new Error('GEMINI_API_KEY is not defined');
+// const geminiVisionCompletion = async (base64Image, promptText) => {
+//   const apiKey = process.env.GEMINI_API_KEY;
+//   if (!apiKey) throw new Error('GEMINI_API_KEY is not defined');
 
-  const model = process.env.GEMINI_VISION_MODEL || 'gemini-1.5-flash';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+//   const model = process.env.GEMINI_VISION_MODEL || 'gemini-1.5-flash';
+//   const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  const requestBody = {
-    contents: [
-      {
-        parts: [
-          { text: promptText },
-          {
-            inlineData: {
-              mimeType: 'image/jpeg',
-              data: cleanBase64(base64Image)
-            }
-          }
-        ]
-      }
-    ],
-    generationConfig: {
-      temperature: 0.1,
-      responseMimeType: 'application/json'
-    }
-  };
+//   const requestBody = {
+//     contents: [
+//       {
+//         parts: [
+//           { text: promptText },
+//           {
+//             inlineData: {
+//               mimeType: 'image/jpeg',
+//               data: cleanBase64(base64Image)
+//             }
+//           }
+//         ]
+//       }
+//     ],
+//     generationConfig: {
+//       temperature: 0.1,
+//       responseMimeType: 'application/json'
+//     }
+//   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(requestBody)
-  });
+//   const response = await fetch(url, {
+//     method: 'POST',
+//     headers: { 'Content-Type': 'application/json' },
+//     body: JSON.stringify(requestBody)
+//   });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`Gemini API error ${response.status}: ${errText}`);
-  }
+//   if (!response.ok) {
+//     const errText = await response.text();
+//     throw new Error(`Gemini API error ${response.status}: ${errText}`);
+//   }
 
-  const data = await response.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error('Empty response from Gemini vision model');
-  return text;
-};
+//   const data = await response.json();
+//   const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+//   if (!text) throw new Error('Empty response from Gemini vision model');
+//   return text;
+// };
 
 // ── 2. OpenAI Completion ─────────────────────────────────────────────────────
-const openAiVisionCompletion = async (base64Image, promptText) => {
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) throw new Error('OPENAI_API_KEY is not defined');
+// const openAiVisionCompletion = async (base64Image, promptText) => {
+//   const apiKey = process.env.OPENAI_API_KEY;
+//   if (!apiKey) throw new Error('OPENAI_API_KEY is not defined');
 
-  const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
-  const url = 'https://api.openai.com/v1/chat/completions';
+//   const model = process.env.OPENAI_VISION_MODEL || 'gpt-4o-mini';
+//   const url = 'https://api.openai.com/v1/chat/completions';
 
-  const cleanB64 = cleanBase64(base64Image);
-  const imageUrl = `data:image/jpeg;base64,${cleanB64}`;
+//   const cleanB64 = cleanBase64(base64Image);
+//   const imageUrl = `data:image/jpeg;base64,${cleanB64}`;
 
-  const requestBody = {
-    model: model,
-    messages: [
-      {
-        role: 'user',
-        content: [
-          { type: 'text', text: promptText },
-          {
-            type: 'image_url',
-            image_url: { url: imageUrl }
-          }
-        ]
-      }
-    ],
-    temperature: 0.1,
-    response_format: { type: 'json_object' }
-  };
+//   const requestBody = {
+//     model: model,
+//     messages: [
+//       {
+//         role: 'user',
+//         content: [
+//           { type: 'text', text: promptText },
+//           {
+//             type: 'image_url',
+//             image_url: { url: imageUrl }
+//           }
+//         ]
+//       }
+//     ],
+//     temperature: 0.1,
+//     response_format: { type: 'json_object' }
+//   };
 
-  const response = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
-    },
-    body: JSON.stringify(requestBody)
-  });
+//   const response = await fetch(url, {
+//     method: 'POST',
+//     headers: {
+//       'Content-Type': 'application/json',
+//       Authorization: `Bearer ${apiKey}`
+//     },
+//     body: JSON.stringify(requestBody)
+//   });
 
-  if (!response.ok) {
-    const errText = await response.text();
-    throw new Error(`OpenAI API error ${response.status}: ${errText}`);
-  }
+//   if (!response.ok) {
+//     const errText = await response.text();
+//     throw new Error(`OpenAI API error ${response.status}: ${errText}`);
+//   }
 
-  const data = await response.json();
-  const text = data?.choices?.[0]?.message?.content;
-  if (!text) throw new Error('Empty response from OpenAI vision model');
-  return text;
-};
+//   const data = await response.json();
+//   const text = data?.choices?.[0]?.message?.content;
+//   if (!text) throw new Error('Empty response from OpenAI vision model');
+//   return text;
+// };
 
 // ── 3. Grok / Groq Completion ───────────────────────────────────────────────
 const grokVisionCompletion = async (base64Image, promptText) => {
@@ -169,8 +169,8 @@ const grokVisionCompletion = async (base64Image, promptText) => {
 // ── Core Orchestrator with Fallbacks ─────────────────────────────────────────
 exports.generateVisionCompletion = async (base64Image, promptText) => {
   const providers = [
-    { name: 'Gemini', fn: () => geminiVisionCompletion(base64Image, promptText), key: process.env.GEMINI_API_KEY },
-    { name: 'OpenAI', fn: () => openAiVisionCompletion(base64Image, promptText), key: process.env.OPENAI_API_KEY },
+    // { name: 'Gemini', fn: () => geminiVisionCompletion(base64Image, promptText), key: process.env.GEMINI_API_KEY },
+    // { name: 'OpenAI', fn: () => openAiVisionCompletion(base64Image, promptText), key: process.env.OPENAI_API_KEY },
     { name: 'Grok/Groq', fn: () => grokVisionCompletion(base64Image, promptText), key: process.env.GROK_API_KEY || process.env.GROQ_API_KEY }
   ];
 
