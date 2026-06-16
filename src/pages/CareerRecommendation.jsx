@@ -925,7 +925,7 @@ export default function CareerRecommendation() {
         {/* ── Header ── */}
         <header className="cr-header">
           <div className="cr-header-left">
-            <span className="cr-eyebrow">🤖 Powered by llama3 via Ollama · scikit-learn recommendation engine</span>
+            <span className="cr-eyebrow">🤖 Powered by NeuroLearn Recommendation Engine</span>
             <h1 className="cr-title">Career Recommendation</h1>
             <p className="cr-subtitle">
               AI-powered career path analysis from your learning data{hasResume?' + extracted resume data':''}.

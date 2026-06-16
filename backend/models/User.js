@@ -43,6 +43,33 @@ const userSchema = new mongoose.Schema({
     originalName: { type: String, default: null },
     uploadedAt: { type: Date, default: null },
   },
+  linkedinUrl: {
+    type: String,
+    trim: true,
+    default: null,
+  },
+  linkedinData: {
+    name:        String,
+    headline:    String,
+    location:    String,
+    about:       String,
+    skills:      [String],
+    experience:  [{
+      title:    String,
+      company:  String,
+      duration: String,
+      description: String,
+    }],
+    education:   [{
+      school:  String,
+      degree:  String,
+      period:  String,
+    }],
+    certifications: [String],
+    posts:       [String],
+    scrapedAt:   { type: Date, default: null },
+    scrapeError: { type: String, default: null },
+  },
   cachedRecommendations: {
     recommendations: { type: mongoose.Schema.Types.Mixed, default: null },
     explanation:     { type: String, default: null },

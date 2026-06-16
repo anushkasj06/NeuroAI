@@ -7,9 +7,11 @@ from urllib import request as urllib_request
 
 from fastapi import HTTPException
 
+# Notice: agar ai model badmashi kare toh kripya gemma4:31b-cloud ya deepseek-v3.1:671b-cloud use karle... mujhe galiya na dene ki kripa kare ispe meri koi galti nahi! Dhanyabad!
 
 def _call_ollama(base_url: str, model: str, system_prompt: str, user_prompt: str, temperature: float, timeout: int = 180) -> str:
     """Call Ollama via its OpenAI-compatible API."""
+    # print("Ollama url: " , os.getenv("OLLAMA_URL") , " Ollama model: " , os.getenv("OLLAMA_MODEL"), "Ollama API: " , os.getenv("OLLAMA_API_KEY"));
     payload = json.dumps({
         "model": model,
         "messages": [
@@ -18,27 +20,54 @@ def _call_ollama(base_url: str, model: str, system_prompt: str, user_prompt: str
         ],
         "temperature": temperature,
         "max_tokens": 1024,
+        "stream": False,
     }).encode("utf-8")
 
+    if not base_url:
+        base_url = "https://ollama.com"
+        
+    endpoint = base_url.rstrip('/')
+    # If using OpenAI compatible API, ensure /v1 is in the URL, otherwise just use /api/chat if they provided it directly
+    if not endpoint.endswith('/v1') and not endpoint.endswith('/api'):
+        # Prefer OpenAI-compatible endpoint as the code expects "choices"
+        endpoint += '/v1/chat/completions'
+    elif endpoint.endswith('/v1'):
+        endpoint += '/chat/completions'
+    elif endpoint.endswith('/api'):
+        endpoint += '/chat'
+
+    # print("endpoint", endpoint)
     req = urllib_request.Request(
-        f"{base_url.rstrip('/')}/chat/completions",
+        endpoint,
         data=payload,
-        headers={"Authorization": "Bearer ollama", "Content-Type": "application/json"},
+        headers={"Authorization": f"Bearer {os.getenv('OLLAMA_API_KEY')}", "Content-Type": "application/json"},
         method="POST",
     )
 
-    with urllib_request.urlopen(req, timeout=timeout) as response:
-        data = json.loads(response.read().decode("utf-8"))
+    try:
+        with urllib_request.urlopen(req, timeout=timeout) as response:
+            data = json.loads(response.read().decode("utf-8"))
+    except urllib_error.HTTPError as e:
+        body = e.read().decode("utf-8", errors="ignore")
+        print(f"DEBUG: HTTP Error {e.code}: {body}")
+        raise e
 
-    return str(data["choices"][0]["message"]["content"]).strip()
+    # Handle both OpenAI-compatible format ("choices") and Ollama native format ("message")
+    if "choices" in data:
+        return str(data["choices"][0]["message"]["content"]).strip()
+    elif "message" in data:
+        return str(data["message"]["content"]).strip()
+    else:
+        return str(data).strip()
 
 
 # ─── Config ───────────────────────────────────────────────────────
 
-_OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434/v1").strip()
+_OLLAMA_URL = os.getenv("OLLAMA_URL")
+
 # Read model lazily so dotenv has a chance to load first
 def _get_model() -> str:
-    return os.getenv("OLLAMA_MODEL", "llama3").strip() or "llama3"
+    return os.getenv("OLLAMA_MODEL")
 
 _OLLAMA_MODEL = _get_model()
 _last_successful_provider: dict = {"name": "ollama", "model": _OLLAMA_MODEL}
