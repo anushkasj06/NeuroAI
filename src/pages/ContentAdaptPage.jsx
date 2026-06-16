@@ -11,6 +11,7 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import ReactMarkdown from 'react-markdown';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 import {
   SparklesIcon, ArrowPathIcon, FunnelIcon,
@@ -71,6 +72,7 @@ export default function ContentAdaptPage() {
   const [sessionHistory, setSessionHistory] = useState([]);
   const [sessionHistoryLoading, setSessionHistoryLoading] = useState(false);
   const [sessionHistoryError, setSessionHistoryError] = useState('');
+  const [selectedContent, setSelectedContent] = useState(null);
 
   const { data: dashData,  loading: dashLoad,  refetch: refetchDash } = useContentAdaptDashboard();
   const { data: histData,  loading: histLoad,  refetch: refetchHist } = useContentAdaptHistory(filterSubject || null, 80);
@@ -203,7 +205,7 @@ export default function ContentAdaptPage() {
           {!dashLoad && dashRecs.length > 0 && (
             <div className="grid sm:grid-cols-2 gap-4">
               {dashRecs.map(rec => (
-                <ContentFormatCard key={rec._id} record={rec} onApply={handleApply} onDismiss={handleDismiss} />
+                <ContentFormatCard key={rec._id} record={rec} onApply={handleApply} onDismiss={handleDismiss} onViewContent={() => setSelectedContent(rec)} />
               ))}
             </div>
           )}
@@ -282,18 +284,63 @@ export default function ContentAdaptPage() {
           {!histLoad && histRecs.length > 0 && (
             <div className="space-y-2">
               {histRecs.map(rec => (
-                <HistoryRow key={rec._id} record={rec} onApply={handleApply} onDismiss={handleDismiss} />
+                <HistoryRow key={rec._id} record={rec} onApply={handleApply} onDismiss={handleDismiss} onViewContent={() => setSelectedContent(rec)} />
               ))}
             </div>
           )}
         </section>
       </div>
+
+      {selectedContent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[85vh] flex flex-col shadow-xl">
+            <div className="flex justify-between items-center p-4 border-b border-slate-100">
+              <div>
+                <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                  <span className="text-2xl">{FORMAT_META[selectedContent.recommendedFormat]?.emoji}</span>
+                  Adapted {FORMAT_META[selectedContent.recommendedFormat]?.label} Content
+                </h3>
+                <p className="text-sm text-slate-500">{selectedContent.topic} {selectedContent.subtopic ? `› ${selectedContent.subtopic}` : ''}</p>
+              </div>
+              <button onClick={() => setSelectedContent(null)} className="text-slate-400 hover:text-slate-600 font-bold p-2">✕</button>
+            </div>
+            <div className="p-6 overflow-y-auto">
+              {(selectedContent.primaryReasoning || selectedContent.adaptationNote) && (
+                <div className="mb-6 p-4 bg-indigo-50 border border-indigo-100 rounded-xl">
+                  <h4 className="text-sm font-bold text-indigo-800 mb-1 flex items-center gap-2">
+                    <SparklesIcon className="h-4 w-4" /> Why was this adapted for you?
+                  </h4>
+                  {selectedContent.primaryReasoning && (
+                    <p className="text-xs text-indigo-700 mb-1">{selectedContent.primaryReasoning}</p>
+                  )}
+                  {selectedContent.adaptationNote && (
+                    <p className="text-xs text-indigo-600 italic">{selectedContent.adaptationNote}</p>
+                  )}
+                </div>
+              )}
+              
+              <div className="prose prose-sm prose-emerald max-w-none">
+                {selectedContent.generatedContent ? (
+                  <ReactMarkdown>{selectedContent.generatedContent}</ReactMarkdown>
+                ) : (
+                  <p className="text-slate-500 italic">No adapted content was generated for this recommendation.</p>
+                )}
+              </div>
+            </div>
+            <div className="p-4 border-t border-slate-100 bg-slate-50 rounded-b-2xl flex justify-end">
+               <Link to={`/materials`} onClick={() => handleApply(selectedContent._id)} className="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold hover:bg-emerald-700">
+                  Save & Go to Materials
+               </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-// ── Compact history row ───────────────────────────────────────────────────────
-function HistoryRow({ record, onApply, onDismiss }) {
+
+function HistoryRow({ record, onApply, onDismiss, onViewContent }) {
   const meta = FORMAT_META[record.recommendedFormat] || FORMAT_META.pdf;
   const isActive = record.status === 'active';
 
@@ -331,6 +378,11 @@ function HistoryRow({ record, onApply, onDismiss }) {
           </span>
         ) : (
           <>
+            {record.generatedContent && (
+               <button onClick={onViewContent} className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-100 text-emerald-700 hover:bg-emerald-200">
+                 Read Content
+               </button>
+            )}
             <Link to={`/materials`} onClick={() => onApply(record._id)}
               className="flex-1 rounded-lg bg-emerald-600 px-2 py-1 text-center text-[10px] font-bold text-white hover:bg-emerald-700 sm:flex-none">
               Use {meta.emoji}

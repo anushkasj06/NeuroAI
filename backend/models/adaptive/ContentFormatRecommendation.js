@@ -74,6 +74,10 @@ const contentFormatRecommendationSchema = new mongoose.Schema(
     primaryReasoning: { type: String, default: '' },
     adaptationNote:   { type: String, default: '' },  // e.g. "High confusion → simplified visual"
 
+    // ── Generated Content ─────────────────────────────────────────────────
+    generatedContent: { type: String, default: '' },
+    generatedSummary: { type: String, default: '' },
+
     // ── Lifecycle ─────────────────────────────────────────────────────────
     status: {
       type: String,

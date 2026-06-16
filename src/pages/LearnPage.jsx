@@ -59,6 +59,47 @@ export default function LearnPage() {
     })();
   }, [searchParams]);
 
+  // Audio / Reading mode state
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechPaused, setSpeechPaused] = useState(false);
+
+  useEffect(() => {
+    // Cleanup speech on unmount or material change
+    return () => {
+      window.speechSynthesis.cancel();
+    };
+  }, [material]);
+
+  const toggleSpeech = () => {
+    if (!material?.content) return;
+    
+    if (isSpeaking) {
+      if (speechPaused) {
+        window.speechSynthesis.resume();
+        setSpeechPaused(false);
+      } else {
+        window.speechSynthesis.pause();
+        setSpeechPaused(true);
+      }
+    } else {
+      const textToRead = material.content.replace(/#|\*|_|`/g, ''); // strip basic markdown
+      const utterance = new SpeechSynthesisUtterance(textToRead);
+      utterance.onend = () => {
+        setIsSpeaking(false);
+        setSpeechPaused(false);
+      };
+      window.speechSynthesis.speak(utterance);
+      setIsSpeaking(true);
+      setSpeechPaused(false);
+    }
+  };
+
+  const stopSpeech = () => {
+    window.speechSynthesis.cancel();
+    setIsSpeaking(false);
+    setSpeechPaused(false);
+  };
+
   const handleGenerate = async () => {
     if (!selected.subjectSlug || !selected.topic) { setError('Select a subject and topic.'); return; }
     setLoading(true); setError(''); setMaterial(null); setQuizMode(false); setQuizAnswers({}); setQuizSubmitted(false);
@@ -197,6 +238,37 @@ export default function LearnPage() {
                 <option value="competitive gamer">Competitive gamer</option>
               </select>
             </div>
+
+            {/* Audio Reading Mode Controls */}
+            <div className="sticky top-4 z-40 bg-white shadow-sm border border-emerald-100 rounded-2xl p-4 flex items-center justify-between">
+              <div>
+                <h3 className="font-bold text-slate-800 flex items-center gap-2">
+                  <span className="text-xl">🎧</span> Audio / Reading Mode
+                </h3>
+                <p className="text-xs text-slate-500">Listen to your generated material</p>
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={toggleSpeech}
+                  className={`px-4 py-2 rounded-xl font-bold text-sm transition-colors ${
+                    isSpeaking && !speechPaused
+                      ? 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                      : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                  }`}
+                >
+                  {isSpeaking && !speechPaused ? '⏸ Pause' : speechPaused ? '▶ Resume' : '▶ Play'}
+                </button>
+                {isSpeaking && (
+                  <button
+                    onClick={stopSpeech}
+                    className="px-4 py-2 rounded-xl font-bold text-sm bg-rose-100 text-rose-700 hover:bg-rose-200 transition-colors"
+                  >
+                    ⏹ Stop
+                  </button>
+                )}
+              </div>
+            </div>
+
             <MaterialViewer
               material={material}
               learningStyle={learningStyle}
