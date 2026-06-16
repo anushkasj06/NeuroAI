@@ -1,59 +1,102 @@
-# Dependencies
-/node_modules
-/.pnp
-.pnp.js
-# Create .gitignore file
-node_modules/
-.env
-.DS_Store
-build/
-dist/
-.vscode/
-venv/
-
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.log
-
-# Environment variables
+# ── Environment variables ─────────────────────────────────────────────────────
+# Never commit real secrets — copy .env.example → .env and fill in your values
 .env
 .env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
 
-# Debug logs
+# ── Node / npm ────────────────────────────────────────────────────────────────
+node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+.pnp
+.pnp.js
+package-lock.json   # optional: remove this line if you want to commit the lock
 
-# Build outputs
-/build
-/dist
-/.next
+# ── Build outputs ─────────────────────────────────────────────────────────────
+dist/
+build/
+.next/
+out/
 
-# System files
+# ── Vite ──────────────────────────────────────────────────────────────────────
+.vite/
+
+# ── Python ────────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyw
+*.pyz
+*.egg
+*.egg-info/
+dist/
+*.dist-info/
+venv/
+.venv/
+env/
+.env/
+*.pyc
+
+# ── Jupyter ───────────────────────────────────────────────────────────────────
+.ipynb_checkpoints/
+*.ipynb
+
+# ── ML model artifacts ────────────────────────────────────────────────────────
+*.pkl
+*.joblib
+*.h5
+*.pt
+*.pth
+*.onnx
+*.bin
+predictor/models/
+predictor/data/
+ml_service/data/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+backend-*.log
+backend-*.err.log
+
+# ── Media / large assets ──────────────────────────────────────────────────────
+# Avoid committing large binary files — use Git LFS or a CDN instead
+public/audio.mpeg
+public/vedio.mp4
+dist/audio.mpeg
+dist/vedio.mp4
+
+# ── Uploads ───────────────────────────────────────────────────────────────────
+backend/uploads/
+
+# ── OS generated ──────────────────────────────────────────────────────────────
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
 
-# Testing
-/coverage
-
-# Editor directories and files
-.idea
-.vscode
+# ── Editor / IDE ──────────────────────────────────────────────────────────────
+.vscode/
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
 
-# OS generated files
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db 
+# ── Misc ──────────────────────────────────────────────────────────────────────
 .vercel
+coverage/
+.cache/
+*.xlsx

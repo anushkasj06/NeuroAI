@@ -33,6 +33,11 @@ import Chatbot from './components/Chatbot';
 import CareerRecommendation from './pages/CareerRecommendation';
 import AdaptiveInsightsPage from './pages/AdaptiveInsightsPage';
 import ContentAdaptPage from './pages/ContentAdaptPage';
+import InterviewDashboard from './pages/InterviewDashboard';
+import InterviewSchedule from './pages/InterviewSchedule';
+import InterviewPrepare from './pages/InterviewPrepare';
+import InterviewRoom from './pages/InterviewRoom';
+import InterviewAnalysisPage from './pages/InterviewAnalysisPage';
 
 
 import SocketTestPage from './pages/SocketTestPage';
@@ -83,6 +88,11 @@ function AppShell() {
           <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
           <Route path="/teacher/content" element={<P allowedRoles={['teacher']}><TeacherContentStudio /></P>} />
           <Route path="/career-recommendation" element={<P allowedRoles={['student']}><CareerRecommendation /></P>} />
+          <Route path="/interview" element={<P allowedRoles={['student']}><InterviewDashboard /></P>} />
+          <Route path="/interview/schedule" element={<P allowedRoles={['student']}><InterviewSchedule /></P>} />
+          <Route path="/interview/:id/prepare" element={<P allowedRoles={['student']}><InterviewPrepare /></P>} />
+          <Route path="/interview/:id/room" element={<P allowedRoles={['student']}><InterviewRoom /></P>} />
+          <Route path="/interview/:id/analysis" element={<P allowedRoles={['student']}><InterviewAnalysisPage /></P>} />
           <Route path="/socket-test" element={<P><SocketTestPage /></P>} />
         </Routes>
       </main>
@@ -94,7 +104,7 @@ function AppShell() {
 function App() {
   return (
     <AuthProvider>
-      <Router>
+      <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <SocketProvider>
           <AppShell />
         </SocketProvider>
