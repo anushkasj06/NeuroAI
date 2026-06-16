@@ -34,5 +34,7 @@ router.get('/live-jobs', protect, careerController.liveJobs);
 router.post('/linkedin/scrape', protect, careerController.scrapeLinkedIn);
 router.get('/linkedin', protect, careerController.getLinkedInData);
 router.delete('/linkedin', protect, careerController.clearLinkedInData);
+router.get('/explore', protect, careerController.exploreCareer);
+router.get('/explore/:careerId/pathways', protect, careerController.getCareerPathways);
 
 module.exports = router;
