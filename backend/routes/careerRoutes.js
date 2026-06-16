@@ -36,5 +36,7 @@ router.get('/linkedin', protect, careerController.getLinkedInData);
 router.delete('/linkedin', protect, careerController.clearLinkedInData);
 router.get('/explore', protect, careerController.exploreCareer);
 router.get('/explore/:careerId/pathways', protect, careerController.getCareerPathways);
+router.get('/explore/:careerId/roadmap', protect, careerController.getSkillRoadmap);
+router.post('/qualification', protect, careerController.saveQualification);
 
 module.exports = router;

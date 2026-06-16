@@ -122,6 +122,10 @@ export const career = {
     api.get(`/career/explore${category ? `?category=${encodeURIComponent(category)}` : ''}`),
   getCareerPathways: (careerId) =>
     api.get(`/career/explore/${careerId}/pathways`),
+  getSkillRoadmap: (careerId) =>
+    api.get(`/career/explore/${careerId}/roadmap`),
+  saveQualification: (data) =>
+    api.post('/career/qualification', data),
 };
 
 export const emotion = {

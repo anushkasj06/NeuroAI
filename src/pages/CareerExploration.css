@@ -608,3 +608,340 @@
   color: var(--ce-muted);
   font-size: 0.9rem;
 }
+
+
+/* ── Qualification Modal ───────────────────────────────────────────────── */
+.ce-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ce-modal {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+.ce-modal__header {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--ce-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ce-modal__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0;
+}
+
+.ce-modal__subtitle {
+  font-size: 0.82rem;
+  color: var(--ce-muted);
+  margin: 0;
+}
+
+.ce-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ce-modal__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .ce-modal__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ce-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ce-modal__field label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ce-muted);
+}
+
+.ce-modal__field input,
+.ce-modal__field select {
+  padding: 9px 12px;
+  border: 1px solid var(--ce-line);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: var(--ce-ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ce-modal__field input:focus,
+.ce-modal__field select:focus {
+  border-color: var(--ce-accent);
+}
+
+.ce-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ce-modal__btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  transition: all 0.2s;
+}
+
+.ce-modal__btn--ghost {
+  background: transparent;
+  color: var(--ce-muted);
+  border: 1px solid var(--ce-line);
+}
+
+.ce-modal__btn--ghost:hover {
+  border-color: var(--ce-accent);
+  color: var(--ce-accent);
+}
+
+.ce-modal__btn--primary {
+  background: linear-gradient(135deg, var(--ce-accent), var(--ce-accent2));
+  color: #fff;
+}
+
+.ce-modal__btn--primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Detail Tabs ───────────────────────────────────────────────────────── */
+.ce-detail__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--ce-line);
+  margin-bottom: 28px;
+}
+
+.ce-detail__tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ce-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ce-detail__tab:hover {
+  color: var(--ce-ink);
+}
+
+.ce-detail__tab--active {
+  color: var(--ce-accent);
+  border-bottom-color: var(--ce-accent);
+}
+
+/* ── Visual Skill Roadmap ──────────────────────────────────────────────── */
+.ce-roadmap {
+  margin-bottom: 32px;
+}
+
+.ce-roadmap__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: var(--ce-accent);
+}
+
+.ce-roadmap__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0;
+}
+
+.ce-roadmap__track {
+  position: relative;
+  padding-left: 40px;
+}
+
+.ce-roadmap__spine {
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--ce-accent), var(--ce-accent2), #a78bfa, #f472b6);
+  border-radius: 2px;
+}
+
+.ce-roadmap__level {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.ce-roadmap__level:last-child {
+  margin-bottom: 0;
+}
+
+.ce-roadmap__level-label {
+  position: absolute;
+  left: -40px;
+  top: 0;
+  width: auto;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ce-roadmap__nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-left: 20px;
+  padding-top: 40px;
+}
+
+.ce-roadmap__node {
+  position: relative;
+}
+
+.ce-roadmap__node--parent {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid var(--level-color, var(--ce-line));
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 160px;
+}
+
+.ce-roadmap__node--leaf {
+  display: none;
+}
+
+.ce-roadmap__node-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.ce-roadmap__children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ce-roadmap__child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.06);
+  border: 1px solid rgba(15, 118, 110, 0.15);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ce-ink);
+  transition: all 0.2s;
+}
+
+.ce-roadmap__child:hover {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: var(--ce-accent);
+}
+
+.ce-roadmap__check {
+  color: var(--ce-accent);
+  flex-shrink: 0;
+}
+
+/* ── Roadmap responsive ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ce-roadmap__track {
+    padding-left: 20px;
+  }
+  .ce-roadmap__spine {
+    left: 8px;
+  }
+  .ce-roadmap__level-label {
+    left: -20px;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+  .ce-roadmap__nodes {
+    padding-left: 10px;
+  }
+}
+
+
+/* ── Suggested Pathway ─────────────────────────────────────────────────── */
+.ce-pathway--suggested {
+  border-color: rgba(15, 118, 110, 0.4);
+  background: rgba(15, 118, 110, 0.03);
+  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.1), 0 4px 16px rgba(15, 118, 110, 0.06);
+}
+
+.ce-pathway__suggested-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ce-accent), var(--ce-accent2));
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: ce-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ce-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
