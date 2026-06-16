@@ -31,6 +31,7 @@ import StudyMaterial from './pages/StudyMaterial';
 import TeacherContentStudio from './pages/TeacherContentStudio';
 import Chatbot from './components/Chatbot';
 import CareerRecommendation from './pages/CareerRecommendation';
+import CareerExploration from './pages/CareerExploration';
 import AdaptiveInsightsPage from './pages/AdaptiveInsightsPage';
 import ContentAdaptPage from './pages/ContentAdaptPage';
 import InterviewDashboard from './pages/InterviewDashboard';
@@ -88,6 +89,7 @@ function AppShell() {
           <Route path="/teacher" element={<P allowedRoles={['teacher']}><TeacherDashboard /></P>} />
           <Route path="/teacher/content" element={<P allowedRoles={['teacher']}><TeacherContentStudio /></P>} />
           <Route path="/career-recommendation" element={<P allowedRoles={['student']}><CareerRecommendation /></P>} />
+          <Route path="/career-exploration" element={<P allowedRoles={['student']}><CareerExploration /></P>} />
           <Route path="/interview" element={<P allowedRoles={['student']}><InterviewDashboard /></P>} />
           <Route path="/interview/schedule" element={<P allowedRoles={['student']}><InterviewSchedule /></P>} />
           <Route path="/interview/:id/prepare" element={<P allowedRoles={['student']}><InterviewPrepare /></P>} />

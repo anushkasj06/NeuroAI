@@ -1,0 +1,947 @@
+/* ── Career Exploration Page ────────────────────────────────────────────── */
+.ce-page {
+  --ce-ink: #0f172a;
+  --ce-muted: #475569;
+  --ce-line: rgba(148, 163, 184, 0.3);
+  --ce-surface: rgba(255, 255, 255, 0.85);
+  --ce-accent: #0f766e;
+  --ce-accent2: #0ea5e9;
+  --ce-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  background: radial-gradient(900px 420px at 10% -10%, rgba(14, 116, 144, 0.14), transparent 60%),
+    radial-gradient(800px 500px at 90% 10%, rgba(14, 165, 233, 0.14), transparent 65%),
+    linear-gradient(180deg, #f8fafc 0%, #ffffff 50%, #eef2f7 100%);
+  min-height: 100vh;
+  color: var(--ce-ink);
+  font-family: 'Sora', 'Space Grotesk', 'Manrope', 'Segoe UI', sans-serif;
+}
+
+.ce-shell {
+  max-width: 1260px;
+  margin: 0 auto;
+  padding: 28px 20px 64px;
+}
+
+/* ── Header ────────────────────────────────────────────────────────────── */
+.ce-header {
+  padding-bottom: 24px;
+  border-bottom: 1px solid var(--ce-line);
+  margin-bottom: 24px;
+}
+
+.ce-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--ce-line);
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 11px;
+  color: var(--ce-muted);
+  margin-bottom: 10px;
+}
+
+.ce-title {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ce-ink);
+  margin: 0 0 6px;
+}
+
+.ce-subtitle {
+  font-size: 0.875rem;
+  color: var(--ce-muted);
+  max-width: 560px;
+  line-height: 1.55;
+}
+
+/* ── Controls ──────────────────────────────────────────────────────────── */
+.ce-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.ce-search {
+  position: relative;
+  flex: 1;
+  min-width: 220px;
+  max-width: 360px;
+}
+
+.ce-search__icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--ce-muted);
+}
+
+.ce-search__input {
+  width: 100%;
+  padding: 10px 12px 10px 36px;
+  border: 1px solid var(--ce-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  font-size: 0.85rem;
+  color: var(--ce-ink);
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.ce-search__input:focus {
+  border-color: var(--ce-accent);
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.ce-filters {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.ce-filter-btn {
+  padding: 7px 14px;
+  border: 1px solid var(--ce-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ce-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ce-filter-btn:hover {
+  border-color: var(--ce-accent);
+  color: var(--ce-accent);
+}
+
+.ce-filter-btn--active {
+  background: var(--ce-accent);
+  border-color: var(--ce-accent);
+  color: #fff;
+}
+
+/* ── Career Grid ───────────────────────────────────────────────────────── */
+.ce-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .ce-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Career Card ───────────────────────────────────────────────────────── */
+.ce-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--ce-line);
+  border-radius: 16px;
+  background: var(--ce-surface);
+  backdrop-filter: blur(8px);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: left;
+  width: 100%;
+}
+
+.ce-card:hover {
+  border-color: var(--ce-accent);
+  box-shadow: var(--ce-shadow);
+  transform: translateY(-2px);
+}
+
+.ce-card__icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--ce-accent);
+}
+
+.ce-card__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.ce-card__title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0 0 4px;
+}
+
+.ce-card__desc {
+  font-size: 0.8rem;
+  color: var(--ce-muted);
+  line-height: 1.45;
+  margin: 0 0 10px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.ce-card__meta {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.75rem;
+}
+
+.ce-card__salary {
+  font-weight: 700;
+  color: var(--ce-ink);
+}
+
+.ce-card__demand {
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.ce-demand-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.ce-card__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.ce-card__arrow {
+  font-size: 1.2rem;
+  color: var(--ce-muted);
+  transition: transform 0.2s, color 0.2s;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.ce-card:hover .ce-card__arrow {
+  color: var(--ce-accent);
+  transform: translateX(3px);
+}
+
+/* ── Pills ─────────────────────────────────────────────────────────────── */
+.ce-pill {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--ce-accent);
+  white-space: nowrap;
+}
+
+.ce-pill--lg {
+  padding: 5px 12px;
+  font-size: 0.78rem;
+}
+
+.ce-pill--sm {
+  padding: 2px 7px;
+  font-size: 0.65rem;
+}
+
+.ce-pill--more {
+  background: rgba(148, 163, 184, 0.15);
+  color: var(--ce-muted);
+}
+
+/* ── Detail View ───────────────────────────────────────────────────────── */
+.ce-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: 1px solid var(--ce-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.6);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ce-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 24px;
+}
+
+.ce-back-btn:hover {
+  border-color: var(--ce-accent);
+  color: var(--ce-accent);
+}
+
+.ce-detail__header {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  margin-bottom: 28px;
+}
+
+.ce-detail__icon {
+  font-size: 3rem;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(15, 118, 110, 0.08);
+  color: var(--ce-accent);
+  flex-shrink: 0;
+}
+
+.ce-detail__title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0 0 6px;
+}
+
+.ce-detail__desc {
+  font-size: 0.9rem;
+  color: var(--ce-muted);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Stats ─────────────────────────────────────────────────────────────── */
+.ce-detail__stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--ce-line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.65);
+  margin-bottom: 32px;
+}
+
+@media (max-width: 640px) {
+  .ce-detail__stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.ce-stat {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-right: 1px solid var(--ce-line);
+}
+
+.ce-stat:last-child {
+  border-right: none;
+}
+
+.ce-stat__label {
+  font-size: 0.7rem;
+  color: var(--ce-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ce-stat__value {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+}
+
+/* ── Skills Section ────────────────────────────────────────────────────── */
+.ce-section-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ce-section-subtitle {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--ce-muted);
+}
+
+.ce-detail__skills-section {
+  margin-bottom: 32px;
+}
+
+.ce-detail__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Qualification ─────────────────────────────────────────────────────── */
+.ce-detail__qual {
+  background: rgba(255, 255, 255, 0.65);
+  border: 1px solid var(--ce-line);
+  border-radius: 16px;
+  padding: 20px;
+  margin-bottom: 32px;
+}
+
+.ce-qual-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.ce-qual-item--wide {
+  grid-column: 1 / -1;
+}
+
+.ce-qual-item__label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--ce-muted);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 4px;
+}
+
+.ce-qual-item__value {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ce-ink);
+  text-transform: capitalize;
+}
+
+.ce-qual-item__skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 4px;
+}
+
+/* ── Pathways ──────────────────────────────────────────────────────────── */
+.ce-detail__pathways {
+  margin-bottom: 32px;
+}
+
+.ce-pathway {
+  border: 1px solid var(--ce-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.65);
+  margin-bottom: 12px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+
+.ce-pathway--open {
+  border-color: rgba(15, 118, 110, 0.3);
+}
+
+.ce-pathway__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+}
+
+.ce-pathway__header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ce-pathway__badge {
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.1);
+  color: var(--ce-accent);
+  font-size: 0.7rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.ce-pathway__name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0;
+}
+
+.ce-pathway__header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ce-pathway__duration {
+  font-size: 0.78rem;
+  color: var(--ce-muted);
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ce-pathway__chevron {
+  color: var(--ce-muted);
+  transition: transform 0.2s;
+}
+
+.ce-pathway__chevron--up {
+  transform: rotate(180deg);
+}
+
+.ce-pathway__steps {
+  padding: 0 20px 20px;
+}
+
+/* ── Timeline Steps ────────────────────────────────────────────────────── */
+.ce-step {
+  display: flex;
+  gap: 14px;
+}
+
+.ce-step__timeline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.ce-step__dot {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ce-accent), var(--ce-accent2));
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ce-step__line {
+  width: 2px;
+  flex: 1;
+  min-height: 24px;
+  background: linear-gradient(180deg, var(--ce-accent), rgba(14, 165, 233, 0.2));
+  margin: 4px 0;
+}
+
+.ce-step__content {
+  padding-bottom: 20px;
+}
+
+.ce-step__title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0 0 3px;
+}
+
+.ce-step__desc {
+  font-size: 0.8rem;
+  color: var(--ce-muted);
+  line-height: 1.45;
+  margin: 0 0 6px;
+}
+
+.ce-step__duration {
+  font-size: 0.72rem;
+  color: var(--ce-accent);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ── Utilities ─────────────────────────────────────────────────────────── */
+.ce-loader {
+  text-align: center;
+  padding: 60px 20px;
+  font-size: 0.9rem;
+  color: var(--ce-muted);
+}
+
+.ce-error {
+  background: rgba(220, 38, 38, 0.07);
+  border: 1px solid rgba(220, 38, 38, 0.25);
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 0.83rem;
+  color: #b91c1c;
+  margin-bottom: 20px;
+}
+
+.ce-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--ce-muted);
+  font-size: 0.9rem;
+}
+
+
+/* ── Qualification Modal ───────────────────────────────────────────────── */
+.ce-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(15, 23, 42, 0.5);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.ce-modal {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.18);
+  max-width: 560px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 32px;
+}
+
+.ce-modal__header {
+  text-align: center;
+  margin-bottom: 24px;
+  color: var(--ce-accent);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.ce-modal__title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0;
+}
+
+.ce-modal__subtitle {
+  font-size: 0.82rem;
+  color: var(--ce-muted);
+  margin: 0;
+}
+
+.ce-modal__form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ce-modal__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .ce-modal__row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ce-modal__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ce-modal__field label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ce-muted);
+}
+
+.ce-modal__field input,
+.ce-modal__field select {
+  padding: 9px 12px;
+  border: 1px solid var(--ce-line);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  color: var(--ce-ink);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ce-modal__field input:focus,
+.ce-modal__field select:focus {
+  border-color: var(--ce-accent);
+}
+
+.ce-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.ce-modal__btn {
+  padding: 10px 18px;
+  border-radius: 10px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: none;
+  transition: all 0.2s;
+}
+
+.ce-modal__btn--ghost {
+  background: transparent;
+  color: var(--ce-muted);
+  border: 1px solid var(--ce-line);
+}
+
+.ce-modal__btn--ghost:hover {
+  border-color: var(--ce-accent);
+  color: var(--ce-accent);
+}
+
+.ce-modal__btn--primary {
+  background: linear-gradient(135deg, var(--ce-accent), var(--ce-accent2));
+  color: #fff;
+}
+
+.ce-modal__btn--primary:hover {
+  opacity: 0.9;
+  transform: translateY(-1px);
+}
+
+/* ── Detail Tabs ───────────────────────────────────────────────────────── */
+.ce-detail__tabs {
+  display: flex;
+  gap: 2px;
+  border-bottom: 2px solid var(--ce-line);
+  margin-bottom: 28px;
+}
+
+.ce-detail__tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ce-muted);
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ce-detail__tab:hover {
+  color: var(--ce-ink);
+}
+
+.ce-detail__tab--active {
+  color: var(--ce-accent);
+  border-bottom-color: var(--ce-accent);
+}
+
+/* ── Visual Skill Roadmap ──────────────────────────────────────────────── */
+.ce-roadmap {
+  margin-bottom: 32px;
+}
+
+.ce-roadmap__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: var(--ce-accent);
+}
+
+.ce-roadmap__title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  margin: 0;
+}
+
+.ce-roadmap__track {
+  position: relative;
+  padding-left: 40px;
+}
+
+.ce-roadmap__spine {
+  position: absolute;
+  left: 18px;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: linear-gradient(180deg, var(--ce-accent), var(--ce-accent2), #a78bfa, #f472b6);
+  border-radius: 2px;
+}
+
+.ce-roadmap__level {
+  position: relative;
+  margin-bottom: 32px;
+}
+
+.ce-roadmap__level:last-child {
+  margin-bottom: 0;
+}
+
+.ce-roadmap__level-label {
+  position: absolute;
+  left: -40px;
+  top: 0;
+  width: auto;
+  padding: 6px 14px;
+  border-radius: 8px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  z-index: 2;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.ce-roadmap__nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-left: 20px;
+  padding-top: 40px;
+}
+
+.ce-roadmap__node {
+  position: relative;
+}
+
+.ce-roadmap__node--parent {
+  background: rgba(255, 255, 255, 0.85);
+  border: 1.5px solid var(--level-color, var(--ce-line));
+  border-radius: 12px;
+  padding: 12px 16px;
+  min-width: 160px;
+}
+
+.ce-roadmap__node--leaf {
+  display: none;
+}
+
+.ce-roadmap__node-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ce-ink);
+  display: block;
+  margin-bottom: 8px;
+}
+
+.ce-roadmap__children {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ce-roadmap__child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 8px;
+  background: rgba(15, 118, 110, 0.06);
+  border: 1px solid rgba(15, 118, 110, 0.15);
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--ce-ink);
+  transition: all 0.2s;
+}
+
+.ce-roadmap__child:hover {
+  background: rgba(15, 118, 110, 0.12);
+  border-color: var(--ce-accent);
+}
+
+.ce-roadmap__check {
+  color: var(--ce-accent);
+  flex-shrink: 0;
+}
+
+/* ── Roadmap responsive ────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ce-roadmap__track {
+    padding-left: 20px;
+  }
+  .ce-roadmap__spine {
+    left: 8px;
+  }
+  .ce-roadmap__level-label {
+    left: -20px;
+    font-size: 0.65rem;
+    padding: 4px 10px;
+  }
+  .ce-roadmap__nodes {
+    padding-left: 10px;
+  }
+}
+
+
+/* ── Suggested Pathway ─────────────────────────────────────────────────── */
+.ce-pathway--suggested {
+  border-color: rgba(15, 118, 110, 0.4);
+  background: rgba(15, 118, 110, 0.03);
+  box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.1), 0 4px 16px rgba(15, 118, 110, 0.06);
+}
+
+.ce-pathway__suggested-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--ce-accent), var(--ce-accent2));
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  white-space: nowrap;
+  animation: ce-pulse 2s ease-in-out infinite;
+}
+
+@keyframes ce-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.85; }
+}
