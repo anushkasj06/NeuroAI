@@ -287,3 +287,25 @@
     max-width: min(320px, 88vw);
   }
 }
+
+@media (max-width: 520px) {
+  .materials-kpi-strip {
+    grid-template-columns: 1fr;
+  }
+
+  .materials-card__header,
+  .materials-card__meta,
+  .material-card__header,
+  .material-card__meta {
+    flex-wrap: wrap;
+  }
+
+  .materials-selected-pill {
+    max-width: 100%;
+  }
+
+  .materials-list--inline .material-card {
+    min-width: min(280px, 86vw);
+    max-width: min(300px, 86vw);
+  }
+}

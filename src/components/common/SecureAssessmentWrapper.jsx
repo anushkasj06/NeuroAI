@@ -69,21 +69,19 @@ export default function SecureAssessmentWrapper({ secure, children, onForceSubmi
     <div className="relative min-h-screen" style={{ userSelect: 'none' }}>
 
       {/* ── Security status bar ─────────────────────────────────────────── */}
-      <div className={`sticky top-0 z-50 w-full ${cfg.color} text-white px-4 py-2 flex items-center justify-between text-xs font-semibold shadow-md`}>
-        <div className="flex items-center gap-2">
-          <StatusIcon className="h-4 w-4" />
-          <span>Secure Assessment Mode — {cfg.label}</span>
+      <div className={`sticky top-0 z-50 w-full ${cfg.color} text-white px-3 py-2 flex items-center justify-between text-xs font-semibold shadow-md`}>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <StatusIcon className="h-3.5 w-3.5 flex-shrink-0" />
+          <span className="truncate">Secure — {cfg.label}</span>
         </div>
-        <div className="flex items-center gap-4">
-          {/* Violation counter */}
-          <div className="flex items-center gap-1.5">
-            <span>Violations:</span>
-            <span className="px-2 py-0.5 rounded-full bg-white/20 font-bold">{total}/5</span>
-          </div>
-          {/* Fullscreen indicator */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-1">
-            <ArrowsPointingOutIcon className="h-3.5 w-3.5" />
-            <span>{isFullscreen ? 'Fullscreen' : 'Windowed'}</span>
+            <span>Violations:</span>
+            <span className="px-1.5 py-0.5 rounded-full bg-white/20 font-bold">{total}/5</span>
+          </div>
+          <div className="hidden sm:flex items-center gap-1">
+            <ArrowsPointingOutIcon className="h-3 w-3" />
+            <span>{isFullscreen ? 'FS' : 'Win'}</span>
           </div>
         </div>
       </div>
@@ -91,18 +89,14 @@ export default function SecureAssessmentWrapper({ secure, children, onForceSubmi
       {/* ── Violation warning toast ──────────────────────────────────────── */}
       {showWarning && warningMessage && (
         <div
-          className={`fixed top-14 left-1/2 -translate-x-1/2 z-50 max-w-md w-full mx-4 rounded-2xl border shadow-xl px-4 py-3 flex items-start gap-3 animate-[slideDown_0.3s_ease] ${cfg.bg} border-current ${cfg.text}`}
-          style={{ animation: 'slideDown 0.3s ease' }}
+          className={`fixed top-12 left-3 right-3 sm:left-1/2 sm:-translate-x-1/2 sm:max-w-md z-50 rounded-xl border shadow-xl px-3 py-2.5 flex items-start gap-2 ${cfg.bg} border-current ${cfg.text}`}
         >
-          <ExclamationTriangleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <ExclamationTriangleIcon className="h-4 w-4 flex-shrink-0 mt-0.5" />
           <div className="flex-1 min-w-0">
-            <p className="font-semibold text-sm">Security Alert</p>
-            <p className="text-xs mt-0.5 leading-relaxed">{warningMessage}</p>
+            <p className="font-semibold text-xs">Security Alert</p>
+            <p className="text-[11px] mt-0.5 leading-relaxed">{warningMessage}</p>
           </div>
-          <button
-            onClick={dismissWarning}
-            className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center hover:bg-black/10"
-          >
+          <button onClick={dismissWarning} className="flex-shrink-0 h-5 w-5 rounded-full flex items-center justify-center hover:bg-black/10">
             <XMarkIcon className="h-3.5 w-3.5" />
           </button>
         </div>
@@ -111,18 +105,14 @@ export default function SecureAssessmentWrapper({ secure, children, onForceSubmi
       {/* ── Not-fullscreen overlay ───────────────────────────────────────── */}
       {!isFullscreen && !disqualified && (
         <div className="fixed inset-0 z-40 bg-slate-900/80 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-sm w-full text-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mx-auto">
-              <ArrowsPointingOutIcon className="h-8 w-8 text-amber-600" />
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-xs w-full text-center space-y-3">
+            <div className="h-14 w-14 rounded-full bg-amber-100 flex items-center justify-center mx-auto">
+              <ArrowsPointingOutIcon className="h-7 w-7 text-amber-600" />
             </div>
-            <h2 className="text-lg font-bold text-slate-900">Fullscreen required</h2>
-            <p className="text-sm text-slate-500">
-              This assessment must be taken in fullscreen mode. Click below to continue.
-            </p>
-            <button
-              onClick={requestFullscreen}
-              className="w-full h-11 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors"
-            >
+            <h2 className="text-base font-bold text-slate-900">Fullscreen required</h2>
+            <p className="text-xs text-slate-500">This assessment must be taken in fullscreen mode.</p>
+            <button onClick={requestFullscreen}
+              className="w-full h-10 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors">
               Enter Fullscreen
             </button>
           </div>
@@ -132,21 +122,20 @@ export default function SecureAssessmentWrapper({ secure, children, onForceSubmi
       {/* ── Disqualification overlay ─────────────────────────────────────── */}
       {disqualified && (
         <div className="fixed inset-0 z-50 bg-rose-900/90 backdrop-blur-sm flex items-center justify-center px-4">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-rose-100 flex items-center justify-center mx-auto">
-              <NoSymbolIcon className="h-8 w-8 text-rose-600" />
+          <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full text-center space-y-3">
+            <div className="h-14 w-14 rounded-full bg-rose-100 flex items-center justify-center mx-auto">
+              <NoSymbolIcon className="h-7 w-7 text-rose-600" />
             </div>
-            <h2 className="text-xl font-bold text-rose-700">Assessment Flagged</h2>
-            <p className="text-sm text-slate-600">
-              Multiple security violations were detected. Your attempt has been recorded
-              and flagged for review. The test will be submitted automatically in 3 seconds.
+            <h2 className="text-lg font-bold text-rose-700">Assessment Flagged</h2>
+            <p className="text-xs text-slate-600 leading-relaxed">
+              Multiple security violations were detected. The test will be submitted automatically in 3 seconds.
             </p>
-            <div className="space-y-1 text-left">
+            <div className="space-y-1 text-left max-h-32 overflow-y-auto">
               {violations.slice(-4).map((v, i) => (
                 <div key={i} className="flex items-center gap-2 text-xs text-slate-500 bg-slate-50 rounded-lg px-3 py-1.5">
                   <span>{VIOLATION_ICONS[v.type] || '⚠'}</span>
-                  <span className="font-medium capitalize">{v.type.replace(/_/g, ' ')}</span>
-                  <span className="ml-auto">{new Date(v.timestamp).toLocaleTimeString()}</span>
+                  <span className="font-medium capitalize truncate">{v.type.replace(/_/g, ' ')}</span>
+                  <span className="ml-auto text-[10px]">{new Date(v.timestamp).toLocaleTimeString()}</span>
                 </div>
               ))}
             </div>
@@ -154,11 +143,11 @@ export default function SecureAssessmentWrapper({ secure, children, onForceSubmi
         </div>
       )}
 
-      {/* ── Violation log sidebar (last 3 violations) ────────────────────── */}
+      {/* ── Violation log (bottom-right, hidden on very small screens) ─── */}
       {violations.length > 0 && !disqualified && (
-        <div className="fixed bottom-4 right-4 z-40 w-52 space-y-1.5">
+        <div className="fixed bottom-4 right-3 z-40 w-44 sm:w-52 space-y-1.5">
           {violations.slice(-3).map((v, i) => (
-            <div key={i} className="flex items-center gap-2 bg-slate-900/90 text-white text-[10px] rounded-xl px-3 py-2 shadow-lg">
+            <div key={i} className="flex items-center gap-2 bg-slate-900/90 text-white text-[10px] rounded-xl px-2.5 py-1.5 shadow-lg">
               <span>{VIOLATION_ICONS[v.type] || '⚠'}</span>
               <div className="min-w-0">
                 <p className="font-semibold capitalize truncate">{v.type.replace(/_/g, ' ')}</p>

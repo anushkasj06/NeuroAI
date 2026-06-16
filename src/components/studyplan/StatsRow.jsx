@@ -53,12 +53,12 @@ export default function StatsRow({ analytics: a }) {
         const Icon = s.icon;
         return (
           <div key={s.label} className="ai-kpi">
-            <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wide text-slate-400">
-              <Icon className="h-4 w-4 text-teal-600" />
-              {s.label}
+            <div className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400 truncate">
+              <Icon className="h-3.5 w-3.5 text-teal-600 flex-shrink-0" />
+              <span className="truncate">{s.label}</span>
             </div>
-            <p className="text-lg font-semibold text-slate-900 leading-tight">{s.value}</p>
-            <p className="text-xs text-slate-400 mt-0.5 truncate">{s.sub}</p>
+            <p className="text-base sm:text-lg font-semibold text-slate-900 leading-tight truncate">{s.value}</p>
+            <p className="text-[10px] text-slate-400 mt-0.5 truncate">{s.sub}</p>
           </div>
         );
       })}

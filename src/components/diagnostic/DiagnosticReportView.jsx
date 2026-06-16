@@ -15,14 +15,14 @@ export default function DiagnosticReportView({ data }) {
 
   return (
     <div className="space-y-6">
-      <div className={`rounded-3xl p-8 text-white bg-gradient-to-br ${styleGradient} shadow-xl`}>
-        <p className="text-white/80 text-sm font-medium uppercase tracking-wide">Your learning style</p>
-        <h1 className="text-3xl sm:text-4xl font-bold mt-2">{report.preferredLearningStyle}</h1>
-        <p className="mt-4 text-white/90 text-lg">{report.aiGeneratedSummary}</p>
-        <p className="mt-6 text-white/95 italic">&ldquo;{report.motivationalFeedback}&rdquo;</p>
+      <div className={`rounded-3xl p-6 sm:p-8 text-white bg-gradient-to-br ${styleGradient} shadow-xl`}>
+        <p className="text-white/80 text-xs font-medium uppercase tracking-wide">Your learning style</p>
+        <h1 className="text-2xl sm:text-4xl font-bold mt-2">{report.preferredLearningStyle}</h1>
+        <p className="mt-3 text-white/90 text-base sm:text-lg leading-relaxed">{report.aiGeneratedSummary}</p>
+        <p className="mt-4 text-white/95 italic text-sm sm:text-base">&ldquo;{report.motivationalFeedback}&rdquo;</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 sm:grid-cols-2 lg:grid-cols-4">
         {[
           { label: 'Engagement', value: `${report.engagementScore}%` },
           { label: 'Confidence', value: report.confidenceLevel },

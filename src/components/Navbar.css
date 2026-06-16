@@ -397,3 +397,61 @@
   font-size: 14px;
   font-weight: 600;
 }
+
+/* ── Mobile responsive additions ──────────────────────────────────────────── */
+
+/* Give body breathing room on small screens (accounts for mobile topbar) */
+@media (max-width: 1023px) {
+  .app-main {
+    padding-left: 0 !important;
+  }
+}
+
+/* Topbar height comfortable on small screens */
+@media (max-width: 480px) {
+  .guest-topbar__inner,
+  .mobile-topbar {
+    height: 56px;
+    padding: 0 12px;
+  }
+
+  .brand__name {
+    font-size: 16px;
+  }
+
+  .guest-btn {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+}
+
+/* Mobile drawer: full-screen comfortable scrollable */
+@media (max-width: 480px) {
+  .mobile-drawer {
+    padding: 10px 8px 16px;
+  }
+
+  .side-link {
+    min-height: 44px;       /* thumb-friendly tap target */
+    padding: 10px 10px;
+    font-size: 14px;
+  }
+
+  .side-link__icon {
+    width: 26px;
+    height: 26px;
+  }
+
+  .logout-btn {
+    min-height: 44px;
+    font-size: 14px;
+  }
+}
+
+/* Ensure mobile drawer links are full-width and easy to tap */
+@media (max-width: 1023px) {
+  .mobile-drawer .side-link {
+    width: 100%;
+    border-radius: 12px;
+  }
+}

@@ -82,16 +82,16 @@ function scoreColor(v) {
 
 function ScoreBar({ icon: Icon, label, value, color }) {
   return (
-    <div className="flex items-center gap-2 text-xs">
+    <div className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 text-xs sm:flex sm:gap-2">
       <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color }} />
-      <span className="w-16 text-slate-500 font-medium">{label}</span>
-      <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <span className="min-w-0 text-slate-500 font-medium sm:w-16">{label}</span>
+      <span className="w-8 text-right font-bold text-slate-600">{value}%</span>
+      <div className="col-span-3 h-1.5 bg-slate-100 rounded-full overflow-hidden sm:col-span-1 sm:flex-1">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${value}%`, background: color }}
         />
       </div>
-      <span className="w-8 text-right font-bold text-slate-600">{value}%</span>
     </div>
   );
 }
@@ -122,12 +122,12 @@ export default function AdaptiveRecommendationCard({
 
   return (
     <div
-      className={`rounded-2xl border p-4 transition-all duration-200 ${cfg.bg} ${cfg.border} ${
+      className={`relative rounded-2xl border p-4 transition-all duration-200 ${cfg.bg} ${cfg.border} ${
         inactive ? 'opacity-50' : ''
       }`}
     >
       {/* ── Header row ─────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-2.5 min-w-0">
           {/* Case icon */}
           <span
@@ -163,7 +163,7 @@ export default function AdaptiveRecommendationCard({
         {!inactive && onDismiss && (
           <button
             onClick={() => onDismiss(record._id)}
-            className="flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200/60 hover:text-slate-600 transition-colors"
+            className="absolute right-3 top-3 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200/60 hover:text-slate-600 sm:static sm:h-6 sm:w-6"
             title="Dismiss"
           >
             <XMarkIcon className="h-4 w-4" />
@@ -172,7 +172,7 @@ export default function AdaptiveRecommendationCard({
 
         {/* Applied badge */}
         {isApplied && (
-          <span className="flex-shrink-0 flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+          <span className="flex w-fit flex-shrink-0 items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
             <CheckCircleIcon className="h-3 w-3" />
             Applied
           </span>
@@ -207,7 +207,7 @@ export default function AdaptiveRecommendationCard({
             </span>
           )}
           {rec.suggestedNextTopic && (
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600 max-w-[160px] truncate">
+            <span className="max-w-full truncate rounded-full border border-slate-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-slate-600 sm:max-w-[160px]">
               ➡ {rec.suggestedNextTopic}
             </span>
           )}
@@ -220,7 +220,7 @@ export default function AdaptiveRecommendationCard({
           <Link
             to={rec.actionRoute}
             onClick={() => onApply && onApply(record._id)}
-            className="flex-1 flex items-center justify-center gap-1.5 h-8 rounded-xl text-xs font-semibold text-white transition-colors"
+            className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-white transition-colors sm:h-8"
             style={{ background: cfg.color }}
           >
             <FaceSmileIcon className="h-3.5 w-3.5" />

@@ -79,7 +79,7 @@ export default function EngagementDrillDown({ sessionId, className = '' }) {
         <div className="animate-pulse space-y-3">
           <div className="h-4 bg-slate-200 rounded w-40" />
           <div className="h-24 bg-slate-100 rounded-xl" />
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             {[...Array(4)].map((_, i) => <div key={i} className="h-16 bg-slate-100 rounded-xl" />)}
           </div>
         </div>
@@ -116,7 +116,7 @@ export default function EngagementDrillDown({ sessionId, className = '' }) {
     <div className={`bg-white border border-slate-100 rounded-2xl p-5 space-y-5 ${className}`}>
 
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-sm font-semibold text-slate-900">Engagement Breakdown</h3>
           <p className="text-xs text-slate-400 mt-0.5">{m.subject} · {m.topic}</p>
@@ -127,7 +127,7 @@ export default function EngagementDrillDown({ sessionId, className = '' }) {
       </div>
 
       {/* Composite score */}
-      <div className="flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-indigo-50 to-slate-50">
+      <div className="flex flex-col gap-4 rounded-2xl border border-slate-100 bg-gradient-to-r from-indigo-50 to-slate-50 p-4 sm:flex-row sm:items-center">
         <div className="text-center">
           <p className="text-4xl font-black text-indigo-600">{m.engagementScore}</p>
           <p className="text-[10px] text-slate-400 font-semibold">/ 100</p>
@@ -154,7 +154,7 @@ export default function EngagementDrillDown({ sessionId, className = '' }) {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <StatBlock icon={ClockIcon}      label="Session duration"  value={formatDuration(m.sessionDurationMs)} color="#6366f1" />
         <StatBlock icon={BoltIcon}       label="Interactions"      value={m.interactionEventCount || 0} sub={`${(m.activeInteractionMinutes || 0).toFixed(1)} active mins`} color="#3b82f6" />
         <StatBlock icon={EyeIcon}        label="Face missing"      value={formatMs(m.totalFaceMissingMs)} sub={`${m.facePresenceRate || 0}% present`} color="#10b981" />
@@ -167,15 +167,15 @@ export default function EngagementDrillDown({ sessionId, className = '' }) {
           <p className="text-xs font-semibold text-slate-500 mb-2">Emotion distribution</p>
           <div className="space-y-1.5">
             {emoEntries.map(([emo, val]) => (
-              <div key={emo} className="flex items-center gap-2 text-xs">
-                <span className="w-20 capitalize font-medium text-slate-600">{emo}</span>
-                <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div key={emo} className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 text-xs sm:flex sm:gap-2">
+                <span className="min-w-0 capitalize font-medium text-slate-600 sm:w-20">{emo}</span>
+                <span className="w-8 text-right font-bold text-slate-500">{Math.round(val * 100)}%</span>
+                <div className="col-span-2 h-2 bg-slate-100 rounded-full overflow-hidden sm:col-span-1 sm:flex-1">
                   <div
                     className="h-full rounded-full transition-all duration-700"
                     style={{ width: `${Math.round(val * 100)}%`, background: EMOTION_COLORS[emo] || '#94a3b8' }}
                   />
                 </div>
-                <span className="w-8 text-right font-bold text-slate-500">{Math.round(val * 100)}%</span>
               </div>
             ))}
           </div>

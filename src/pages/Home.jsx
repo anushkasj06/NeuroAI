@@ -54,21 +54,21 @@ export default function Home() {
     <div className="min-h-screen bg-slate-50 text-slate-950">
       <section className="relative overflow-hidden border-b border-slate-200 bg-white">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_10%,rgba(14,116,144,0.16),transparent_34%),radial-gradient(circle_at_80%_18%,rgba(14,165,233,0.14),transparent_32%)]" />
-        <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-10 px-4 py-16 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
+        <div className="relative mx-auto grid min-h-[calc(100vh-4rem)] max-w-7xl items-center gap-10 px-4 py-12 lg:grid-cols-[1.05fr_0.95fr] lg:px-8">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/75 px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
               <CpuChipIcon className="h-4 w-4 text-teal-700" />
               Fully adaptive AI learning platform
             </div>
-            <h1 className="mt-5 max-w-3xl text-4xl font-semibold tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
+            <h1 className="mt-5 max-w-3xl text-3xl font-semibold tracking-normal text-slate-950 sm:text-5xl lg:text-6xl">
               NeuroLearn AI teaches, tests, adapts, and improves with every session.
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-8 text-slate-600">
+            <p className="mt-4 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
               A personalized learning system for students that combines diagnostic assessment, learning-style detection,
               AI teacher sessions, adaptive quizzes, progress reports, and dynamic study-plan updates.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Link
                 to={primaryTarget}
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-teal-700 to-sky-600 px-5 text-sm font-semibold text-white shadow-lg shadow-teal-900/15 transition hover:-translate-y-0.5"
@@ -84,14 +84,15 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="mt-10 grid gap-3 sm:grid-cols-3">
+            <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
               <Stat value="1:1" label="AI teacher flow" />
               <Stat value="Live" label="adaptive questions" />
               <Stat value="Daily" label="plan updates" />
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-2xl shadow-slate-900/10">
+          {/* Hero card hidden on small phones, shown from md up */}
+          <div className="hidden md:block rounded-2xl border border-slate-200 bg-white/85 p-4 shadow-2xl shadow-slate-900/10">
             <div className="rounded-xl border border-slate-200 bg-slate-950 p-4 text-white">
               <div className="flex items-center justify-between border-b border-white/10 pb-3">
                 <div>
@@ -124,7 +125,7 @@ export default function Home() {
             and modifies the plan when performance drops.
           </p>
         </div>
-        <div className="mt-8 grid gap-5 md:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:grid-cols-2 md:grid-cols-3">
           {pillars.map((item) => {
             const Icon = item.icon;
             return (
@@ -145,7 +146,7 @@ export default function Home() {
           <div className="grid gap-10 lg:grid-cols-[0.8fr_1.2fr]">
             <div>
               <p className="text-sm font-semibold text-teal-700">Learning engine</p>
-              <h2 className="mt-2 text-3xl font-semibold">From diagnostic to daily adaptation.</h2>
+              <h2 className="mt-2 text-2xl font-semibold sm:text-3xl">From diagnostic to daily adaptation.</h2>
               <p className="mt-3 text-slate-600">
                 NeuroLearn turns student signals into a continuous teaching loop, so every lesson creates evidence for the next lesson.
               </p>
@@ -165,10 +166,10 @@ export default function Home() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-16 lg:px-8">
-        <div className="rounded-2xl border border-slate-200 bg-slate-950 p-8 text-white lg:p-10">
+        <div className="rounded-2xl border border-slate-200 bg-slate-950 p-5 text-white sm:p-8 lg:p-10">
           <div className="grid gap-8 lg:grid-cols-[1fr_auto] lg:items-center">
             <div>
-              <h2 className="text-3xl font-semibold">Ready to learn with a system that reacts to you?</h2>
+              <h2 className="text-2xl font-semibold sm:text-3xl">Ready to learn with a system that reacts to you?</h2>
               <p className="mt-3 max-w-2xl text-slate-300">
                 Start with your diagnostic profile, then let the AI Teacher guide lessons, questions, feedback, revision, and progress.
               </p>
@@ -187,7 +188,7 @@ export default function Home() {
       <footer className="border-t border-slate-200 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between lg:px-8">
           <p>NeuroLearn AI. Adaptive learning, teaching, testing, and progress intelligence.</p>
-          <div className="flex gap-4">
+          <div className="flex flex-wrap gap-4">
             <Link to="/diagnostic" className="hover:text-slate-900">Diagnostic</Link>
             <Link to="/ai-teacher" className="hover:text-slate-900">AI Teacher</Link>
             <Link to="/study-plan" className="hover:text-slate-900">Study Plan</Link>

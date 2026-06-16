@@ -262,3 +262,425 @@
   background: #0f766e;
   box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.12);
 }
+
+/* ── Mobile responsive additions ──────────────────────────────────────────── */
+
+/* Shell padding: tighter on phones */
+@media (max-width: 640px) {
+  .ai-shell {
+    padding: 16px 14px 40px;
+  }
+
+  .ai-hero__title {
+    font-size: 1.55rem;
+    line-height: 1.25;
+  }
+
+  .ai-hero {
+    padding: 4px 0 16px;
+  }
+
+  /* Buttons stack on very small screens */
+  .ai-hero .flex.flex-wrap {
+    gap: 8px;
+  }
+
+  .ai-btn {
+    padding: 9px 12px;
+    font-size: 0.82rem;
+    border-radius: 10px;
+  }
+}
+
+/* KPI strip: 2 columns on mobile, 3 on tablet */
+@media (max-width: 1023px) {
+  .ai-kpi-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .ai-kpi:not(:last-child) {
+    border-right: none;
+    border-bottom: 1px solid var(--ai-line);
+  }
+
+  /* Re-add right border every 2nd column on mobile 2-col grid */
+  .ai-kpi:nth-child(odd) {
+    border-right: 1px solid var(--ai-line) !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .ai-kpi-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .ai-kpi {
+    padding: 12px 10px;
+  }
+}
+
+/* Grid: single column on tablets and below */
+@media (max-width: 1023px) {
+  .ai-grid-main {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+
+/* Rail: remove left border on very small screens to save space */
+@media (max-width: 480px) {
+  .ai-rail {
+    padding-left: 12px;
+  }
+
+  .ai-section {
+    padding: 14px 0;
+  }
+
+  .ai-panel__header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* Chips: prevent overflow */
+.ai-chip {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+/* Row items: wrap on mobile */
+.ai-row {
+  flex-wrap: wrap;
+}
+
+/* Quick actions: smaller padding on mobile */
+@media (max-width: 480px) {
+  .ai-row {
+    padding: 10px 0;
+    gap: 8px;
+  }
+}
+
+/* Study plan KPI strip override */
+.plan-kpi {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+
+@media (min-width: 640px) {
+  .plan-kpi {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+
+/* Progress bar meta: stack on small */
+@media (max-width: 480px) {
+  .plan-progress__meta {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   COMPREHENSIVE MOBILE-RESPONSIVE ADDITIONS
+   Applies to all pages that import AIDashboard.css via the .ai-* classes.
+   Breakpoints:  xs  ≤ 360px | sm  ≤ 480px | md  ≤ 640px | lg  ≤ 1023px
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Shell & layout ─────────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ai-shell {
+    padding: 14px 12px 36px;
+  }
+  .ai-hero {
+    padding: 4px 0 14px;
+  }
+  .ai-hero__title {
+    font-size: 1.45rem;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+  }
+  .ai-section {
+    padding: 12px 0;
+  }
+}
+
+/* ── 2. KPI strip – always 2-col on ≤640, respect 6-col on desktop ──────── */
+@media (max-width: 640px) {
+  .ai-kpi-strip {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  .ai-kpi {
+    padding: 10px 10px;
+  }
+  .ai-kpi:nth-child(odd) {
+    border-right: 1px solid var(--ai-line) !important;
+  }
+  .ai-kpi:nth-child(even) {
+    border-right: none !important;
+  }
+}
+
+/* ── 3. Main grid – always 1-col on ≤1023px ────────────────────────────── */
+@media (max-width: 1023px) {
+  .ai-grid-main {
+    grid-template-columns: 1fr !important;
+    gap: 18px;
+  }
+}
+
+/* ── 4. Buttons – full-width on very small screens when stacked ─────────── */
+@media (max-width: 360px) {
+  .ai-btn {
+    padding: 8px 10px;
+    font-size: 0.78rem;
+    gap: 5px;
+  }
+}
+
+/* ── 5. Panel header – wrap on small screens ─────────────────────────────── */
+@media (max-width: 480px) {
+  .ai-panel__header {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding-bottom: 10px;
+  }
+  .ai-panel__title {
+    font-size: 0.875rem;
+  }
+  .ai-rail {
+    padding-left: 10px;
+  }
+}
+
+/* ── 6. Row items – wrap on mobile ─────────────────────────────────────── */
+@media (max-width: 480px) {
+  .ai-row {
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 0;
+  }
+}
+
+/* ── 7. Stats row (StatsRow.jsx) ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .ai-kpi-strip.grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  /* Label truncation inside KPI on narrow screens */
+  .ai-kpi p,
+  .ai-kpi span {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+  }
+}
+
+/* ── 8. Study-plan specific overrides ───────────────────────────────────── */
+.plan-kpi {
+  grid-template-columns: repeat(2, 1fr) !important;
+}
+@media (min-width: 640px) {
+  .plan-kpi {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+@media (max-width: 480px) {
+  .plan-progress__meta {
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11px;
+  }
+  .plan-hero__sub {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .plan-hero__actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .plan-week-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    gap: 6px;
+    padding-bottom: 4px;
+  }
+  .plan-day-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .plan-session-list {
+    gap: 10px;
+  }
+  .plan-session {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .plan-month-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* ── 9. Flow items (TodayPlanCard) ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .ai-flow__item > div {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .ai-icon-chip {
+    width: 26px;
+    height: 26px;
+  }
+}
+
+/* ── 10. Diagnostic report view ─────────────────────────────────────────── */
+@media (max-width: 640px) {
+  /* Learning style hero card */
+  .diag-hero {
+    padding: 24px 20px !important;
+  }
+  .diag-hero h1 {
+    font-size: 1.6rem !important;
+  }
+  .diag-hero p {
+    font-size: 0.9rem !important;
+  }
+  /* Stats grid → 2-col */
+  .diag-stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ── 11. Common component cards (AdaptiveRecommendationCard, etc.) ────────── */
+@media (max-width: 480px) {
+  /* Recommendation card action button: full-width */
+  .rec-action-btn {
+    width: 100%;
+  }
+  /* Score bar labels: truncate */
+  .score-bar-label {
+    max-width: 60px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+/* ── 12. AITeacherSession layout ─────────────────────────────────────────── */
+@media (max-width: 1023px) {
+  .at-grid {
+    grid-template-columns: 1fr !important;
+  }
+  /* Stack webcam/attention below questions */
+  .at-sidebar {
+    position: static !important;
+    order: 2;
+  }
+}
+@media (max-width: 640px) {
+  .at-sidebar > div {
+    display: none; /* hide webcam widgets on phones to save space */
+  }
+  .at-sidebar > div:first-child {
+    display: block; /* keep emotion detector but hidden by user toggle */
+  }
+}
+
+/* ── 13. Progress stepper ───────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  /* Step labels: hide on very small screens, show icon only */
+  .prog-step-label {
+    display: none;
+  }
+  .prog-step-dot {
+    width: 32px !important;
+    height: 32px !important;
+    font-size: 14px !important;
+  }
+}
+
+/* ── 14. Onboarding form ─────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .onboard-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .onboard-subject-row {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+  }
+  .onboard-subject-row input {
+    width: 100% !important;
+  }
+}
+
+/* ── 15. Attention tracker / webcam cards ────────────────────────────────── */
+@media (max-width: 480px) {
+  .attention-chips {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 4px;
+  }
+  .attention-chip-item {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
+  }
+}
+
+/* ── 16. Dashboard panels: remove rail on mobile for clean look ────────────── */
+@media (max-width: 360px) {
+  .ai-rail {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+/* ── 17. Dashboard right-column cards: full-width on mobile ───────────────── */
+@media (max-width: 640px) {
+  /* Engagement score card SVG donut: smaller */
+  .engagement-donut {
+    width: 70px !important;
+    height: 70px !important;
+  }
+  /* Analytics panel bar chart: shorter height */
+  .analytics-chart {
+    height: 70px !important;
+  }
+}
+
+/* ── 18. Modality radar chart ───────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .modality-radar {
+    height: 180px !important;
+  }
+}
+
+/* ── 19. Safe area padding (iPhone notch / home indicator) ─────────────── */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .ai-dashboard {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* ── 20. Prevent overflow / horizontal scroll ───────────────────────────── */
+.ai-dashboard,
+.ai-shell,
+.ai-rail,
+.ai-row {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Tags: wrap gracefully on mobile */
+.ai-tag-list {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* KPI value: avoid breaking on small screens */
+.ai-kpi-value {
+  word-break: break-word;
+  overflow-wrap: break-word;
+}

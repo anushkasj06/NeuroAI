@@ -6,15 +6,15 @@ export default function ProgressStepper({ currentStep }) {
   const currentIdx = stepIndex(currentStep);
 
   return (
-    <div className="mb-8">
+    <div className="mb-6">
       <div className="flex items-center justify-between gap-1 overflow-x-auto pb-2">
         {DIAGNOSTIC_STEPS.map((step, idx) => {
           const isActive = idx === currentIdx;
           const isComplete = idx < currentIdx;
           return (
-            <div key={step.id} className="flex flex-col items-center min-w-[72px] flex-1">
+            <div key={step.id} className="flex flex-col items-center min-w-[48px] sm:min-w-[72px] flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center text-lg transition-all duration-300 ${
+                className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-base sm:text-lg transition-all duration-300 ${
                   isComplete
                     ? 'bg-emerald-500 text-white shadow-md'
                     : isActive
@@ -25,7 +25,7 @@ export default function ProgressStepper({ currentStep }) {
                 {isComplete ? '✓' : step.icon}
               </div>
               <span
-                className={`mt-2 text-xs font-medium text-center ${
+                className={`mt-1.5 text-[9px] sm:text-xs font-medium text-center hidden xs:block ${
                   isActive ? 'text-indigo-600' : isComplete ? 'text-emerald-600' : 'text-gray-400'
                 }`}
               >
@@ -35,12 +35,10 @@ export default function ProgressStepper({ currentStep }) {
           );
         })}
       </div>
-      <div className="mt-4 h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="mt-3 h-2 bg-gray-100 rounded-full overflow-hidden">
         <div
           className="h-full bg-gradient-to-r from-indigo-500 to-purple-500 transition-all duration-500"
-          style={{
-            width: `${((currentIdx + 1) / DIAGNOSTIC_STEPS.length) * 100}%`,
-          }}
+          style={{ width: `${((currentIdx + 1) / DIAGNOSTIC_STEPS.length) * 100}%` }}
         />
       </div>
     </div>
