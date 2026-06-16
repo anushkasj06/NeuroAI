@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import MaterialAdaptationShowcase from './MaterialAdaptationShowcase';
 
 export default function MaterialViewer({ material, learningStyle, onStartQuiz }) {
   const [tab, setTab] = useState('main');
@@ -62,15 +63,26 @@ export default function MaterialViewer({ material, learningStyle, onStartQuiz })
       {/* Tabs */}
       <div className="flex gap-1 px-4 pt-4 overflow-x-auto">
         {tabs.map((t) => (
-          <button key={t.id} onClick={() => setTab(t.id)}
-            className={`shrink-0 px-4 py-2 rounded-t-xl text-sm font-medium border-b-2 transition-all ${tab === t.id ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:text-gray-700'}`}>
+          <button
+            key={t.id}
+            onClick={() => setTab(t.id)}
+            className={`shrink-0 px-4 py-2 rounded-t-xl text-sm font-medium border-b-2 transition-all ${
+              tab === t.id ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+          >
             {t.emoji} {t.label}
           </button>
         ))}
       </div>
 
-      <div className="p-6">
-        {/* Main content */}
+      {/* Content Area */}
+      <div className="p-6 sm:p-8 bg-slate-50/50">
+        <MaterialAdaptationShowcase 
+          adaptations={material.adaptations} 
+          lastAdaptedAt={material.lastAdaptedAt} 
+        />
+        
+        {/* Main Content */}
         {tab === 'main' && (
           <div>
             {learningStyle === 'Audio Learner' && (

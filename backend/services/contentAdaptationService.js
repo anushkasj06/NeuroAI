@@ -21,14 +21,16 @@
 
 'use strict';
 
-const mongoose                    = require('mongoose');
+const mongoose = require('mongoose');
 const ContentFormatRecommendation = require('../models/adaptive/ContentFormatRecommendation');
-const AdaptiveLearningRecord      = require('../models/adaptive/AdaptiveLearningRecord');
-const EngagementMetrics           = require('../models/adaptive/EngagementMetrics');
-const LearningStyleReport         = require('../models/LearningStyleReport');
-const TopicProgress               = require('../models/TopicProgress');
-const StudentAnswer               = require('../models/StudentAnswer');
-const LearningSession             = require('../models/LearningSession');
+const AdaptiveLearningRecord = require('../models/adaptive/AdaptiveLearningRecord');
+const EngagementMetrics = require('../models/adaptive/EngagementMetrics');
+const LearningStyleReport = require('../models/LearningStyleReport');
+const TopicProgress = require('../models/TopicProgress');
+const StudentAnswer = require('../models/StudentAnswer');
+const LearningSession = require('../models/LearningSession');
+const LearningMaterial = require('../models/LearningMaterial');
+const ProgressReport = require('../models/ProgressReport');
 const { chatCompletion, parseJson } = require('./grokService');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -47,55 +49,55 @@ const FORMATS = ['video', 'pdf', 'infographic', 'flashcards', 'interactive_quiz'
  */
 const FORMAT_AFFINITY = {
   video: {
-    styleAffinity:     { 'Visual Learner': 1.0, 'Audio Learner': 0.9, 'Reading/Writing Learner': 0.4, 'Interactive Learner': 0.5 },
-    confusionRelief:   0.75,   // visual walkthroughs break confusion well
-    engagementLift:    0.85,   // video re-engages passive learners effectively
-    successReinforce:  0.60,
+    styleAffinity: { 'Visual Learner': 1.0, 'Audio Learner': 0.9, 'Reading/Writing Learner': 0.4, 'Interactive Learner': 0.5 },
+    confusionRelief: 0.75,   // visual walkthroughs break confusion well
+    engagementLift: 0.85,   // video re-engages passive learners effectively
+    successReinforce: 0.60,
   },
   pdf: {
-    styleAffinity:     { 'Visual Learner': 0.3, 'Audio Learner': 0.2, 'Reading/Writing Learner': 1.0, 'Interactive Learner': 0.3 },
-    confusionRelief:   0.55,   // structured text helps systematic thinkers
-    engagementLift:    0.25,   // low — already low-engagement students won't pick up docs
-    successReinforce:  0.45,
+    styleAffinity: { 'Visual Learner': 0.3, 'Audio Learner': 0.2, 'Reading/Writing Learner': 1.0, 'Interactive Learner': 0.3 },
+    confusionRelief: 0.55,   // structured text helps systematic thinkers
+    engagementLift: 0.25,   // low — already low-engagement students won't pick up docs
+    successReinforce: 0.45,
   },
   infographic: {
-    styleAffinity:     { 'Visual Learner': 0.95, 'Audio Learner': 0.35, 'Reading/Writing Learner': 0.50, 'Interactive Learner': 0.55 },
-    confusionRelief:   0.80,   // visual summaries cut through complexity fast
-    engagementLift:    0.70,   // colour/layout catches attention
-    successReinforce:  0.50,
+    styleAffinity: { 'Visual Learner': 0.95, 'Audio Learner': 0.35, 'Reading/Writing Learner': 0.50, 'Interactive Learner': 0.55 },
+    confusionRelief: 0.80,   // visual summaries cut through complexity fast
+    engagementLift: 0.70,   // colour/layout catches attention
+    successReinforce: 0.50,
   },
   flashcards: {
-    styleAffinity:     { 'Visual Learner': 0.55, 'Audio Learner': 0.40, 'Reading/Writing Learner': 0.70, 'Interactive Learner': 0.85 },
-    confusionRelief:   0.65,   // spaced repetition isolates gaps
-    engagementLift:    0.75,   // self-testing is engaging
-    successReinforce:  0.90,   // best for low-success reinforcement loops
+    styleAffinity: { 'Visual Learner': 0.55, 'Audio Learner': 0.40, 'Reading/Writing Learner': 0.70, 'Interactive Learner': 0.85 },
+    confusionRelief: 0.65,   // spaced repetition isolates gaps
+    engagementLift: 0.75,   // self-testing is engaging
+    successReinforce: 0.90,   // best for low-success reinforcement loops
   },
   interactive_quiz: {
-    styleAffinity:     { 'Visual Learner': 0.60, 'Audio Learner': 0.45, 'Reading/Writing Learner': 0.55, 'Interactive Learner': 1.0 },
-    confusionRelief:   0.50,   // good for testing understanding but not explaining
-    engagementLift:    0.90,   // highest engagement lift of all formats
-    successReinforce:  0.80,
+    styleAffinity: { 'Visual Learner': 0.60, 'Audio Learner': 0.45, 'Reading/Writing Learner': 0.55, 'Interactive Learner': 1.0 },
+    confusionRelief: 0.50,   // good for testing understanding but not explaining
+    engagementLift: 0.90,   // highest engagement lift of all formats
+    successReinforce: 0.80,
   },
   coding_practice: {
-    styleAffinity:     { 'Visual Learner': 0.40, 'Audio Learner': 0.20, 'Reading/Writing Learner': 0.50, 'Interactive Learner': 0.95 },
-    confusionRelief:   0.35,   // hands-on but increases confusion if foundations are shaky
-    engagementLift:    0.80,   // high for technically-oriented students
-    successReinforce:  0.70,
+    styleAffinity: { 'Visual Learner': 0.40, 'Audio Learner': 0.20, 'Reading/Writing Learner': 0.50, 'Interactive Learner': 0.95 },
+    confusionRelief: 0.35,   // hands-on but increases confusion if foundations are shaky
+    engagementLift: 0.80,   // high for technically-oriented students
+    successReinforce: 0.70,
   },
 };
 
 // Dimension weights for the composite score
 const WEIGHTS = {
-  styleAffinity:    0.35,
-  confusionRelief:  0.25,
-  engagementLift:   0.25,
+  styleAffinity: 0.35,
+  confusionRelief: 0.25,
+  engagementLift: 0.25,
   successReinforce: 0.15,
 };
 
 // Adjustment multipliers for extreme signal values
-const CONFUSION_BOOST_THRESHOLD  = 60;   // boost confusionRelief weight when confusion is high
+const CONFUSION_BOOST_THRESHOLD = 60;   // boost confusionRelief weight when confusion is high
 const ENGAGEMENT_BOOST_THRESHOLD = 35;   // boost engagementLift weight when engagement is low
-const SUCCESS_BOOST_THRESHOLD    = 40;   // boost successReinforce when history is weak
+const SUCCESS_BOOST_THRESHOLD = 40;   // boost successReinforce when history is weak
 
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, Number(v) || 0));
 
@@ -132,7 +134,7 @@ async function collectInputSignals({ userId, sessionId, subjectSlug, topic }) {
     // Blend mastery and best quiz score
     historicalSuccess = clamp(
       (progress.masteryPercent || 0) * 0.6 +
-      (progress.bestQuizScore  || 0) * 0.4
+      (progress.bestQuizScore || 0) * 0.4
     );
   } else {
     // Fall back to recent StudentAnswer average
@@ -162,25 +164,25 @@ function rankFormats({ learningStyle, confusionScore, engagementScore, historica
   const effectiveWeights = { ...WEIGHTS };
 
   if (confusionScore >= CONFUSION_BOOST_THRESHOLD) {
-    effectiveWeights.confusionRelief  += 0.10;
-    effectiveWeights.styleAffinity    -= 0.05;
+    effectiveWeights.confusionRelief += 0.10;
+    effectiveWeights.styleAffinity -= 0.05;
     effectiveWeights.successReinforce -= 0.05;
   }
   if (engagementScore <= ENGAGEMENT_BOOST_THRESHOLD) {
-    effectiveWeights.engagementLift   += 0.10;
-    effectiveWeights.styleAffinity    -= 0.05;
+    effectiveWeights.engagementLift += 0.10;
+    effectiveWeights.styleAffinity -= 0.05;
     effectiveWeights.successReinforce -= 0.05;
   }
   if (historicalSuccess <= SUCCESS_BOOST_THRESHOLD) {
     effectiveWeights.successReinforce += 0.10;
-    effectiveWeights.styleAffinity    -= 0.05;
-    effectiveWeights.confusionRelief  -= 0.05;
+    effectiveWeights.styleAffinity -= 0.05;
+    effectiveWeights.confusionRelief -= 0.05;
   }
 
   // Normalise dimension inputs to [0,1]
-  const confusionNorm  = confusionScore  / 100;
+  const confusionNorm = confusionScore / 100;
   const engagementNorm = engagementScore / 100;
-  const successNorm    = historicalSuccess / 100;
+  const successNorm = historicalSuccess / 100;
 
   const scores = FORMATS.map((format) => {
     const aff = FORMAT_AFFINITY[format];
@@ -196,10 +198,10 @@ function rankFormats({ learningStyle, confusionScore, engagementScore, historica
     const successValue = aff.successReinforce * (1 - successNorm);
 
     const raw =
-      styleScore     * effectiveWeights.styleAffinity    +
-      confusionValue * effectiveWeights.confusionRelief  +
-      engagementValue* effectiveWeights.engagementLift   +
-      successValue   * effectiveWeights.successReinforce;
+      styleScore * effectiveWeights.styleAffinity +
+      confusionValue * effectiveWeights.confusionRelief +
+      engagementValue * effectiveWeights.engagementLift +
+      successValue * effectiveWeights.successReinforce;
 
     // raw is in [0, ~0.4] since affinities are ≤1 and weights sum to ~1
     const score = clamp(Math.round(raw * 200)); // scale to 0–100
@@ -245,8 +247,8 @@ function buildReasoning({ format, learningStyle, confusionScore, engagementScore
 
 /** Short adaptation note for UI display */
 function buildAdaptationNote({ confusionScore, engagementScore, historicalSuccess, recommendedFormat }) {
-  if (confusionScore >= 70)    return `High confusion detected — ${recommendedFormat.replace('_', ' ')} reduces cognitive load fastest.`;
-  if (engagementScore <= 30)   return `Low engagement — switching to ${recommendedFormat.replace('_', ' ')} format to re-activate attention.`;
+  if (confusionScore >= 70) return `High confusion detected — ${recommendedFormat.replace('_', ' ')} reduces cognitive load fastest.`;
+  if (engagementScore <= 30) return `Low engagement — switching to ${recommendedFormat.replace('_', ' ')} format to re-activate attention.`;
   if (historicalSuccess <= 30) return `Weak past results — ${recommendedFormat.replace('_', ' ')} reinforces fundamentals before progressing.`;
   return `${recommendedFormat.replace('_', ' ')} is the best fit for your current learning state.`;
 }
@@ -284,17 +286,17 @@ exports.recommend = async ({
 
   // 2. Merge any caller overrides
   const inputs = {
-    learningStyle:     overrides.learningStyle    ?? collected.learningStyle,
-    confusionScore:    overrides.confusionScore   !== undefined ? Number(overrides.confusionScore)   : collected.confusionScore,
-    engagementScore:   overrides.engagementScore  !== undefined ? Number(overrides.engagementScore)  : collected.engagementScore,
-    historicalSuccess: overrides.historicalSuccess !== undefined ? Number(overrides.historicalSuccess): collected.historicalSuccess,
+    learningStyle: overrides.learningStyle ?? collected.learningStyle,
+    confusionScore: overrides.confusionScore !== undefined ? Number(overrides.confusionScore) : collected.confusionScore,
+    engagementScore: overrides.engagementScore !== undefined ? Number(overrides.engagementScore) : collected.engagementScore,
+    historicalSuccess: overrides.historicalSuccess !== undefined ? Number(overrides.historicalSuccess) : collected.historicalSuccess,
   };
 
   // 3. Rank all formats
   const ranked = rankFormats(inputs);
 
-  const primary   = ranked[0];
-  const fallback  = ranked[1];
+  const primary = ranked[0];
+  const fallback = ranked[1];
 
   // 4. Build reasoning strings
   const rankedFormats = ranked.map((item) => ({
@@ -303,7 +305,7 @@ exports.recommend = async ({
   }));
 
   const primaryReasoning = buildReasoning({ format: primary.format, ...inputs });
-  const adaptationNote   = buildAdaptationNote({ ...inputs, recommendedFormat: primary.format });
+  const adaptationNote = buildAdaptationNote({ ...inputs, recommendedFormat: primary.format });
 
   // 4b. Generate the actual adapted content dynamically
   let generatedContent = '';
@@ -326,9 +328,10 @@ ${adaptationNote}
 
 INSTRUCTIONS:
 1. Adapt the TONE and COMPLEXITY based on the analytics. If confusion is high, use extremely simple analogies. If engagement is low, use a highly interactive, exciting tone.
-2. Structure the output as VALID JSON ONLY with this structure:
+2. CRITICAL: ALWAYS start the markdown content with a short, personalized intro explicitly telling the student exactly HOW and WHY you've adapted this content specifically for them based on their metrics (e.g., "I noticed you were confused last time, so I've simplified this using a real-world analogy..." or "Since you learn best visually and your engagement was dropping, I've made this fast-paced and visual...").
+3. Structure the output as VALID JSON ONLY with this structure:
 {
-  "content": "The actual markdown content here, perfectly adapted to the format. E.g. if flashcards, provide Q&A. If video, provide a video script. Format it beautifully with Markdown.",
+  "content": "The actual markdown content here starting with the personalized intro, perfectly adapted to the format. E.g. if flashcards, provide Q&A. Format it beautifully with Markdown.",
   "summary": "A 1-sentence summary of what this content covers."
 }
 No other text outside the JSON.`;
@@ -336,7 +339,7 @@ No other text outside the JSON.`;
     const aiResponse = await chatCompletion([
       { role: 'system', content: 'You are an expert personalized tutor. Return JSON only.' },
       { role: 'user', content: prompt }
-    ], { temperature: 0.7 });
+    ], { temperature: 0.8 });
 
     const parsed = parseJson(aiResponse);
     generatedContent = parsed?.content || '';
@@ -349,22 +352,22 @@ No other text outside the JSON.`;
   // 5. Persist
   const doc = await ContentFormatRecommendation.create({
     userId,
-    sessionId:   sessionId  || null,
-    materialId:  materialId || null,
+    sessionId: sessionId || null,
+    materialId: materialId || null,
     subjectSlug,
-    subject:     subject || subjectSlug,
+    subject: subject || subjectSlug,
     topic,
     subtopic,
     inputs,
     recommendedFormat: primary.format,
-    fallbackFormat:    fallback.format,
+    fallbackFormat: fallback.format,
     rankedFormats,
     primaryReasoning,
     adaptationNote,
     generatedContent,
     generatedSummary,
     generatedAt: new Date(),
-    expiresAt:   new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   });
 
   return doc;
@@ -402,9 +405,10 @@ exports.getUserHistory = async (userId, { subjectSlug, limit = 20 } = {}) => {
 exports.getDashboardSummary = async (userId) => {
   const records = await ContentFormatRecommendation.aggregate([
     { $match: { userId: new mongoose.Types.ObjectId(userId), status: 'active' } },
-    { $sort:  { generatedAt: -1 } },
-    { $group: {
-        _id:   '$topic',
+    { $sort: { generatedAt: -1 } },
+    {
+      $group: {
+        _id: '$topic',
         record: { $first: '$$ROOT' },
       }
     },
@@ -462,4 +466,68 @@ exports.markDismissed = async (recordId, userId) => {
     { $set: { status: 'dismissed' } },
     { new: true }
   );
+};
+
+/**
+ * adaptExistingMaterial
+ * Actively modifies an existing LearningMaterial based on an Adaptive Assessment ProgressReport.
+ */
+exports.adaptExistingMaterial = async ({ userId, subjectSlug, topic, report }) => {
+  try {
+    const material = await LearningMaterial.findOne({ userId, subjectSlug, topic });
+    if (!material) return;
+
+    if (!report.weakAreas?.length && (!report.planModification || !report.planModification.changes?.length)) {
+      // Nothing major to adapt based on
+      return;
+    }
+
+    const prompt = `You are NeuroLearn's adaptive curriculum engine.
+The student just completed an assessment on "${topic}". 
+Based on their performance, we need to completely restructure their learning material to help them improve.
+
+STUDENT ASSESSMENT REPORT:
+- Weak Areas: ${report.weakAreas.join(', ')}
+- Recommended Plan Changes: ${(report.planModification?.changes || []).join(', ')}
+- Concept Mastery: ${report.conceptMastery}%
+
+CURRENT LEARNING MATERIAL (Markdown format):
+${material.content.slice(0, 4000)} // Truncated to avoid context limits if too long
+
+INSTRUCTIONS:
+1. Rewrite the current learning material. Simplify concepts they are weak in, use new vivid analogies, or expand where needed.
+2. Maintain the overall markdown structure but heavily adapt the pedagogical approach.
+3. Explicitly generate an array of "adaptations" detailing exactly what pedagogical decisions you made.
+
+OUTPUT JSON FORMAT:
+{
+  "content": "The rewritten markdown content",
+  "summary": "A 1-sentence updated summary of the material",
+  "adaptations": [
+    {
+      "type": "simplification", // or "expansion", "reinforcement", "visual_added", "format_change", "tone_adjustment"
+      "focusArea": "The specific subtopic you targeted",
+      "description": "Exactly what you changed and why (e.g., 'Swapped technical jargon for a house-address analogy because you struggled with pointers.')"
+    }
+  ]
+}`;
+
+    const aiResponse = await chatCompletion([
+      { role: 'system', content: 'You are an expert personalized tutor and curriculum designer. Return valid JSON only.' },
+      { role: 'user', content: prompt }
+    ], { temperature: 0.7 });
+
+    const parsed = parseJson(aiResponse);
+    if (!parsed?.content) return;
+
+    material.content = parsed.content;
+    if (parsed.summary) material.summary = parsed.summary;
+    material.adaptations = parsed.adaptations || [];
+    material.lastAdaptedAt = new Date();
+
+    await material.save();
+    console.log(`[Adaptation] Successfully adapted material for user ${userId} topic ${topic}`);
+  } catch (error) {
+    console.error('[Adaptation] Failed to adapt existing material:', error);
+  }
 };

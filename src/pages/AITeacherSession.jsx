@@ -248,10 +248,19 @@ export default function AITeacherSession() {
                 </div>
                 <ConfidencePicker value={confidence} onChange={setConfidence} />
               </div>
-              <SubjectTopicSelector subjects={subjects} selected={selected} onSelect={setSelected} />
+              
+              {subjects.length === 0 && !loading && !error ? (
+                <div className="p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm mb-4">
+                  <strong className="block mb-1">No subjects found</strong>
+                  You haven't completed the diagnostic assessment or enrolled in any subjects yet. Please go to the Diagnostic section to set up your profile first.
+                </div>
+              ) : (
+                <SubjectTopicSelector subjects={subjects} selected={selected} onSelect={setSelected} />
+              )}
+              
               <button
                 onClick={startSession}
-                disabled={working || !selected.subjectSlug || !selected.topic}
+                disabled={working || !selected.subjectSlug || !selected.topic || subjects.length === 0}
                 className="mt-5 w-full h-12 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 disabled:opacity-40 transition-colors"
               >
                 {working && !session ? 'Preparing session...' : 'Start learning session'}

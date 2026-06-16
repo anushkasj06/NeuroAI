@@ -90,6 +90,16 @@ const learningMaterialSchema = new mongoose.Schema(
     generatedByAI: { type: Boolean, default: true },
     aiModel: { type: String, default: 'grok' },
     rawAiResponse: { type: mongoose.Schema.Types.Mixed },
+
+    // Post-assessment adaptation
+    adaptations: [
+      {
+        type: { type: String, enum: ['simplification', 'expansion', 'reinforcement', 'visual_added', 'format_change', 'tone_adjustment'], required: true },
+        focusArea: { type: String, required: true },
+        description: { type: String, required: true },
+      }
+    ],
+    lastAdaptedAt: { type: Date },
   },
   { timestamps: true }
 );

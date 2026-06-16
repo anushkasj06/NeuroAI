@@ -431,7 +431,17 @@ exports.completeTeachingSession = async (req, res) => {
       topic:       session.topic,
       subtopic:    session.subtopic || '',
     }).catch((err) =>
-      console.warn('[ContentAdapt] Auto-recommend failed for session', session._id, err.message)
+      console.warn('[Adaptation] Recommend failed for session', session._id, err.message)
+    );
+
+    // ── Fire-and-forget explicit content adaptation ────────────────────────
+    contentAdaptationService.adaptExistingMaterial({
+      userId,
+      subjectSlug: session.subjectSlug,
+      topic: session.topic,
+      report,
+    }).catch((err) =>
+      console.warn('[Adaptation] Existing material adapt failed', session._id, err.message)
     );
 
     const planUpdate = modifyStudyPlan({ plan, session, report });
