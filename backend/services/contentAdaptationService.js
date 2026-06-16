@@ -29,6 +29,7 @@ const LearningStyleReport         = require('../models/LearningStyleReport');
 const TopicProgress               = require('../models/TopicProgress');
 const StudentAnswer               = require('../models/StudentAnswer');
 const LearningSession             = require('../models/LearningSession');
+const { chatCompletion, parseJson } = require('./grokService');
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -304,6 +305,47 @@ exports.recommend = async ({
   const primaryReasoning = buildReasoning({ format: primary.format, ...inputs });
   const adaptationNote   = buildAdaptationNote({ ...inputs, recommendedFormat: primary.format });
 
+  // 4b. Generate the actual adapted content dynamically
+  let generatedContent = '';
+  let generatedSummary = '';
+  try {
+    const prompt = `You are NeuroLearn's Adaptive Content Engine.
+Generate a short, highly personalized learning module for a student.
+
+TOPIC: ${topic} ${subtopic ? `> ${subtopic}` : ''}
+SUBJECT: ${subject || subjectSlug}
+
+STUDENT ANALYTICS:
+- Learning Style: ${inputs.learningStyle}
+- Confusion Score: ${inputs.confusionScore}% (Higher means they are struggling/confused)
+- Engagement Score: ${inputs.engagementScore}% (Lower means they are bored/distracted)
+- Historical Success: ${inputs.historicalSuccess}% (Mastery of past concepts)
+
+FORMAT TO USE: ${primary.format.toUpperCase()}
+${adaptationNote}
+
+INSTRUCTIONS:
+1. Adapt the TONE and COMPLEXITY based on the analytics. If confusion is high, use extremely simple analogies. If engagement is low, use a highly interactive, exciting tone.
+2. Structure the output as VALID JSON ONLY with this structure:
+{
+  "content": "The actual markdown content here, perfectly adapted to the format. E.g. if flashcards, provide Q&A. If video, provide a video script. Format it beautifully with Markdown.",
+  "summary": "A 1-sentence summary of what this content covers."
+}
+No other text outside the JSON.`;
+
+    const aiResponse = await chatCompletion([
+      { role: 'system', content: 'You are an expert personalized tutor. Return JSON only.' },
+      { role: 'user', content: prompt }
+    ], { temperature: 0.7 });
+
+    const parsed = parseJson(aiResponse);
+    generatedContent = parsed?.content || '';
+    generatedSummary = parsed?.summary || '';
+  } catch (error) {
+    console.error('Failed to dynamically generate adapted content:', error);
+    generatedContent = `*Content generation temporarily unavailable for ${topic}.*`;
+  }
+
   // 5. Persist
   const doc = await ContentFormatRecommendation.create({
     userId,
@@ -319,6 +361,8 @@ exports.recommend = async ({
     rankedFormats,
     primaryReasoning,
     adaptationNote,
+    generatedContent,
+    generatedSummary,
     generatedAt: new Date(),
     expiresAt:   new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
   });
