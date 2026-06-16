@@ -1,6 +1,6 @@
 # NeuroAI — Career Recommendation ML Service
 
-This is the Python ML service (FastAPI + scikit-learn + Ollama llama3) merged into NeuroAI.
+This is the Python ML service (FastAPI + scikit-learn + Ollama gpt) merged into NeuroAI.
 
 ## Start
 
@@ -16,8 +16,7 @@ Runs on **http://localhost:8000**
 
 ## Requires
 - Python 3.10+
-- Ollama running locally with llama3 pulled:  `ollama pull llama3`
-- Redis (optional — caching falls back gracefully if not running)
+- Ollama api key
 
 ## Install Python deps
 ```bash
