@@ -224,7 +224,7 @@ export default function AITeacherSession() {
                 The lesson teaches, checks understanding, adapts difficulty, and changes the study plan when mastery drops.
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <Metric label="Sessions" value={analytics?.summary?.totalSessions || 0} />
               <Metric label="Avg mastery" value={`${analytics?.summary?.averageMastery || 0}%`} />
               <Metric label="Accuracy" value={`${analytics?.summary?.answerAccuracy || 0}%`} />
@@ -240,8 +240,8 @@ export default function AITeacherSession() {
         {/* ── Pre-session: clean single-column centered layout ──────── */}
         {!session && (
           <div className="max-w-2xl mx-auto space-y-5">
-            <div className="bg-white border border-slate-200 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-5">
+            <div className="bg-white border border-slate-200 rounded-xl p-4 sm:p-6">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
                 <div>
                   <h2 className="text-lg font-bold text-slate-900">Select a topic</h2>
                   <p className="text-xs text-slate-500 mt-1">{learningStyle}</p>
@@ -290,7 +290,7 @@ export default function AITeacherSession() {
 
         {/* ── Active session: split columns for tutoring & webcam ──────────────── */}
         {session && (
-          <div className="grid lg:grid-cols-[1fr_350px] gap-6 items-start">
+          <div className="at-grid grid lg:grid-cols-[1fr_350px] gap-6 items-start">
             <div className="space-y-5">
               <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
                 <div className="border-b border-slate-200 p-5">
@@ -303,7 +303,7 @@ export default function AITeacherSession() {
                       <h2 className="text-2xl font-bold mt-1">{session.topic}</h2>
                       {openingMessage && <p className="text-slate-600 mt-2 md-content"><ReactMarkdown>{openingMessage}</ReactMarkdown></p>}
                     </div>
-                    <div className="grid grid-cols-2 gap-2 min-w-[260px]">
+                    <div className="grid w-full grid-cols-1 gap-2 sm:grid-cols-2 md:w-auto md:min-w-[260px]">
                       {classroomStats.map((item) => <Metric key={item.label} label={item.label} value={item.value} compact />)}
                     </div>
                   </div>
@@ -330,7 +330,7 @@ export default function AITeacherSession() {
               />
             </div>
 
-            <div className="sticky top-6 space-y-6">
+            <div className="at-sidebar sticky top-6 space-y-6">
               <WebcamEmotionDetector
                 sessionId={session._id}
                 triggerContext={{

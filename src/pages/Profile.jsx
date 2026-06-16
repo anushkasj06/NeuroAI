@@ -160,23 +160,23 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="mx-auto max-w-7xl px-4 py-8 lg:px-8">
-        <header className="border-b border-slate-200 pb-6">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="mx-auto max-w-7xl px-4 py-6 lg:px-8">
+        <header className="border-b border-slate-200 pb-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600">
                 <UserCircleIcon className="h-4 w-4 text-teal-700" />
                 Learning profile
               </div>
-              <h1 className="mt-4 text-3xl font-semibold tracking-normal">Student context for personalization</h1>
-              <p className="mt-2 max-w-2xl text-slate-600">
+              <h1 className="mt-3 text-2xl font-semibold tracking-normal sm:text-3xl">Student context for personalization</h1>
+              <p className="mt-2 max-w-2xl text-sm text-slate-600 sm:text-base">
                 This profile feeds diagnostics, subject readiness, AI teacher personalization, and study-plan recommendations.
               </p>
             </div>
             {!isEditing && (
               <button
                 onClick={() => setIsEditing(true)}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800"
+                className="self-start inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white hover:bg-slate-800 sm:self-auto"
               >
                 <PencilSquareIcon className="h-4 w-4" />
                 Edit profile
@@ -191,13 +191,13 @@ export default function Profile() {
           </div>
         )}
 
-        <section className="mt-6 grid gap-4 md:grid-cols-3">
+        <section className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3">
           <Metric icon={CheckCircleIcon} label="Profile readiness" value={`${completedFields}%`} />
           <Metric icon={AcademicCapIcon} label="Subject average" value={`${subjectAverage}%`} />
           <Metric icon={BookOpenIcon} label="Current CGPA" value={formData.profile.currentCGPA ? `${formData.profile.currentCGPA}/10` : 'Not set'} />
         </section>
 
-        <main className="mt-8 grid gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+        <main className="mt-6 grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
           <aside className="space-y-5">
             <div className="rounded-xl border border-slate-200 bg-white p-5">
               <div className="flex items-center gap-4">

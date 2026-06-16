@@ -238,7 +238,7 @@ export default function InterviewRoom() {
     <div className="min-h-screen flex flex-col" style={{ background: 'linear-gradient(180deg,#f8fafc 0%,#ffffff 100%)' }}>
 
       {/* ── TOP BAR ── */}
-      <header className="flex-shrink-0 flex items-center justify-between px-6 py-3 bg-white border-b border-slate-200 shadow-sm">
+      <header className="flex-shrink-0 flex flex-col gap-3 px-4 py-3 bg-white border-b border-slate-200 shadow-sm sm:flex-row sm:items-center sm:justify-between sm:px-6">
         <div className="flex items-center gap-3 min-w-0">
           <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
             callStatus === 'active' || callStatus === 'muted' ? 'bg-emerald-500 animate-pulse' :
@@ -250,7 +250,7 @@ export default function InterviewRoom() {
           <span className="flex-shrink-0 text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full capitalize">{interview?.difficulty}</span>
           <span className="flex-shrink-0 text-xs px-2 py-0.5 bg-slate-100 text-slate-500 rounded-full capitalize">{interview?.interviewType}</span>
         </div>
-        <div className="flex items-center gap-5">
+        <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:gap-5">
           <div className={`flex items-center gap-1.5 font-mono text-sm font-semibold ${
             isOverTime ? 'text-rose-500' : elapsed > timeLimit * 0.8 ? 'text-amber-500' : 'text-slate-700'
           }`}>
@@ -275,10 +275,10 @@ export default function InterviewRoom() {
       </header>
 
       {/* ── MAIN ── */}
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
 
         {/* LEFT: Avatar + Current Question */}
-        <aside className="w-72 flex-shrink-0 bg-white border-r border-slate-200 flex flex-col p-4 gap-4 overflow-y-auto">
+        <aside className="w-full flex-shrink-0 bg-white border-b border-slate-200 flex flex-col p-4 gap-4 overflow-y-auto lg:w-72 lg:border-b-0 lg:border-r">
 
           {/* AI Avatar */}
           <div className="text-center py-3">
@@ -371,7 +371,7 @@ export default function InterviewRoom() {
         </aside>
 
         {/* CENTER: Transcript */}
-        <main className="flex-1 flex flex-col overflow-hidden bg-slate-50/50 relative">
+        <main className="relative flex min-h-[60vh] flex-1 flex-col overflow-hidden bg-slate-50/50">
 
           {/* Error banner */}
           {vapiError && (
@@ -383,7 +383,7 @@ export default function InterviewRoom() {
           )}
 
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-3 space-y-4 sm:p-6">
             {transcript.length === 0 && !partialAi && !partialUser && callStatus === 'idle' && (
               <div className="flex flex-col items-center justify-center h-full text-center">
                 <div className="w-16 h-16 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center mb-4">
@@ -406,7 +406,7 @@ export default function InterviewRoom() {
                 }`}>
                   {msg.role === 'ai' ? 'AI' : 'You'}
                 </div>
-                <div className={`max-w-[70%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm ${
+                <div className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm sm:max-w-[70%] ${
                   msg.role === 'ai'
                     ? 'bg-white border border-slate-200 text-slate-800 rounded-tl-sm'
                     : 'bg-blue-600 text-white rounded-tr-sm'
@@ -423,7 +423,7 @@ export default function InterviewRoom() {
             {partialAi && (
               <div className="flex gap-3 items-start">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 border border-blue-200 flex items-center justify-center text-xs font-bold text-blue-600">AI</div>
-                <div className="max-w-[70%] rounded-2xl rounded-tl-sm px-4 py-3 bg-white border border-blue-200 text-slate-600 text-sm italic shadow-sm">
+                <div className="max-w-[85%] rounded-2xl rounded-tl-sm px-4 py-3 bg-white border border-blue-200 text-slate-600 text-sm italic shadow-sm sm:max-w-[70%]">
                   {partialAi}<span className="inline-block w-1.5 h-4 bg-blue-400 ml-1 animate-pulse rounded-sm" />
                 </div>
               </div>
@@ -433,7 +433,7 @@ export default function InterviewRoom() {
             {partialUser && (
               <div className="flex gap-3 items-start flex-row-reverse">
                 <div className="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-600">You</div>
-                <div className="max-w-[70%] rounded-2xl rounded-tr-sm px-4 py-3 bg-blue-500/90 text-white text-sm italic shadow-sm">
+                <div className="max-w-[85%] rounded-2xl rounded-tr-sm px-4 py-3 bg-blue-500/90 text-white text-sm italic shadow-sm sm:max-w-[70%]">
                   {partialUser}<span className="inline-block w-1.5 h-4 bg-white ml-1 animate-pulse rounded-sm opacity-80" />
                 </div>
               </div>
@@ -470,7 +470,7 @@ export default function InterviewRoom() {
         </main>
 
         {/* RIGHT: Progress */}
-        <aside className="w-64 flex-shrink-0 bg-white border-l border-slate-200 p-4 flex flex-col gap-4 overflow-y-auto">
+        <aside className="w-full flex-shrink-0 bg-white border-t border-slate-200 p-4 flex flex-col gap-4 overflow-y-auto lg:w-64 lg:border-l lg:border-t-0">
 
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -544,8 +544,8 @@ export default function InterviewRoom() {
       </div>
 
       {/* ── BOTTOM CONTROLS ── */}
-      <footer className="flex-shrink-0 bg-white border-t border-slate-200 px-6 py-4 shadow-sm">
-        <div className="flex items-center justify-center gap-4 max-w-xl mx-auto">
+      <footer className="flex-shrink-0 bg-white border-t border-slate-200 px-4 py-4 shadow-sm sm:px-6">
+        <div className="flex max-w-xl flex-wrap items-center justify-center gap-3 mx-auto sm:gap-4">
 
           {callStatus === 'idle' && !vapiError && (
             <button onClick={startCall}

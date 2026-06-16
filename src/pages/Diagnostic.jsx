@@ -11,7 +11,7 @@ import DiagnosticReportView from '../components/diagnostic/DiagnosticReportView'
 
 function ContentLoadingPlaceholder({ label }) {
   return (
-    <div className="bg-white rounded-3xl shadow-xl p-12 text-center">
+    <div className="bg-white rounded-3xl shadow-xl p-6 text-center sm:p-12">
       <div className="relative w-16 h-16 mx-auto mb-4">
         <div className="absolute inset-0 rounded-full border-4 border-indigo-100" />
         <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin" />
@@ -79,7 +79,7 @@ export default function Diagnostic() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 py-10 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 px-3 py-6 sm:px-4 sm:py-10">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
@@ -171,7 +171,7 @@ export default function Diagnostic() {
         {step === 'report' && report && <DiagnosticReportView data={report} />}
 
         {step === 'report' && !report && !loading && (
-          <div className="text-center bg-white rounded-2xl p-8 shadow">
+          <div className="text-center bg-white rounded-2xl p-5 shadow sm:p-8">
             <p className="text-gray-600 mb-4">No report yet. Complete all assessments.</p>
             <button
               type="button"

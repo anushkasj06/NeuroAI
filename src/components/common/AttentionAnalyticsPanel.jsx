@@ -76,8 +76,8 @@ export default function AttentionAnalyticsPanel({ days = 7, compact = false, cla
     <div className={`bg-white border border-slate-100 rounded-2xl shadow-sm p-5 ${className}`}>
 
       {/* ── Header ───────────────────────────────────────────────── */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
+      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex min-w-0 items-center gap-2">
           <span className="h-9 w-9 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center">
             <EyeIcon className="h-5 w-5 text-indigo-600" />
           </span>
@@ -87,7 +87,7 @@ export default function AttentionAnalyticsPanel({ days = 7, compact = false, cla
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {/* Day filter */}
           <select
             value={selectedDays}
@@ -140,7 +140,7 @@ export default function AttentionAnalyticsPanel({ days = 7, compact = false, cla
         <div className="space-y-5">
 
           {/* KPI row */}
-          <div className={`grid gap-3 ${compact ? 'grid-cols-2' : 'grid-cols-2 sm:grid-cols-4'}`}>
+          <div className={`grid gap-3 ${compact ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4'}`}>
             <KPITile
               icon={<SignalIcon className="h-4 w-4 text-indigo-600" />}
               label="Avg Attention"
@@ -169,7 +169,7 @@ export default function AttentionAnalyticsPanel({ days = 7, compact = false, cla
 
           {/* Duration stats */}
           {!compact && (
-            <div className="grid grid-cols-3 gap-2 text-xs">
+            <div className="grid grid-cols-1 gap-2 text-xs sm:grid-cols-3">
               <DurationChip
                 icon={<ClockIcon className="h-3.5 w-3.5" />}
                 label="Looking away"
@@ -248,9 +248,9 @@ export default function AttentionAnalyticsPanel({ days = 7, compact = false, cla
 function KPITile({ icon, label, value, color }) {
   return (
     <div className="rounded-xl border border-slate-100 bg-slate-50 p-3">
-      <div className="flex items-center gap-1.5 mb-1.5">
+      <div className="flex min-w-0 items-center gap-1.5 mb-1.5">
         {icon}
-        <span className="text-xs text-slate-500 font-medium">{label}</span>
+        <span className="min-w-0 text-xs text-slate-500 font-medium">{label}</span>
       </div>
       <p className="text-lg font-bold" style={{ color }}>{value}</p>
     </div>
@@ -259,7 +259,7 @@ function KPITile({ icon, label, value, color }) {
 
 function DurationChip({ icon, label, value, warn }) {
   return (
-    <div className={`flex items-center gap-1.5 rounded-lg border px-2.5 py-2 ${warn ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
+    <div className={`flex min-w-0 items-center gap-1.5 rounded-lg border px-2.5 py-2 ${warn ? 'bg-amber-50 border-amber-200 text-amber-700' : 'bg-slate-50 border-slate-200 text-slate-600'}`}>
       {icon}
       <div>
         <p className="text-[10px] font-medium leading-none">{label}</p>

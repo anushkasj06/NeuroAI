@@ -85,7 +85,7 @@ export default function AdaptiveSessionResult({ session, report, className = '' 
           />
 
           {/* Score summary strip */}
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <ScoreChip label="Readiness"  value={result.scores?.readinessScore}  />
             <ScoreChip label="Confidence" value={result.scores?.confidenceScore} />
             <ScoreChip label="Confusion"  value={result.scores?.confusionScore}  invert />

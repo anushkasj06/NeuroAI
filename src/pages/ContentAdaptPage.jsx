@@ -60,7 +60,7 @@ function KpiTile({ label, value, sub, color = '#6366f1' }) {
   return (
     <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm">
       <p className="text-xs text-slate-400 font-medium mb-1">{label}</p>
-      <p className="text-2xl font-black" style={{ color }}>{value}</p>
+      <p className="break-words text-xl font-black sm:text-2xl" style={{ color }}>{value}</p>
       {sub && <p className="text-[10px] text-slate-400 mt-0.5">{sub}</p>}
     </div>
   );
@@ -153,7 +153,7 @@ export default function ContentAdaptPage() {
 
         {/* KPI strip */}
         {stats && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <KpiTile label="Total recommendations" value={stats.totalRecommendations}  color="#6366f1" />
             <KpiTile label="Applied"               value={stats.totalApplied}          color="#22c55e" />
             <KpiTile label="Apply rate"            value={`${stats.applyRate}%`}       color="#f59e0b" />
@@ -345,7 +345,7 @@ function HistoryRow({ record, onApply, onDismiss, onViewContent }) {
   const isActive = record.status === 'active';
 
   return (
-    <div className={`bg-white border border-slate-100 rounded-xl px-4 py-3 flex items-center gap-4 ${!isActive ? 'opacity-60' : ''}`}>
+    <div className={`bg-white border border-slate-100 rounded-xl px-4 py-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 ${!isActive ? 'opacity-60' : ''}`}>
       <span className="text-lg flex-shrink-0" title={meta.label}>{meta.emoji}</span>
       <div className="flex-1 min-w-0">
         <p className="text-sm font-semibold text-slate-800 truncate">
@@ -371,7 +371,7 @@ function HistoryRow({ record, onApply, onDismiss, onViewContent }) {
         })}
       </div>
       {/* Actions */}
-      <div className="flex-shrink-0 flex items-center gap-2">
+      <div className="flex w-full flex-shrink-0 items-center gap-2 sm:w-auto">
         {!isActive ? (
           <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full capitalize ${record.status === 'applied' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-500'}`}>
             {record.status}
@@ -384,7 +384,7 @@ function HistoryRow({ record, onApply, onDismiss, onViewContent }) {
                </button>
             )}
             <Link to={`/materials`} onClick={() => onApply(record._id)}
-              className="text-[10px] font-bold px-2 py-1 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700">
+              className="flex-1 rounded-lg bg-emerald-600 px-2 py-1 text-center text-[10px] font-bold text-white hover:bg-emerald-700 sm:flex-none">
               Use {meta.emoji}
             </Link>
             <button onClick={() => onDismiss(record._id)} className="text-[10px] text-slate-400 hover:text-slate-600 font-medium">Dismiss</button>
@@ -418,7 +418,7 @@ function SessionHistoryRow({ session }) {
           {session.status}
         </span>
       </div>
-      <div className="grid grid-cols-3 gap-2 mt-3">
+      <div className="grid grid-cols-1 gap-2 mt-3 sm:grid-cols-3">
         <MiniStat label="Mode" value={mode} />
         <MiniStat label="Difficulty" value={session.difficultyLevel || 'medium'} />
         <MiniStat label="Mastery" value={`${Math.round(mastery || 0)}%`} />

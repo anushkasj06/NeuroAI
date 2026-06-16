@@ -81,10 +81,10 @@ export default function Chatbot() {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-3 right-3 z-50 sm:bottom-4 sm:right-4">
       <button
         onClick={() => setIsOpen((prev) => !prev)}
-        className="group relative flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-teal-700 via-sky-600 to-indigo-600 text-white shadow-xl shadow-slate-900/20 transition hover:-translate-y-1"
+        className="group relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-teal-700 via-sky-600 to-indigo-600 text-white shadow-xl shadow-slate-900/20 transition hover:-translate-y-1 sm:h-14 sm:w-14"
         aria-label="Toggle AI mentor chat"
       >
         <span className="absolute -inset-1 rounded-full bg-gradient-to-br from-teal-300 via-sky-300 to-amber-300 opacity-60 blur transition group-hover:opacity-90" />
@@ -100,7 +100,7 @@ export default function Chatbot() {
       </button>
 
       <div
-        className={`absolute bottom-16 right-0 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 transition-all duration-300 ${
+        className={`absolute bottom-14 right-0 w-[min(24rem,calc(100vw-1.5rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl shadow-slate-900/20 transition-all duration-300 sm:bottom-16 sm:w-[min(24rem,calc(100vw-2rem))] ${
           isOpen ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-4 opacity-0'
         }`}
       >
@@ -121,7 +121,7 @@ export default function Chatbot() {
           </div>
         </div>
 
-        <div className="h-[390px] overflow-y-auto bg-slate-50 p-4">
+        <div className="h-[min(390px,calc(100vh-13rem))] overflow-y-auto bg-slate-50 p-3 sm:p-4">
           <div className="space-y-3">
             {messages.map((message, index) => (
               <div key={`${message.role}-${index}`} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>

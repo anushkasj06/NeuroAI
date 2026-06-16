@@ -9,7 +9,7 @@ export default function BattleResult({ result, userId, onPlayAgain, onHome }) {
     <div className="w-full max-w-lg mx-auto space-y-6 text-center">
 
       {/* Win / Lose banner */}
-      <div className={`rounded-3xl p-8 ${
+      <div className={`rounded-3xl p-5 sm:p-8 ${
         isWinner
           ? 'bg-gradient-to-br from-amber-600 to-yellow-500 shadow-xl shadow-amber-900/40'
           : 'bg-gradient-to-br from-gray-800 to-gray-700'
@@ -26,7 +26,7 @@ export default function BattleResult({ result, userId, onPlayAgain, onHome }) {
       </div>
 
       {/* Stats grid */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {[myStats, oppStats].filter(Boolean).map((s, i) => (
           <div
             key={s.userId}
@@ -59,7 +59,7 @@ export default function BattleResult({ result, userId, onPlayAgain, onHome }) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
+      <div className="flex flex-col gap-3 sm:flex-row">
         <button
           onClick={onPlayAgain}
           className="flex-1 py-3 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-sm hover:opacity-90 transition-opacity"

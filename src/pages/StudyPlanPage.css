@@ -494,6 +494,19 @@
 }
 
 @media (max-width: 520px) {
+  .study-plan .plan-hero,
+  .study-plan .plan-week-header,
+  .study-plan .plan-month-header {
+    gap: 12px;
+  }
+
+  .study-plan .plan-hero__actions,
+  .study-plan .plan-hero__actions .ai-btn,
+  .study-plan .plan-toggle__btn {
+    width: 100%;
+    justify-content: center;
+  }
+
   .study-plan .plan-kpi {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -501,5 +514,23 @@
   .study-plan .plan-empty {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .study-plan .plan-week-tab {
+    flex-shrink: 0;
+  }
+
+  .study-plan .plan-day-grid,
+  .study-plan .plan-month-grid,
+  .study-plan .plan-month-body {
+    grid-template-columns: 1fr;
+  }
+
+  .study-plan .plan-session {
+    flex-wrap: wrap;
+  }
+
+  .study-plan .plan-check {
+    width: 100%;
   }
 }

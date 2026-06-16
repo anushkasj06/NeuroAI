@@ -79,7 +79,7 @@ export default function Login() {
 export function AuthShell({ eyebrow, title, subtitle, footer, children }) {
   return (
     <div className="min-h-screen bg-slate-50 text-slate-950">
-      <div className="mx-auto grid min-h-screen max-w-7xl items-center gap-8 px-4 py-10 lg:grid-cols-[1fr_460px] lg:px-8">
+      <div className="mx-auto grid min-h-screen max-w-7xl items-center gap-8 px-4 py-6 sm:py-10 lg:grid-cols-[1fr_460px] lg:px-8">
         <section className="hidden lg:block">
           <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-600 shadow-sm">
             <AcademicCapIcon className="h-4 w-4 text-teal-700" />
@@ -101,10 +101,10 @@ export function AuthShell({ eyebrow, title, subtitle, footer, children }) {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-900/8 sm:p-8">
+        <section className="mx-auto w-full max-w-md rounded-2xl border border-slate-200 bg-white p-4 shadow-xl shadow-slate-900/8 sm:p-8 lg:max-w-none">
           <div className="mb-7">
             <p className="text-sm font-semibold text-teal-700">{eyebrow}</p>
-            <h2 className="mt-2 text-2xl font-semibold text-slate-950">{title}</h2>
+            <h2 className="mt-2 text-xl font-semibold text-slate-950 sm:text-2xl">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-slate-600">{subtitle}</p>
           </div>
           {children}
@@ -132,7 +132,7 @@ export function Field({ label, icon: Icon, ...props }) {
         <input
           {...props}
           required={props.required ?? true}
-          className="h-11 w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
+          className="h-11 min-w-0 w-full bg-transparent text-sm text-slate-950 outline-none placeholder:text-slate-400"
         />
       </span>
     </label>

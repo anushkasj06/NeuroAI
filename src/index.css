@@ -794,3 +794,140 @@ body {
 .pg-badge--success { background: #dcfce7; color: #15803d; }
 .pg-badge--warn    { background: #fef3c7; color: #b45309; }
 .pg-badge--danger  { background: #fee2e2; color: #dc2626; }
+
+/* ── Global mobile responsive additions ──────────────────────────────────── */
+
+/* Prevent horizontal scroll on all screens */
+html, body {
+  overflow-x: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+img,
+svg,
+canvas,
+video,
+iframe {
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+/* Safe area insets for notched phones */
+.app-main {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Quiz panel mobile ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  body {
+    min-width: 320px;
+  }
+
+  .quiz-panel { border-radius: 10px; }
+
+  .quiz-header {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .quiz-header-title { font-size: 1.05rem; }
+
+  .quiz-header-actions {
+    width: 100%;
+    justify-content: stretch;
+  }
+
+  .quiz-btn-outline,
+  .quiz-btn-solid {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    flex: 1;
+  }
+
+  .quiz-question-card { padding: 14px 16px; }
+
+  .quiz-prompt { font-size: 0.98rem; }
+
+  .quiz-option {
+    padding: 12px 12px;
+    font-size: 13px;
+    gap: 10px;
+  }
+
+  .quiz-option-letter {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
+  }
+
+  .quiz-meta-bar { flex-wrap: wrap; gap: 6px; }
+
+  .quiz-feedback {
+    margin: 0 14px 14px;
+    padding: 14px;
+  }
+
+  .quiz-feedback-header { gap: 12px; }
+
+  .quiz-feedback-score-ring { width: 48px; height: 48px; }
+  .quiz-feedback-score-inner { width: 36px; height: 36px; font-size: 11px; }
+
+  .quiz-report { margin: 0 14px 14px; padding: 14px; }
+
+  .quiz-report-metrics {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Teaching flow timeline mobile ──────────────────────────────────────── */
+@media (max-width: 480px) {
+  .tf-container { padding: 16px 10px 14px; }
+  .tf-block { grid-template-columns: 24px 1fr; gap: 10px; }
+  .tf-dot { width: 24px; height: 24px; }
+  .tf-card { padding: 14px 12px; border-radius: 10px; }
+  .tf-title { font-size: 1rem; }
+  .tf-card-header { flex-direction: column; gap: 6px; }
+  .tf-time { font-size: 10px; }
+}
+
+/* ── md-content mobile ──────────────────────────────────────────────────── */
+@media (max-width: 640px) {
+  .md-content { font-size: 0.9rem; line-height: 1.75; }
+  .md-content h1 { font-size: 1.3rem; }
+  .md-content h2 { font-size: 1.1rem; }
+  .md-content h3 { font-size: 1rem; }
+  .md-content pre { padding: 0.75em 1em; font-size: 0.78em; }
+  .md-content table { font-size: 0.78rem; display: block; overflow-x: auto; }
+}
+
+/* ── Form inputs: comfortable tap size on mobile ─────────────────────── */
+@media (max-width: 640px) {
+  input, select, textarea {
+    font-size: 16px !important; /* prevents iOS zoom on focus */
+  }
+}
+
+@media (max-width: 480px) {
+  #google_translate_element {
+    right: 12px;
+    bottom: 12px;
+    max-width: calc(100vw - 96px);
+    padding: 6px 8px;
+  }
+
+  .goog-te-combo {
+    max-width: 100%;
+    font-size: 12px !important;
+  }
+}

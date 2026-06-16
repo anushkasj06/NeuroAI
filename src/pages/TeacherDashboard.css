@@ -423,8 +423,13 @@
 }
 
 @media (max-width: 640px) {
+  .teacher-dashboard-page {
+    padding: 16px 10px 36px;
+  }
+
   .teacher-hero {
     flex-direction: column;
+    padding: 18px;
   }
 
   .teacher-actions {
@@ -434,5 +439,26 @@
 
   .heatmap {
     grid-template-columns: 1fr;
+  }
+
+  .overview-band,
+  .report-grid,
+  .visual-grid,
+  .teacher-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .student-report-header,
+  .section-head {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .student-report-header h2 {
+    font-size: 22px;
+  }
+
+  .chart-box {
+    height: 200px;
   }
 }

@@ -118,6 +118,14 @@ export const career = {
   marketTrends: () => api.get('/career/market-trends'),
   liveJobs: (role, location, limit = 20) =>
     api.get(`/career/live-jobs?role=${encodeURIComponent(role)}&location=${encodeURIComponent(location || 'india')}&limit=${limit}`),
+  explore: (category) =>
+    api.get(`/career/explore${category ? `?category=${encodeURIComponent(category)}` : ''}`),
+  getCareerPathways: (careerId) =>
+    api.get(`/career/explore/${careerId}/pathways`),
+  getSkillRoadmap: (careerId) =>
+    api.get(`/career/explore/${careerId}/roadmap`),
+  saveQualification: (data) =>
+    api.post('/career/qualification', data),
 };
 
 export const emotion = {

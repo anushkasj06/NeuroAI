@@ -126,7 +126,7 @@ export default function ContentFormatCard({ record, onApply, onDismiss, compact 
     <div className={`rounded-2xl border p-4 transition-all duration-200 ${cfg.bg} ${cfg.border} ${inactive ? 'opacity-55' : ''}`}>
 
       {/* ── Header ─────────────────────────────────────────────────────── */}
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="relative mb-3 flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="flex items-start gap-2.5 min-w-0">
           <span
             className="flex-shrink-0 h-9 w-9 rounded-xl flex items-center justify-center mt-0.5 text-lg"
@@ -154,7 +154,7 @@ export default function ContentFormatCard({ record, onApply, onDismiss, compact 
         {!inactive && onDismiss && (
           <button
             onClick={() => onDismiss(record._id)}
-            className="flex-shrink-0 h-6 w-6 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-200/70 hover:text-slate-600 transition-colors"
+            className="absolute right-0 top-0 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-slate-400 transition-colors hover:bg-slate-200/70 hover:text-slate-600 sm:static sm:h-6 sm:w-6"
             title="Dismiss"
           >
             <XMarkIcon className="h-4 w-4" />
@@ -162,7 +162,7 @@ export default function ContentFormatCard({ record, onApply, onDismiss, compact 
         )}
 
         {record.status === 'applied' && (
-          <span className="flex-shrink-0 flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-full">
+          <span className="flex w-fit flex-shrink-0 items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-600">
             <CheckCircleIcon className="h-3 w-3" /> Applied
           </span>
         )}
@@ -195,16 +195,16 @@ export default function ContentFormatCard({ record, onApply, onDismiss, compact 
             {record.rankedFormats.slice(0, 4).map((f) => {
               const fc = FORMAT_CONFIG[f.format] || FORMAT_CONFIG.pdf;
               return (
-                <div key={f.format} className="flex items-center gap-2 text-xs">
+                <div key={f.format} className="grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-2 gap-y-1 text-xs sm:flex sm:gap-2">
                   <span className="w-4 text-slate-400 font-bold text-[10px]">#{f.rank}</span>
-                  <span className="text-slate-600 font-medium w-28 truncate">{fc.emoji} {fc.label}</span>
-                  <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                  <span className="min-w-0 truncate font-medium text-slate-600 sm:w-28">{fc.emoji} {fc.label}</span>
+                  <span className="w-8 text-right font-bold text-slate-500">{f.score}%</span>
+                  <div className="col-span-3 h-1.5 bg-slate-100 rounded-full overflow-hidden sm:col-span-1 sm:flex-1">
                     <div
                       className={`h-full rounded-full transition-all duration-700 ${scoreBar(f.score)}`}
                       style={{ width: `${f.score}%` }}
                     />
                   </div>
-                  <span className="w-8 text-right font-bold text-slate-500">{f.score}%</span>
                 </div>
               );
             })}
@@ -226,7 +226,7 @@ export default function ContentFormatCard({ record, onApply, onDismiss, compact 
         <Link
           to={actionLink}
           onClick={() => onApply && onApply(record._id)}
-          className="flex items-center justify-center gap-1.5 h-8 w-full rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90"
+          className="flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90 sm:h-8"
           style={{ background: cfg.color }}
         >
           <FmtIcon className="h-3.5 w-3.5" />

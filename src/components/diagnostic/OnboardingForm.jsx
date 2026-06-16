@@ -285,7 +285,7 @@ export default function OnboardingForm({ onComplete, onError }) {
 
     if (step === 1) {
       return (
-        <div className="grid gap-5 sm:grid-cols-2">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2">
           {[
             ['targetPercentage', 'Target percentage (%)', 0, 100],
             ['currentCgpaOrPercentage', 'Current CGPA / %', 0, 100],
@@ -374,24 +374,22 @@ export default function OnboardingForm({ onComplete, onError }) {
           <div className="flex flex-col sm:flex-row gap-3">
             <select
               id="subjectAdd"
-              className={`${selectClass} flex-1`}
+              className={`${selectClass} flex-1 text-sm`}
               value={subjectToAdd}
               onChange={(e) => setSubjectToAdd(e.target.value)}
             >
               <option value="">— Choose a subject —</option>
               {unselectedSubjects.map((sub) => (
-                <option key={sub.slug} value={sub.slug}>
-                  {sub.name}
-                </option>
+                <option key={sub.slug} value={sub.slug}>{sub.name}</option>
               ))}
             </select>
             <button
               type="button"
               onClick={addSubjectFromDropdown}
               disabled={!subjectToAdd}
-              className="px-6 py-3 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 disabled:opacity-40 whitespace-nowrap"
+              className="w-full sm:w-auto px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-medium text-sm hover:bg-indigo-700 disabled:opacity-40"
             >
-              + Add subject
+              + Add
             </button>
           </div>
         </div>
@@ -410,24 +408,19 @@ export default function OnboardingForm({ onComplete, onError }) {
               {Object.values(form.selectedSubjects).map((s) => (
                 <div
                   key={s.subjectSlug}
-                  className="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl"
+                  className="flex flex-col xs:flex-row xs:items-center gap-2 p-3 bg-indigo-50/50 border border-indigo-100 rounded-xl"
                 >
-                  <span className="font-medium text-gray-800 sm:w-48 shrink-0">{s.subjectName}</span>
+                  <span className="font-medium text-gray-800 text-sm xs:w-44 shrink-0">{s.subjectName}</span>
                   <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    placeholder="Current marks %"
+                    type="number" min={0} max={100}
+                    placeholder="Marks %"
                     aria-label={`Marks for ${s.subjectName}`}
                     className="flex-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
                     value={s.currentMarks}
                     onChange={(e) => setSubjectMarks(s.subjectSlug, e.target.value)}
                   />
-                  <button
-                    type="button"
-                    onClick={() => removeSubject(s.subjectSlug)}
-                    className="text-sm text-red-600 hover:text-red-800 font-medium"
-                  >
+                  <button type="button" onClick={() => removeSubject(s.subjectSlug)}
+                    className="text-xs text-red-600 hover:text-red-800 font-medium self-start xs:self-auto">
                     Remove
                   </button>
                 </div>
@@ -440,13 +433,13 @@ export default function OnboardingForm({ onComplete, onError }) {
   };
 
   return (
-    <div className="bg-white rounded-3xl shadow-xl p-6 sm:p-8">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+    <div className="bg-white rounded-3xl shadow-xl p-5 sm:p-8">
+      <div className="mb-5">
+        <h2 className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
           {ONBOARDING_STEPS[step].title}
         </h2>
-        <p className="text-gray-600">{ONBOARDING_STEPS[step].desc}</p>
-        <p className="text-sm text-indigo-600 mt-1">
+        <p className="text-gray-600 text-sm">{ONBOARDING_STEPS[step].desc}</p>
+        <p className="text-xs text-indigo-600 mt-1">
           Step {step + 1} of {ONBOARDING_STEPS.length}
         </p>
       </div>
@@ -457,12 +450,12 @@ export default function OnboardingForm({ onComplete, onError }) {
 
       {renderStep()}
 
-      <div className="mt-8 flex justify-between">
+      <div className="mt-6 flex justify-between gap-3">
         <button
           type="button"
           disabled={step === 0 || loading}
           onClick={() => setStep((s) => s - 1)}
-          className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 disabled:opacity-40"
+          className="flex-1 sm:flex-none px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm disabled:opacity-40"
         >
           Back
         </button>
@@ -470,9 +463,9 @@ export default function OnboardingForm({ onComplete, onError }) {
           type="button"
           disabled={loading}
           onClick={handleSubmit}
-          className="px-8 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium disabled:opacity-60"
+          className="flex-1 sm:flex-none px-6 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-medium text-sm disabled:opacity-60"
         >
-          {loading ? 'Saving...' : step === ONBOARDING_STEPS.length - 1 ? 'Start Assessments' : 'Next'}
+          {loading ? 'Saving...' : step === ONBOARDING_STEPS.length - 1 ? 'Start Assessments' : 'Next →'}
         </button>
       </div>
     </div>
