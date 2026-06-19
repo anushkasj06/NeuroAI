@@ -253,7 +253,7 @@ const Quiz = () => {
 
         console.log('Submitting quiz data:', formattedAnswers);
 
-        const response = await axios.post('http://localhost:5000/api/quiz/submit', formattedAnswers, {
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/api/quiz/submit`, formattedAnswers, {
           withCredentials: true
         });
         

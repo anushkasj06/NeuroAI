@@ -6,7 +6,7 @@ const http = require('http');
 const User = require('../models/User');
 const { scrapeLinkedIn, normalizeLinkedInUrl } = require('../services/linkedinScraper');
 
-const ML_SERVICE_URL = process.env.ML_SERVICE_URL || 'http://localhost:8000';
+const ML_SERVICE_URL = process.env.ML_SERVICE_URL || process.env.VITE_ML_URL || 'http://localhost:8000';
 
 function mlFetch(endpoint, body, method = 'POST') {
   return new Promise((resolve, reject) => {
